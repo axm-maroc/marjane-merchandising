@@ -11,6 +11,7 @@ import {
   planograms,
   planogramProducts,
   planogramPhotos,
+  planogramHistory,
   stockHistory,
   salesForecasts,
   anomalies,
@@ -348,4 +349,134 @@ export async function getRecommendationByToken(token: string) {
   if (!db) return undefined;
   const result = await db.select().from(recommendations).where(eq(recommendations.shareToken, token)).limit(1);
   return result[0];
+}
+
+
+// ===== PLANOGRAM HISTORY =====
+export async function getPlanogramHistory(planogramId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db.select()
+    .from(planogramHistory)
+    .where(eq(planogramHistory.planogramId, planogramId))
+    .orderBy(desc(planogramHistory.version));
+  
+  return result;
+}
+
+export async function addPlanogramHistoryEntry(data: {
+  planogramId: number;
+  version: number;
+  changeType: "created" | "updated" | "activated" | "archived" | "restored";
+  changedBy?: string;
+  comment?: string;
+  snapshot?: string;
+}) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.insert(planogramHistory).values({
+    planogramId: data.planogramId,
+    version: data.version,
+    changeType: data.changeType,
+    changedBy: data.changedBy,
+    comment: data.comment,
+    snapshot: data.snapshot,
+  });
+  
+  return result;
+}
+
+export async function restorePlanogramVersion(planogramId: number, version: number, comment?: string) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  // Récupérer l'historique de la version à restaurer
+  const historyEntry = await db.select()
+    .from(planogramHistory)
+    .where(and(
+      eq(planogramHistory.planogramId, planogramId),
+      eq(planogramHistory.version, version)
+    ))
+    .limit(1);
+  
+  if (historyEntry.length === 0) {
+    throw new Error(`Version ${version} not found in history`);
+  }
+  
+  // Récupérer le planogramme actuel
+  const currentPlanogram = await db.select()
+    .from(planograms)
+    .where(eq(planograms.id, planogramId))
+    .limit(1);
+  
+  if (currentPlanogram.length === 0) {
+    throw new Error(`Planogram ${planogramId} not found`);
+  }
+  
+  const newVersion = currentPlanogram[0].version + 1;
+  
+  // Créer une entrée d'historique pour la restauration
+  await addPlanogramHistoryEntry({
+    planogramId,
+    version: newVersion,
+    changeType: "restored",
+    comment: comment || `Restauration de la version ${version}`,
+    snapshot: historyEntry[0].snapshot || undefined,
+  });
+  
+  // Mettre à jour le planogramme avec la nouvelle version
+  await db.update(planograms)
+    .set({
+      version: newVersion,
+      updatedAt: new Date(),
+    })
+    .where(eq(planograms.id, planogramId));
+  
+  return { success: true, newVersion };
+}
+
+// ===== Planogram History Functions =====
+
+export async function getPlanogramVersion(planogramId: number, version: number) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const result = await db
+    .select()
+    .from(planogramHistory)
+    .where(
+      and(
+        eq(planogramHistory.planogramId, planogramId),
+        eq(planogramHistory.version, version)
+      )
+    )
+    .limit(1);
+
+  if (result.length === 0) return null;
+
+  return {
+    ...result[0],
+    snapshot: result[0].snapshot ? JSON.parse(result[0].snapshot) : null,
+  };
+}
+
+export async function getLatestPlanogramVersion(planogramId: number) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const result = await db
+    .select()
+    .from(planogramHistory)
+    .where(eq(planogramHistory.planogramId, planogramId))
+    .orderBy(desc(planogramHistory.version))
+    .limit(1);
+
+  if (result.length === 0) return null;
+
+  return {
+    ...result[0],
+    snapshot: result[0].snapshot ? JSON.parse(result[0].snapshot) : null,
+  };
 }

@@ -96,6 +96,31 @@ export const appRouter = router({
       .query(async ({ input }) => {
         return await db.getPlanogramPhotos(input.planogramId);
       }),
+    getHistory: publicProcedure
+      .input(z.object({ planogramId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getPlanogramHistory(input.planogramId);
+      }),
+    compareVersions: publicProcedure
+      .input(z.object({ 
+        planogramId: z.number(),
+        version1: z.number(),
+        version2: z.number()
+      }))
+      .query(async ({ input }) => {
+        const v1 = await db.getPlanogramVersion(input.planogramId, input.version1);
+        const v2 = await db.getPlanogramVersion(input.planogramId, input.version2);
+        return { version1: v1, version2: v2 };
+      }),
+    restoreVersion: publicProcedure
+      .input(z.object({
+        planogramId: z.number(),
+        version: z.number(),
+        comment: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return await db.restorePlanogramVersion(input.planogramId, input.version, input.comment);
+      }),
     create: publicProcedure
       .input(z.object({
         storeId: z.number(),

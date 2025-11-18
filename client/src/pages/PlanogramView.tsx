@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, LayoutGrid, Box, Calendar, Target, Image as ImageIcon, FileDown } from "lucide-react";
+import { ArrowLeft, LayoutGrid, Box, Calendar, Target, Image as ImageIcon, FileDown, History } from "lucide-react";
 import { Link, useParams } from "wouter";
 import { useMemo, useState } from "react";
 import PlanogramCanvas from "@/components/PlanogramCanvas";
@@ -102,6 +102,16 @@ export default function PlanogramView() {
             <div className="flex items-center gap-3">
               {activePlanogram && (
                 <>
+                  <Link href={`/planograms/${activePlanogram.id}/history`}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                    >
+                      <History className="w-4 h-4" />
+                      Historique
+                    </Button>
+                  </Link>
                   <Button
                     variant="outline"
                     size="sm"

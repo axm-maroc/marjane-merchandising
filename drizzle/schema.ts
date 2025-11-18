@@ -166,6 +166,23 @@ export type PlanogramPhoto = typeof planogramPhotos.$inferSelect;
 export type InsertPlanogramPhoto = typeof planogramPhotos.$inferInsert;
 
 /**
+ * Historique des versions de planogrammes
+ */
+export const planogramHistory = mysqlTable("planogramHistory", {
+  id: int("id").autoincrement().primaryKey(),
+  planogramId: int("planogramId").notNull(),
+  version: int("version").notNull(),
+  changeType: mysqlEnum("changeType", ["created", "updated", "activated", "archived", "restored"]).notNull(),
+  changedBy: varchar("changedBy", { length: 255 }),
+  comment: text("comment"),
+  snapshot: text("snapshot"), // JSON snapshot des données du planogramme
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type PlanogramHistory = typeof planogramHistory.$inferSelect;
+export type InsertPlanogramHistory = typeof planogramHistory.$inferInsert;
+
+/**
  * Historique des stocks
  */
 export const stockHistory = mysqlTable("stockHistory", {

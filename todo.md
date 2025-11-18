@@ -166,3 +166,35 @@
 - [ ] Implémenter la restauration d'une version antérieure
 - [ ] Ajouter des commentaires/notes sur chaque version
 - [ ] Afficher un timeline visuel de l'évolution
+
+
+## Fonctionnalités avancées demandées
+
+### Historique et versioning des planogrammes
+- [x] Créer une table pour l'historique des versions de planogrammes
+- [x] Implémenter la sauvegarde automatique des versions
+- [x] Créer une interface de visualisation de l'historique
+- [x] Permettre la comparaison entre deux versions
+- [x] Implémenter la restauration d'une version antérieure
+- [x] Ajouter des commentaires/notes sur chaque version
+- [x] Afficher un timeline visuel de l'évolution
+- [x] Ajouter un bouton d'accès à l'historique depuis la page de visualisation des planogrammes
+- [x] Ajouter les procédures tRPC pour l'historique (getHistory, compareVersions, restoreVersion)
+
+### Dashboard analytique consolidé
+- [ ] Créer la page du dashboard avec layout responsive
+- [ ] Implémenter le calcul des KPIs (taux de conformité, CA, rotation stocks)
+- [ ] Ajouter des graphiques de tendances temporelles
+- [ ] Créer un système d'alertes critiques en temps réel
+- [ ] Ajouter des filtres temporels (jour, semaine, mois, année)
+- [ ] Implémenter la comparaison inter-magasins
+- [ ] Ajouter l'export automatique des rapports
+
+### Application mobile terrain
+- [ ] Créer une interface mobile responsive
+- [ ] Implémenter la prise de photos de rayonnages
+- [ ] Ajouter la validation de conformité des planogrammes
+- [ ] Créer un système de remontée d'informations terrain
+- [ ] Implémenter la synchronisation en temps réel
+- [ ] Ajouter la géolocalisation des actions terrain
+- [ ] Créer un mode hors-ligne avec synchronisation différée
