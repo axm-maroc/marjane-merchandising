@@ -198,3 +198,40 @@
 - [ ] Implémenter la synchronisation en temps réel
 - [ ] Ajouter la géolocalisation des actions terrain
 - [ ] Créer un mode hors-ligne avec synchronisation différée
+
+
+## Nouvelles fonctionnalités avancées - Phase 2
+
+### Dashboard analytique consolidé
+- [x] Créer la page Dashboard.tsx avec layout responsive
+- [x] Implémenter le calcul des KPIs (taux de conformité, CA, rotation stocks, alertes)
+- [x] Ajouter des graphiques de tendances temporelles avec Chart.js
+- [x] Créer un système d'alertes critiques en temps réel
+- [x] Ajouter des filtres temporels (jour, semaine, mois, année)
+- [x] Implémenter la comparaison inter-magasins
+- [ ] Ajouter l'export automatique des rapports PDF/Excel
+- [x] Ajouter la route /dashboard dans l'application
+- [x] Ajouter le lien vers le dashboard dans la page d'accueil
+
+### Application mobile terrain (séparée)
+- [x] Créer un nouveau projet web mobile optimisé pour smartphones
+- [x] Configurer un port séparé pour l'application mobile (port 3001)
+- [x] Développer une interface mobile-first responsive
+- [x] Implémenter la page d'accueil mobile avec statistiques et géolocalisation
+- [x] Créer le module de prise de photos de rayonnages
+- [x] Ajouter la page de gestion des tâches avec filtres
+- [x] Créer un système de remontée d'anomalies terrain
+- [x] Implémenter la navigation bottom bar mobile
+- [x] Ajouter la géolocalisation des actions terrain
+- [x] Créer la page de profil avec statistiques et réalisations
+- [x] Configurer PWA avec manifest.json
+- [x] Exposer l'application sur une URL publique
+
+### Automatisation du versioning
+- [x] Implémenter la sauvegarde automatique lors du changement de statut
+- [x] Ajouter la sauvegarde automatique lors de l'ajout/suppression de produits
+- [x] Créer un système de détection des modifications importantes
+- [x] Ajouter des procédures tRPC pour updateStatus, addProduct, removeProduct
+- [x] Implémenter la génération automatique de commentaires descriptifs
+- [x] Ajouter la fonction savePlanogramVersion dans db.ts
+- [x] Sauvegarder automatiquement la version initiale lors de la création

@@ -1,7 +1,7 @@
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Store, Package, LayoutGrid, TrendingUp, AlertTriangle, Share2 } from "lucide-react";
+import { Store, Package, LayoutGrid, TrendingUp, AlertTriangle, Share2, BarChart3 } from "lucide-react";
 import { Link } from "wouter";
 import { APP_TITLE } from "@/const";
 
@@ -10,6 +10,14 @@ export default function Home() {
   const { data: products, isLoading: productsLoading } = trpc.products.list.useQuery();
 
   const features = [
+    {
+      icon: BarChart3,
+      title: "Dashboard Analytique",
+      description: "KPIs et vue d'ensemble de la performance",
+      href: "/dashboard",
+      color: "text-purple-600",
+      bgColor: "bg-purple-50",
+    },
     {
       icon: Store,
       title: "Gestion des Magasins",

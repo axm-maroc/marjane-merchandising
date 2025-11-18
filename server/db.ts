@@ -480,3 +480,83 @@ export async function getLatestPlanogramVersion(planogramId: number) {
     snapshot: result[0].snapshot ? JSON.parse(result[0].snapshot) : null,
   };
 }
+
+
+// Fonction pour mettre à jour le statut d'un planogramme
+export async function updatePlanogramStatus(planogramId: number, status: string) {
+  const database = await getDb();
+  if (!database) return null;
+
+  await database.update(planograms)
+    .set({ status: status as "draft" | "active" | "archived" })
+    .where(eq(planograms.id, planogramId));
+
+  return { success: true };
+}
+
+// Fonction pour récupérer un produit par ID
+export async function getProductById(productId: number) {
+  const database = await getDb();
+  if (!database) return null;
+
+  const result = await database.select()
+    .from(products)
+    .where(eq(products.id, productId))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : null;
+}
+
+// Fonction pour supprimer un produit d'un planogramme
+export async function removeProductFromPlanogram(planogramId: number, productId: number) {
+  const database = await getDb();
+  if (!database) return null;
+
+  await database.delete(planogramProducts)
+    .where(
+      and(
+        eq(planogramProducts.planogramId, planogramId),
+        eq(planogramProducts.productId, productId)
+      )
+    );
+
+  return { success: true };
+}
+
+
+// Fonction pour sauvegarder automatiquement une version d'un planogramme
+export async function savePlanogramVersion(planogramId: number, comment: string) {
+  const database = await getDb();
+  if (!database) return null;
+
+  // Récupérer la dernière version
+  const latestVersion = await getLatestPlanogramVersion(planogramId);
+  const newVersionNumber = latestVersion ? latestVersion.version + 1 : 1;
+
+  // Récupérer l'état actuel du planogramme
+  const planogram = await getPlanogramLocationById(planogramId);
+  if (!planogram) {
+    throw new Error(`Planogram ${planogramId} not found`);
+  }
+
+  // Récupérer les produits du planogramme
+  const planogramProductsList = await getPlanogramProducts(planogramId);
+
+  // Créer une snapshot de l'état actuel
+  const snapshot = {
+    planogram,
+    products: planogramProductsList,
+  };
+
+  // Insérer la nouvelle version dans l'historique
+  await database.insert(planogramHistory).values({
+    planogramId,
+    version: newVersionNumber,
+    changeType: "updated",
+    snapshot: JSON.stringify(snapshot),
+    comment,
+    createdAt: new Date(),
+  });
+
+  return { success: true, version: newVersionNumber };
+}

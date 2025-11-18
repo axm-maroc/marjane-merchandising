@@ -152,7 +152,66 @@ export const appRouter = router({
           });
         }
         
+        // Sauvegarder automatiquement la version initiale
+        await db.savePlanogramVersion(planogram.id, "Création initiale du planogramme");
+        
         return planogram;
+      }),
+    updateStatus: publicProcedure
+      .input(z.object({
+        planogramId: z.number(),
+        status: z.enum(["draft", "active", "archived"]),
+      }))
+      .mutation(async ({ input }) => {
+        // Mettre à jour le statut
+        await db.updatePlanogramStatus(input.planogramId, input.status);
+        
+        // Sauvegarder automatiquement une version
+        await db.savePlanogramVersion(
+          input.planogramId, 
+          `Changement de statut vers "${input.status}"`
+        );
+        
+        return { success: true };
+      }),
+    addProduct: publicProcedure
+      .input(z.object({
+        planogramId: z.number(),
+        productId: z.number(),
+        position: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        // Ajouter le produit
+        await db.addProductToPlanogram(input);
+        
+        // Sauvegarder automatiquement une version
+        const product = await db.getProductById(input.productId);
+        await db.savePlanogramVersion(
+          input.planogramId,
+          `Ajout du produit "${product?.name || 'inconnu'}" au planogramme`
+        );
+        
+        return { success: true };
+      }),
+    removeProduct: publicProcedure
+      .input(z.object({
+        planogramId: z.number(),
+        productId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        // Récupérer le nom du produit avant suppression
+        const product = await db.getProductById(input.productId);
+        
+        // Supprimer le produit
+        await db.removeProductFromPlanogram(input.planogramId, input.productId);
+        
+        // Sauvegarder automatiquement une version
+        await db.savePlanogramVersion(
+          input.planogramId,
+          `Suppression du produit "${product?.name || 'inconnu'}" du planogramme`
+        );
+        
+        return { success: true };
       }),
   }),
 
