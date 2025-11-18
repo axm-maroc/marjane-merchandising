@@ -9,7 +9,7 @@ import { useMemo, useState } from "react";
 
 export default function PlanogramView() {
   const params = useParams();
-  const locationId = useMemo(() => parseInt(params.locationId || "0"), [params.locationId]);
+  const locationId = useMemo(() => parseInt(params.id || "0"), [params.id]);
   
   const { data: location } = trpc.planogramLocations.getById.useQuery({ id: locationId });
   const { data: planograms } = trpc.planograms.byLocation.useQuery({ locationId });

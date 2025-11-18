@@ -129,3 +129,9 @@
 
 - [x] Corriger l'erreur 404 sur la page des étagères dans le détail du magasin
 - [x] Corriger l'erreur 404 sur "Voir le planogramme" dans Planogrammes 2D/3D
+
+
+## Bug à corriger - Étagères
+
+- [x] Corriger le message "emplacement introuvable" dans les étagères
+- [x] Restaurer le fonctionnement des étagères comme dans les versions précédentes
