@@ -5,12 +5,18 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import Stores from "./pages/Stores";
+import StoreDetail from "./pages/StoreDetail";
+import PlanogramView from "./pages/PlanogramView";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path="/stores" component={Stores} />
+      <Route path="/stores/:id" component={StoreDetail} />
+      <Route path="/planograms/location/:locationId" component={PlanogramView} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

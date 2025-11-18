@@ -1,32 +1,162 @@
-import { useAuth } from "@/_core/hooks/useAuth";
+import { trpc } from "@/lib/trpc";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { APP_LOGO, APP_TITLE, getLoginUrl } from "@/const";
-import { Streamdown } from 'streamdown';
+import { Store, Package, LayoutGrid, TrendingUp, AlertTriangle, Share2 } from "lucide-react";
+import { Link } from "wouter";
+import { APP_TITLE } from "@/const";
 
-/**
- * All content in this page are only for example, replace with your own feature implementation
- * When building pages, remember your instructions in Frontend Workflow, Frontend Best Practices, Design Guide and Common Pitfalls
- */
 export default function Home() {
-  // The userAuth hooks provides authentication state
-  // To implement login/logout functionality, simply call logout() or redirect to getLoginUrl()
-  let { user, loading, error, isAuthenticated, logout } = useAuth();
+  const { data: stores, isLoading: storesLoading } = trpc.stores.list.useQuery();
+  const { data: products, isLoading: productsLoading } = trpc.products.list.useQuery();
 
-  // If theme is switchable in App.tsx, we can implement theme toggling like this:
-  // const { theme, toggleTheme } = useTheme();
-
-  // Use APP_LOGO (as image src) and APP_TITLE if needed
+  const features = [
+    {
+      icon: Store,
+      title: "Gestion des Magasins",
+      description: "Gérez vos magasins Marjane avec photos et géolocalisation",
+      href: "/stores",
+      color: "text-blue-600",
+      bgColor: "bg-blue-50",
+    },
+    {
+      icon: LayoutGrid,
+      title: "Planogrammes 2D/3D",
+      description: "Créez et visualisez vos planogrammes de rayonnage",
+      href: "/planograms",
+      color: "text-green-600",
+      bgColor: "bg-green-50",
+    },
+    {
+      icon: Package,
+      title: "Suivi des Stocks",
+      description: "Historique et prévisions de stock par produit",
+      href: "/stock",
+      color: "text-purple-600",
+      bgColor: "bg-purple-50",
+    },
+    {
+      icon: TrendingUp,
+      title: "Prévisions IA",
+      description: "Recommandations et prévisions de vente intelligentes",
+      href: "/forecasts",
+      color: "text-orange-600",
+      bgColor: "bg-orange-50",
+    },
+    {
+      icon: AlertTriangle,
+      title: "Détection d'Anomalies",
+      description: "Identifiez les écarts entre planogramme prévu et réel",
+      href: "/anomalies",
+      color: "text-red-600",
+      bgColor: "bg-red-50",
+    },
+    {
+      icon: Share2,
+      title: "Partage de Recommandations",
+      description: "Partagez vos recommandations merchandising",
+      href: "/recommendations",
+      color: "text-indigo-600",
+      bgColor: "bg-indigo-50",
+    },
+  ];
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <main>
-        {/* Example: lucide-react for icons */}
-        <Loader2 className="animate-spin" />
-        Example Page
-        {/* Example: Streamdown for markdown rendering */}
-        <Streamdown>Any **markdown** content</Streamdown>
-        <Button variant="default">Example Button</Button>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      {/* Header */}
+      <header className="bg-white border-b border-slate-200 shadow-sm">
+        <div className="container py-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900">{APP_TITLE}</h1>
+              <p className="text-slate-600 mt-1">Solution d'optimisation merchandising omnicanal</p>
+            </div>
+            <div className="flex gap-4">
+              {!storesLoading && stores && (
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600">{stores.length}</div>
+                  <div className="text-sm text-slate-600">Magasins</div>
+                </div>
+              )}
+              {!productsLoading && products && (
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600">{products.length}</div>
+                  <div className="text-sm text-slate-600">Produits</div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container py-12">
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold text-slate-900 mb-2">Modules Disponibles</h2>
+          <p className="text-slate-600">Sélectionnez un module pour commencer</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {features.map((feature) => {
+            const Icon = feature.icon;
+            return (
+              <Link key={feature.href} href={feature.href}>
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full border-slate-200">
+                  <CardHeader>
+                    <div className={`w-12 h-12 rounded-lg ${feature.bgColor} flex items-center justify-center mb-3`}>
+                      <Icon className={`w-6 h-6 ${feature.color}`} />
+                    </div>
+                    <CardTitle className="text-slate-900">{feature.title}</CardTitle>
+                    <CardDescription className="text-slate-600">{feature.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button variant="outline" className="w-full">
+                      Accéder →
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Quick Stats */}
+        <div className="mt-12">
+          <h2 className="text-2xl font-semibold text-slate-900 mb-6">Magasins Marjane</h2>
+          {storesLoading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="text-slate-600 mt-4">Chargement des magasins...</p>
+            </div>
+          ) : stores && stores.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {stores.map((store) => (
+                <Link key={store.id} href={`/stores/${store.id}`}>
+                  <Card className="hover:shadow-md transition-shadow cursor-pointer border-slate-200">
+                    <CardHeader>
+                      <CardTitle className="text-lg text-slate-900">{store.name}</CardTitle>
+                      <CardDescription className="text-slate-600">
+                        <div className="flex items-start gap-1">
+                          <Store className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                          <span className="text-sm">{store.city}</span>
+                        </div>
+                        {store.surface && (
+                          <div className="text-sm mt-1">{store.surface} m²</div>
+                        )}
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <Card className="border-slate-200">
+              <CardContent className="py-12 text-center">
+                <Store className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+                <p className="text-slate-600">Aucun magasin disponible</p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </main>
     </div>
   );
