@@ -85,3 +85,9 @@
 - [x] Identification des produits mal placés par IA
 - [x] Détection des produits manquants ou en surplus
 - [x] Génération de rapports d'anomalies avec suggestions de correction
+
+
+## Bugs à corriger
+
+- [x] Corriger l'erreur de génération IA dans le module de recommandations
+- [x] Vérifier et tester tous les modules pour s'assurer qu'ils fonctionnent correctement

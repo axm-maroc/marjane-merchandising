@@ -74,7 +74,9 @@ export async function generateRecommendations(
   );
 
   // Appeler l'IA pour générer des recommandations
-  const response = await invokeLLM({
+  let response;
+  try {
+    response = await invokeLLM({
     messages: [
       {
         role: "system",
@@ -152,13 +154,28 @@ Tu dois fournir des recommandations précises, basées sur les données, avec de
         },
       },
     },
-  });
+    });
+  } catch (error) {
+    console.error("[AI Recommendations] LLM invocation failed:", error);
+    throw new Error(`Failed to generate recommendations: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+
+  if (!response || !response.choices || response.choices.length === 0) {
+    throw new Error('Invalid LLM response: no choices returned');
+  }
 
   const content = response.choices[0].message.content;
   if (typeof content !== 'string') {
-    throw new Error('Invalid response format');
+    throw new Error('Invalid response format: content is not a string');
   }
-  const result = JSON.parse(content);
+
+  let result;
+  try {
+    result = JSON.parse(content);
+  } catch (error) {
+    console.error("[AI Recommendations] Failed to parse JSON:", content);
+    throw new Error('Failed to parse LLM response as JSON');
+  }
 
   return {
     type,
