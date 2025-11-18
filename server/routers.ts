@@ -4,6 +4,8 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
 import * as db from "./db";
 import { z } from "zod";
+import * as aiRec from "./ai-recommendations";
+import * as visionAnomaly from "./vision-anomaly-detection";
 
 export const appRouter = router({
   system: systemRouter,
@@ -133,6 +135,24 @@ export const appRouter = router({
       .query(async ({ input }) => {
         return await db.getAnomaliesByPlanogram(input.planogramId);
       }),
+    detect: publicProcedure
+      .input(z.object({
+        planogramId: z.number(),
+        photoUrl: z.string(),
+        photoType: z.enum(["real", "reference"]),
+      }))
+      .mutation(async ({ input }) => {
+        return await visionAnomaly.detectAnomalies(input);
+      }),
+    compare: publicProcedure
+      .input(z.object({
+        beforeUrl: z.string(),
+        afterUrl: z.string(),
+        planogramId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        return await visionAnomaly.comparePhotos(input.beforeUrl, input.afterUrl, input.planogramId);
+      }),
   }),
 
   // Recommendations
@@ -146,6 +166,26 @@ export const appRouter = router({
       .input(z.object({ token: z.string() }))
       .query(async ({ input }) => {
         return await db.getRecommendationByToken(input.token);
+      }),
+    generate: publicProcedure
+      .input(z.object({
+        storeId: z.number(),
+        planogramId: z.number().optional(),
+        productIds: z.array(z.number()).optional(),
+        type: z.enum(["assortment", "placement", "pricing", "promotion"]),
+      }))
+      .mutation(async ({ input }) => {
+        return await aiRec.generateRecommendations(input);
+      }),
+    analyzePlanogram: publicProcedure
+      .input(z.object({ planogramId: z.number() }))
+      .query(async ({ input }) => {
+        return await aiRec.analyzePlanogramEfficiency(input.planogramId);
+      }),
+    productCorrelations: publicProcedure
+      .input(z.object({ storeId: z.number(), productId: z.number() }))
+      .query(async ({ input }) => {
+        return await aiRec.calculateProductCorrelations(input.storeId, input.productId);
       }),
   }),
 });

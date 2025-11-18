@@ -64,3 +64,24 @@
 - [ ] Optimisation des performances
 - [ ] Documentation utilisateur
 - [ ] Checkpoint final et déploiement
+
+
+## Nouvelles fonctionnalités demandées
+
+### Module de suivi des stocks avec graphiques
+- [x] Créer des graphiques interactifs d'évolution des stocks
+- [x] Afficher les tendances de vente par produit
+- [x] Visualiser les prévisions basées sur l'historique
+- [x] Ajouter des indicateurs de performance (rotation, ruptures)
+
+### Moteur IA de recommandations avancé
+- [x] Implémenter des algorithmes d'apprentissage automatique
+- [x] Générer des recommandations d'assortiment optimisées
+- [x] Suggérer des placements basés sur les corrélations de vente
+- [x] Calculer l'impact prévu des recommandations
+
+### Détection d'anomalies par vision
+- [x] Système de comparaison automatique photo vs planogramme
+- [x] Identification des produits mal placés par IA
+- [x] Détection des produits manquants ou en surplus
+- [x] Génération de rapports d'anomalies avec suggestions de correction
