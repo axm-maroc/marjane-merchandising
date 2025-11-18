@@ -135,3 +135,34 @@
 
 - [x] Corriger le message "emplacement introuvable" dans les étagères
 - [x] Restaurer le fonctionnement des étagères comme dans les versions précédentes
+
+
+## Nouvelles fonctionnalités avancées
+
+### Système de drag & drop interactif
+- [x] Implémenter la bibliothèque de drag & drop pour React
+- [x] Créer une zone de canvas interactif pour le planogramme 2D
+- [x] Permettre de glisser-déposer les produits depuis la liste vers le rayonnage
+- [x] Ajouter l'ajustement automatique des positions
+- [x] Implémenter la détection de collisions entre produits
+- [x] Ajouter le redimensionnement visuel des produits
+- [ ] Sauvegarder automatiquement les positions des produits
+
+### Export PDF professionnel
+- [x] Installer les dépendances pour la génération PDF
+- [x] Créer un template PDF professionnel pour les planogrammes
+- [x] Inclure la vue 2D du planogramme dans le PDF
+- [x] Inclure la vue 3D du planogramme dans le PDF
+- [x] Ajouter la liste détaillée des produits avec photos
+- [x] Inclure les objectifs de vente et statistiques
+- [x] Ajouter un bouton d'export PDF dans l'interface
+- [x] Générer un nom de fichier descriptif avec date
+
+### Historique et versioning
+- [ ] Créer une table pour l'historique des versions de planogrammes
+- [ ] Implémenter la sauvegarde automatique des versions
+- [ ] Créer une interface de visualisation de l'historique
+- [ ] Permettre la comparaison entre deux versions
+- [ ] Implémenter la restauration d'une version antérieure
+- [ ] Ajouter des commentaires/notes sur chaque version
+- [ ] Afficher un timeline visuel de l'évolution

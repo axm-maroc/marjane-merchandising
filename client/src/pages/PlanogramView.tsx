@@ -3,9 +3,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, LayoutGrid, Box, Calendar, Target, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, LayoutGrid, Box, Calendar, Target, Image as ImageIcon, FileDown } from "lucide-react";
 import { Link, useParams } from "wouter";
 import { useMemo, useState } from "react";
+import PlanogramCanvas from "@/components/PlanogramCanvas";
+import { exportPlanogramToPDF } from "@/utils/pdfExport";
+import { toast } from "sonner";
 
 export default function PlanogramView() {
   const params = useParams();
@@ -28,6 +31,37 @@ export default function PlanogramView() {
     { planogramId: activePlanogram?.id || 0 },
     { enabled: !!activePlanogram }
   );
+
+  const handleExportPDF = async () => {
+    if (!activePlanogram || !location) return;
+
+    try {
+      toast.info("Génération du PDF en cours...");
+
+      const view2DElement = document.getElementById('planogram-2d-view');
+      const view3DElement = document.getElementById('planogram-3d-view');
+
+      const planogramData = {
+        name: activePlanogram.name,
+        storeName: 'Magasin',
+        location: location.name,
+        version: activePlanogram.version,
+        salesTarget: activePlanogram.salesTarget || undefined,
+        products: (planogramProducts || []).map(pp => ({
+          productName: pp.product?.name || 'Produit inconnu',
+          quantity: pp.quantity,
+          facings: pp.facings,
+          shelfLevel: pp.shelfLevel,
+        })),
+      };
+
+      await exportPlanogramToPDF(planogramData, view2DElement, view3DElement);
+      toast.success("PDF exporté avec succès !");
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      toast.error("Erreur lors de l'export PDF");
+    }
+  };
   
   const { data: planogramPhotos } = trpc.planograms.getPhotos.useQuery(
     { planogramId: activePlanogram?.id || 0 },
@@ -65,11 +99,24 @@ export default function PlanogramView() {
               <h1 className="text-3xl font-bold text-slate-900">{location.name}</h1>
               <p className="text-slate-600 mt-1">Zone: {location.zone}</p>
             </div>
-            {activePlanogram && (
-              <Badge variant={activePlanogram.status === "active" ? "default" : "secondary"} className="text-sm px-3 py-1">
-                {activePlanogram.status === "active" ? "Actif" : activePlanogram.status === "draft" ? "Brouillon" : "Archivé"}
-              </Badge>
-            )}
+            <div className="flex items-center gap-3">
+              {activePlanogram && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleExportPDF}
+                    className="gap-2"
+                  >
+                    <FileDown className="w-4 h-4" />
+                    Exporter PDF
+                  </Button>
+                  <Badge variant={activePlanogram.status === "active" ? "default" : "secondary"} className="text-sm px-3 py-1">
+                    {activePlanogram.status === "active" ? "Actif" : activePlanogram.status === "draft" ? "Brouillon" : "Archivé"}
+                  </Badge>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -143,16 +190,26 @@ export default function PlanogramView() {
           {/* Main Content - Planogram Visualization */}
           <div className="lg:col-span-3">
             {activePlanogram ? (
-              <Tabs defaultValue="2d" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
+              <Tabs defaultValue="editor" className="w-full">
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="editor">Éditeur</TabsTrigger>
                   <TabsTrigger value="2d">Vue 2D</TabsTrigger>
                   <TabsTrigger value="3d">Vue 3D</TabsTrigger>
-                  <TabsTrigger value="photos">Photos Réelles</TabsTrigger>
+                  <TabsTrigger value="photos">Photos</TabsTrigger>
                 </TabsList>
+
+                {/* Interactive Editor */}
+                <TabsContent value="editor">
+                  <InteractivePlanogramEditor 
+                    location={location}
+                    activePlanogram={activePlanogram}
+                    planogramProducts={planogramProducts || []}
+                  />
+                </TabsContent>
 
                 {/* 2D View */}
                 <TabsContent value="2d">
-                  <Card className="border-slate-200">
+                  <Card className="border-slate-200" id="planogram-2d-view">
                     <CardHeader>
                       <div className="flex items-center justify-between">
                         <div>
@@ -185,7 +242,7 @@ export default function PlanogramView() {
 
                 {/* 3D View */}
                 <TabsContent value="3d">
-                  <Card className="border-slate-200">
+                  <Card className="border-slate-200" id="planogram-3d-view">
                     <CardHeader>
                       <CardTitle className="text-slate-900 flex items-center gap-2">
                         <Box className="w-5 h-5" />
@@ -487,5 +544,82 @@ function Planogram3DView({ location, products }: { location: any; products: any[
         Vue 3D en perspective • {products.length} produits affichés
       </div>
     </div>
+  );
+}
+
+// Interactive Planogram Editor Component
+function InteractivePlanogramEditor({ 
+  location, 
+  activePlanogram, 
+  planogramProducts 
+}: { 
+  location: any; 
+  activePlanogram: any; 
+  planogramProducts: any[];
+}) {
+  const utils = trpc.useUtils();
+  const { data: allProducts } = trpc.products.list.useQuery();
+  
+  const [placedProducts, setPlacedProducts] = useState<any[]>(
+    planogramProducts.map(pp => ({
+      productId: pp.productId,
+      product: pp.product,
+      x: pp.positionX || 0,
+      y: 10,
+      width: (pp.product?.width || 80) * (pp.facings || 1),
+      height: pp.product?.height || 200,
+      shelfLevel: pp.shelfLevel || 0,
+    }))
+  );
+
+  const handleProductPlaced = (placement: any) => {
+    setPlacedProducts(prev => [...prev, placement]);
+    // TODO: Save to database
+  };
+
+  const handleProductRemoved = (productId: number) => {
+    setPlacedProducts(prev => prev.filter(p => p.productId !== productId));
+    // TODO: Remove from database
+  };
+
+  const handleProductMoved = (productId: number, x: number, y: number, shelfLevel: number) => {
+    setPlacedProducts(prev => 
+      prev.map(p => 
+        p.productId === productId 
+          ? { ...p, x, y, shelfLevel }
+          : p
+      )
+    );
+    // TODO: Update in database
+  };
+
+  const availableProducts = (allProducts || []).map(p => ({
+    id: p.id,
+    name: p.name,
+    imageUrl: p.photoUrl || '',
+    category: 'Produit',
+  }));
+
+  return (
+    <Card className="border-slate-200">
+      <CardHeader>
+        <CardTitle className="text-slate-900">Éditeur Interactif de Planogramme</CardTitle>
+        <CardDescription className="text-slate-600">
+          Glissez-déposez les produits pour créer votre planogramme
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <PlanogramCanvas
+          products={availableProducts}
+          placedProducts={placedProducts}
+          shelfWidth={location.shelfWidth * 0.15}
+          shelfHeight={location.shelfHeight * 0.15 * location.shelfCount}
+          shelfLevels={location.shelfCount}
+          onProductPlaced={handleProductPlaced}
+          onProductRemoved={handleProductRemoved}
+          onProductMoved={handleProductMoved}
+        />
+      </CardContent>
+    </Card>
   );
 }
