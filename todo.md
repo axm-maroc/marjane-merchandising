@@ -123,3 +123,9 @@
 - [ ] Afficher les vrais produits avec leurs dimensions dans la vue 3D
 - [ ] Ajouter des contrôles de rotation et zoom pour la vue 3D
 - [ ] Améliorer le rendu visuel des produits en 3D
+
+
+## Bugs 404 à corriger
+
+- [x] Corriger l'erreur 404 sur la page des étagères dans le détail du magasin
+- [x] Corriger l'erreur 404 sur "Voir le planogramme" dans Planogrammes 2D/3D

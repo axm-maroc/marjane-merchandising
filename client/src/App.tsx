@@ -21,9 +21,11 @@ function Router() {
     <Switch>
       <Route path={"/"} component={Home} />
       <Route path="/stores" component={Stores} />
-      <Route path="/stores/:id" component={StoreDetail} />      <Route path={"/planograms"} component={Planograms} />
+      <Route path="/stores/:id" component={StoreDetail} />
+      <Route path={"/planograms"} component={Planograms} />
+      <Route path={"/planograms/location/:id"} component={PlanogramView} />
       <Route path={"/planogram/create"} component={CreatePlanogram} />
-      <Route path={" /planogram/:id"} component={PlanogramView} />
+      <Route path={"/planogram/:id"} component={PlanogramView} />
       <Route path="/stock" component={StockTracking} />
       <Route path="/forecasts" component={AIRecommendations} />
       <Route path="/anomalies" component={AnomalyDetection} />
