@@ -143,6 +143,12 @@ export async function getAllCategories() {
 }
 
 // ===== PLANOGRAM LOCATIONS =====
+export async function getAllPlanogramLocations() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(planogramLocations).orderBy(planogramLocations.storeId, planogramLocations.name);
+}
+
 export async function getPlanogramLocationsByStore(storeId: number) {
   const db = await getDb();
   if (!db) return [];

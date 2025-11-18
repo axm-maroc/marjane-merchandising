@@ -91,3 +91,13 @@
 
 - [x] Corriger l'erreur de génération IA dans le module de recommandations
 - [x] Vérifier et tester tous les modules pour s'assurer qu'ils fonctionnent correctement
+
+
+## Bugs critiques à corriger
+
+- [x] Corriger l'erreur 404 dans le module Planogrammes 2D/3D
+- [x] Corriger la vue 3D dans le module gestion des magasins
+- [x] Corriger l'upload de photos réelles dans le module gestion des magasins
+- [x] Corriger le bouton "Générer recommandations" dans le module Recommandations IA
+- [x] Corriger l'analyse de photo dans le module Détection d'anomalies
+- [x] Corriger l'erreur 404 dans le module Partage de recommandations

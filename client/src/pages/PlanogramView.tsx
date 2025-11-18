@@ -208,13 +208,38 @@ export default function PlanogramView() {
                 <TabsContent value="photos">
                   <Card className="border-slate-200">
                     <CardHeader>
-                      <CardTitle className="text-slate-900 flex items-center gap-2">
-                        <ImageIcon className="w-5 h-5" />
-                        Photos Réelles du Planogramme
-                      </CardTitle>
-                      <CardDescription className="text-slate-600">
-                        Comparez le planogramme prévu avec les photos prises en magasin
-                      </CardDescription>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle className="text-slate-900 flex items-center gap-2">
+                            <ImageIcon className="w-5 h-5" />
+                            Photos Réelles du Planogramme
+                          </CardTitle>
+                          <CardDescription className="text-slate-600">
+                            Comparez le planogramme prévu avec les photos prises en magasin
+                          </CardDescription>
+                        </div>
+                        <Button
+                          onClick={() => {
+                            const input = document.createElement('input');
+                            input.type = 'file';
+                            input.accept = 'image/*';
+                            input.multiple = true;
+                            input.onchange = async (e: any) => {
+                              const files = e.target.files;
+                              if (files && files.length > 0 && activePlanogram) {
+                                // TODO: Implémenter l'upload vers S3
+                                alert(`Upload de ${files.length} photo(s) - Fonctionnalité disponible prochainement`);
+                              }
+                            };
+                            input.click();
+                          }}
+                          variant="outline"
+                          size="sm"
+                        >
+                          <ImageIcon className="w-4 h-4 mr-2" />
+                          Ajouter des photos
+                        </Button>
+                      </div>
                     </CardHeader>
                     <CardContent>
                       {planogramPhotos && planogramPhotos.length > 0 ? (
@@ -364,18 +389,102 @@ function Planogram2DView({ location, products }: { location: any; products: any[
   );
 }
 
-// Component for 3D Planogram View (simplified perspective)
+// Component for 3D Planogram View (CSS 3D perspective)
 function Planogram3DView({ location, products }: { location: any; products: any[] }) {
+  const shelfCount = location.shelfCount || 5;
+  const shelfWidth = location.shelfWidth || 200;
+  const shelfHeight = location.shelfHeight || 40;
+  const shelfDepth = location.shelfDepth || 50;
+
+  // Group products by shelf level
+  const productsByShelf = products.reduce((acc: Record<number, any[]>, product) => {
+    const level = product.shelfLevel || 1;
+    if (!acc[level]) acc[level] = [];
+    acc[level].push(product);
+    return acc;
+  }, {});
+
   return (
-    <div className="bg-gradient-to-b from-slate-100 to-slate-200 p-8 rounded-lg border border-slate-300 min-h-[500px] flex items-center justify-center">
-      <div className="text-center">
-        <Box className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-slate-900 mb-2">Vue 3D</h3>
-        <p className="text-slate-600 max-w-md">
-          La visualisation 3D interactive sera disponible prochainement.
-          <br />
-          Elle permettra de voir le rayonnage en perspective avec rotation et zoom.
-        </p>
+    <div className="bg-gradient-to-b from-slate-800 to-slate-900 p-8 rounded-lg border border-slate-700 min-h-[600px] overflow-hidden">
+      <div 
+        className="relative w-full h-[550px]"
+        style={{
+          perspective: '1200px',
+          perspectiveOrigin: '50% 30%',
+        }}
+      >
+        <div 
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+          style={{
+            transform: 'rotateX(15deg) rotateY(-25deg)',
+            transformStyle: 'preserve-3d',
+          }}
+        >
+          {/* Shelves */}
+          {Array.from({ length: shelfCount }, (_, i) => {
+            const shelfLevel = shelfCount - i;
+            const yPos = i * (shelfHeight + 10);
+            const shelfProducts = productsByShelf[shelfLevel] || [];
+            
+            return (
+              <div
+                key={i}
+                className="absolute"
+                style={{
+                  transform: `translate3d(0, ${yPos}px, 0)`,
+                  transformStyle: 'preserve-3d',
+                }}
+              >
+                {/* Shelf surface */}
+                <div
+                  className="bg-gradient-to-br from-amber-700 to-amber-900 border-2 border-amber-600"
+                  style={{
+                    width: `${shelfWidth * 2}px`,
+                    height: `${shelfDepth}px`,
+                    transform: 'rotateX(90deg)',
+                    transformOrigin: 'top',
+                  }}
+                />
+                
+                {/* Products on shelf */}
+                {shelfProducts.map((product, idx) => {
+                  const xPos = (product.positionX || idx * 60) * 2;
+                  return (
+                    <div
+                      key={product.id}
+                      className="absolute bg-gradient-to-br from-blue-500 to-blue-700 border border-blue-400 rounded shadow-lg flex items-center justify-center"
+                      style={{
+                        width: `${(product.width || 30) * 2}px`,
+                        height: `${(product.height || 20) * 2}px`,
+                        transform: `translate3d(${xPos}px, -${(product.height || 20) * 2}px, ${shelfDepth / 2}px)`,
+                        transformStyle: 'preserve-3d',
+                      }}
+                      title={product.productName}
+                    >
+                      <span className="text-white text-xs font-bold truncate px-1">
+                        {product.productName?.substring(0, 8)}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+          
+          {/* Back panel */}
+          <div
+            className="absolute bg-gradient-to-b from-slate-700 to-slate-800 border-2 border-slate-600"
+            style={{
+              width: `${shelfWidth * 2}px`,
+              height: `${(shelfHeight + 10) * shelfCount}px`,
+              transform: 'translateZ(-10px)',
+            }}
+          />
+        </div>
+      </div>
+      
+      <div className="text-center mt-4 text-slate-400 text-sm">
+        Vue 3D en perspective • {products.length} produits affichés
       </div>
     </div>
   );

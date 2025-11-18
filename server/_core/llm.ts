@@ -323,10 +323,22 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
 
   if (!response.ok) {
     const errorText = await response.text();
+    console.error("[LLM] Request failed:", {
+      status: response.status,
+      statusText: response.statusText,
+      error: errorText,
+    });
     throw new Error(
       `LLM invoke failed: ${response.status} ${response.statusText} – ${errorText}`
     );
   }
 
-  return (await response.json()) as InvokeResult;
+  const result = (await response.json()) as InvokeResult;
+  
+  // Log response for debugging
+  if (!result || !result.choices || result.choices.length === 0) {
+    console.error("[LLM] Invalid response structure:", JSON.stringify(result, null, 2));
+  }
+  
+  return result;
 }

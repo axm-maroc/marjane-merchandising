@@ -11,6 +11,8 @@ import PlanogramView from "./pages/PlanogramView";
 import StockTracking from "./pages/StockTracking";
 import AIRecommendations from "./pages/AIRecommendations";
 import AnomalyDetection from "./pages/AnomalyDetection";
+import Planograms from "./pages/Planograms";
+import Recommendations from "./pages/Recommendations";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -19,10 +21,12 @@ function Router() {
       <Route path={"/"} component={Home} />
       <Route path="/stores" component={Stores} />
       <Route path="/stores/:id" component={StoreDetail} />
+      <Route path="/planograms" component={Planograms} />
       <Route path="/planograms/location/:locationId" component={PlanogramView} />
       <Route path="/stock" component={StockTracking} />
       <Route path="/forecasts" component={AIRecommendations} />
       <Route path="/anomalies" component={AnomalyDetection} />
+      <Route path="/recommendations" component={Recommendations} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

@@ -58,6 +58,10 @@ export const appRouter = router({
 
   // Planogram Locations
   planogramLocations: router({
+    list: publicProcedure
+      .query(async () => {
+        return await db.getAllPlanogramLocations();
+      }),
     byStore: publicProcedure
       .input(z.object({ storeId: z.number() }))
       .query(async ({ input }) => {

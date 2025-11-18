@@ -120,7 +120,7 @@ Tu dois fournir des recommandations précises, basées sur les données, avec de
                 type: "object",
                 properties: {
                   productId: {
-                    type: ["number", "null"],
+                    type: "number",
                     description: "ID du produit concerné (si applicable)",
                   },
                   action: {
@@ -138,7 +138,7 @@ Tu dois fournir des recommandations précises, basées sur les données, avec de
                   },
                 },
                 required: ["action", "reason", "priority"],
-                additionalProperties: false,
+                additionalProperties: true,
               },
             },
             insights: {
@@ -150,7 +150,7 @@ Tu dois fournir des recommandations précises, basées sur les données, avec de
             },
           },
           required: ["title", "description", "confidence", "expectedImpact", "actions", "insights"],
-          additionalProperties: false,
+          additionalProperties: true,
         },
       },
     },
