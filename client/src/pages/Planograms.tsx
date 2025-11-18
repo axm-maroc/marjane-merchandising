@@ -2,7 +2,7 @@ import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, LayoutGrid, MapPin, TrendingUp } from "lucide-react";
+import { ArrowLeft, LayoutGrid, MapPin, TrendingUp, Plus } from "lucide-react";
 import { Link } from "wouter";
 
 export default function Planograms() {
@@ -37,13 +37,19 @@ export default function Planograms() {
                 <ArrowLeft className="w-5 h-5" />
               </Button>
             </Link>
-            <div>
+            <div className="flex-1">
               <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-2">
                 <LayoutGrid className="w-8 h-8 text-green-600" />
                 Planogrammes 2D/3D
               </h1>
               <p className="text-slate-600 mt-1">Gérez vos planogrammes de rayonnage par magasin</p>
             </div>
+            <Link href="/planogram/create">
+              <Button size="lg">
+                <Plus className="w-5 h-5 mr-2" />
+                Créer un Planogramme
+              </Button>
+            </Link>
           </div>
         </div>
       </header>

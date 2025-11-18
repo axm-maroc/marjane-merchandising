@@ -162,6 +162,27 @@ export async function getPlanogramLocationById(id: number) {
   return result[0];
 }
 
+export async function createPlanogramLocation(data: {
+  storeId: number;
+  name: string;
+  location: string;
+  width: number;
+  height: number;
+  depth: number;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(planogramLocations).values(data);
+  const insertedId = result[0].insertId;
+  
+  // Récupérer le planogramme créé
+  const planogram = await getPlanogramLocationById(insertedId);
+  if (!planogram) throw new Error("Failed to create planogram location");
+  
+  return planogram;
+}
+
 // ===== PLANOGRAMS =====
 export async function getPlanogramsByLocation(locationId: number) {
   const db = await getDb();
@@ -202,6 +223,53 @@ export async function getPlanogramPhotos(planogramId: number) {
   const db = await getDb();
   if (!db) return [];
   return await db.select().from(planogramPhotos).where(eq(planogramPhotos.planogramId, planogramId)).orderBy(desc(planogramPhotos.takenAt));
+}
+
+export async function addProductToPlanogram(data: {
+  planogramId: number;
+  productId: number;
+  position: number;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Pour l'instant, on crée un planogramme par défaut avec version 1
+  // TODO: Améliorer pour gérer les versions correctement
+  
+  // Vérifier si un planogramme existe déjà pour cette location
+  const existingPlanograms = await db
+    .select()
+    .from(planograms)
+    .where(eq(planograms.locationId, data.planogramId))
+    .limit(1);
+  
+  let planogramId: number;
+  
+  if (existingPlanograms.length === 0) {
+    // Créer un nouveau planogramme
+    const result = await db.insert(planograms).values({
+      locationId: data.planogramId,
+      name: "Planogramme v1",
+      version: 1,
+      status: "draft",
+      salesTarget: 0,
+    });
+    planogramId = result[0].insertId;
+  } else {
+    planogramId = existingPlanograms[0].id;
+  }
+  
+  // Ajouter le produit au planogramme
+  await db.insert(planogramProducts).values({
+    planogramId,
+    productId: data.productId,
+    shelfLevel: 0, // Niveau par défaut
+    positionX: data.position, // Position horizontale
+    facings: 1,
+    quantity: 1,
+  });
+  
+  return { success: true };
 }
 
 // ===== STOCK HISTORY =====

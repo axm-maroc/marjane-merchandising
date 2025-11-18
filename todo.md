@@ -101,3 +101,25 @@
 - [x] Corriger le bouton "Générer recommandations" dans le module Recommandations IA
 - [x] Corriger l'analyse de photo dans le module Détection d'anomalies
 - [x] Corriger l'erreur 404 dans le module Partage de recommandations
+
+
+## Nouvelles fonctionnalités demandées
+
+### Module de partage de recommandations
+- [x] Développer la page complète de partage de recommandations
+- [x] Générer des liens partageables avec QR codes
+- [ ] Créer une vue publique des recommandations partagées
+- [ ] Ajouter un système de tracking des recommandations partagées
+
+### Création et gestion de planogrammes
+- [x] Créer une interface de création de nouveaux planogrammes
+- [x] Ajouter la sélection de thème d'étalage (boissons, snacks, etc.)
+- [x] Permettre l'ajout de produits par thème
+- [x] Implémenter la sélection multiple de produits
+- [ ] Ajouter un système de drag & drop pour placer les produits
+
+### Amélioration de la vue 3D
+- [ ] Synchroniser la vue 3D avec la vue 2D
+- [ ] Afficher les vrais produits avec leurs dimensions dans la vue 3D
+- [ ] Ajouter des contrôles de rotation et zoom pour la vue 3D
+- [ ] Améliorer le rendu visuel des produits en 3D

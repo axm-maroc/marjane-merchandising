@@ -96,6 +96,39 @@ export const appRouter = router({
       .query(async ({ input }) => {
         return await db.getPlanogramPhotos(input.planogramId);
       }),
+    create: publicProcedure
+      .input(z.object({
+        storeId: z.number(),
+        name: z.string(),
+        location: z.string(),
+        width: z.number(),
+        height: z.number(),
+        depth: z.number(),
+        theme: z.string(),
+        productIds: z.array(z.number()),
+      }))
+      .mutation(async ({ input }) => {
+        // Créer le planogramme
+        const planogram = await db.createPlanogramLocation({
+          storeId: input.storeId,
+          name: input.name,
+          location: input.location,
+          width: input.width,
+          height: input.height,
+          depth: input.depth,
+        });
+        
+        // Ajouter les produits au planogramme
+        for (const productId of input.productIds) {
+          await db.addProductToPlanogram({
+            planogramId: planogram.id,
+            productId,
+            position: 0, // Position par défaut, sera mise à jour lors du placement
+          });
+        }
+        
+        return planogram;
+      }),
   }),
 
   // Stock History
@@ -190,6 +223,22 @@ export const appRouter = router({
       .input(z.object({ storeId: z.number(), productId: z.number() }))
       .query(async ({ input }) => {
         return await aiRec.calculateProductCorrelations(input.storeId, input.productId);
+      }),
+    share: publicProcedure
+      .input(z.object({ 
+        recommendationId: z.number(),
+        expiresInDays: z.number().default(30),
+      }))
+      .mutation(async ({ input }) => {
+        // Générer un token unique
+        const shareToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + input.expiresInDays);
+        
+        // TODO: Sauvegarder le lien de partage dans la base de données
+        // Pour l'instant, on retourne juste le token
+        
+        return { shareToken, expiresAt };
       }),
   }),
 });
