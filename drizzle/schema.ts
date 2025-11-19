@@ -153,12 +153,15 @@ export type InsertPlanogramProduct = typeof planogramProducts.$inferInsert;
  */
 export const planogramPhotos = mysqlTable("planogramPhotos", {
   id: int("id").autoincrement().primaryKey(),
-  planogramId: int("planogramId").notNull(),
+  planogramId: int("planogramId"),
+  storeId: int("storeId").notNull(),
+  userId: int("userId").notNull(), // Merchandiser qui a pris la photo
   url: text("url").notNull(),
   fileKey: varchar("fileKey", { length: 500 }).notNull(),
-  takenAt: timestamp("takenAt").notNull(),
-  uploadedBy: varchar("uploadedBy", { length: 255 }),
-  notes: text("notes"),
+  latitude: varchar("latitude", { length: 50 }),
+  longitude: varchar("longitude", { length: 50 }),
+  description: text("description"),
+  timestamp: timestamp("timestamp").notNull(), // Moment de la prise de photo
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
@@ -257,3 +260,4 @@ export const recommendations = mysqlTable("recommendations", {
 
 export type Recommendation = typeof recommendations.$inferSelect;
 export type InsertRecommendation = typeof recommendations.$inferInsert;
+

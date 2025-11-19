@@ -11,6 +11,7 @@ import {
   planograms,
   planogramProducts,
   planogramPhotos,
+  InsertPlanogramPhoto,
   planogramHistory,
   stockHistory,
   salesForecasts,
@@ -223,7 +224,7 @@ export async function getPlanogramProducts(planogramId: number) {
 export async function getPlanogramPhotos(planogramId: number) {
   const db = await getDb();
   if (!db) return [];
-  return await db.select().from(planogramPhotos).where(eq(planogramPhotos.planogramId, planogramId)).orderBy(desc(planogramPhotos.takenAt));
+  return await db.select().from(planogramPhotos).where(eq(planogramPhotos.planogramId, planogramId)).orderBy(desc(planogramPhotos.timestamp));
 }
 
 export async function addProductToPlanogram(data: {
@@ -559,4 +560,26 @@ export async function savePlanogramVersion(planogramId: number, comment: string)
   });
 
   return { success: true, version: newVersionNumber };
+}
+
+
+// Photos terrain
+export async function savePlanogramPhoto(data: InsertPlanogramPhoto) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(planogramPhotos).values(data);
+  return result;
+}
+
+export async function getUserPhotos(userId: number, limit: number = 20) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db
+    .select()
+    .from(planogramPhotos)
+    .where(eq(planogramPhotos.userId, userId))
+    .orderBy(desc(planogramPhotos.timestamp))
+    .limit(limit);
 }

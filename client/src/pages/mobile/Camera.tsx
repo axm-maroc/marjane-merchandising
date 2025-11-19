@@ -1,5 +1,8 @@
 import { Camera as CameraIcon, Upload, X, CheckCircle } from 'lucide-react';
 import { useState, useRef } from 'react';
+import { trpc } from '@/lib/trpc';
+import { useAuth } from '@/_core/hooks/useAuth';
+import { toast } from 'sonner';
 
 export default function CameraPage() {
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
@@ -18,22 +21,80 @@ export default function CameraPage() {
     }
   };
 
+  const { user } = useAuth();
+  const uploadPhotoMutation = trpc.photos.upload.useMutation();
+
   const handleUpload = async () => {
-    if (!capturedImage) return;
+    if (!capturedImage || !user) {
+      toast.error('Vous devez être connecté pour uploader une photo');
+      return;
+    }
 
     setUploading(true);
     
-    // Simulate upload
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    setUploading(false);
-    setUploaded(true);
+    try {
+      // Convertir base64 en Blob
+      const response = await fetch(capturedImage);
+      const blob = await response.blob();
+      
+      // Créer FormData pour l'upload
+      const formData = new FormData();
+      formData.append('file', blob, `photo-${Date.now()}.jpg`);
+      
+      // Upload vers le serveur qui gérera S3
+      const uploadResponse = await fetch('/api/upload-photo', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!uploadResponse.ok) {
+        throw new Error('Upload failed');
+      }
+      
+      const { url, fileKey } = await uploadResponse.json();
+      
+      // Récupérer la géolocalisation
+      let latitude: string | undefined;
+      let longitude: string | undefined;
+      
+      if (navigator.geolocation) {
+        try {
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject);
+          });
+          latitude = position.coords.latitude.toString();
+          longitude = position.coords.longitude.toString();
+        } catch (error) {
+          console.log('Géolocalisation non disponible');
+        }
+      }
+      
+      // Sauvegarder les métadonnées dans la base de données
+      await uploadPhotoMutation.mutateAsync({
+        storeId: 1, // TODO: Récupérer le vrai storeId
+        userId: user.id,
+        url,
+        fileKey,
+        latitude,
+        longitude,
+        description: 'Photo prise depuis l\'application mobile',
+        timestamp: new Date(),
+      });
+      
+      setUploading(false);
+      setUploaded(true);
+      toast.success('Photo uploadée avec succès !');
 
-    // Reset after 2 seconds
-    setTimeout(() => {
-      setCapturedImage(null);
-      setUploaded(false);
-    }, 2000);
+      // Reset after 2 seconds
+      setTimeout(() => {
+        setCapturedImage(null);
+        setUploaded(false);
+      }, 2000);
+    } catch (error) {
+      console.error('Upload error:', error);
+      setUploading(false);
+      toast.error('Erreur lors de l\'upload de la photo');
+    }
   };
 
   const handleReset = () => {

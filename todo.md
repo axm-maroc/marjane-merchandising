@@ -244,3 +244,23 @@
 - [x] Créer le composant MobileLayout avec navigation bottom bar
 - [x] Ajouter un point d'entrée depuis la page d'accueil
 - [x] Tester l'accès et la navigation mobile
+
+
+## Upload photo avec S3 et métadonnées
+- [x] Créer la table photos dans le schéma de base de données (planogramPhotos)
+- [x] Ajouter les procédures tRPC pour upload et liste des photos
+- [x] Implémenter la capture photo réelle dans Camera.tsx
+- [x] Ajouter l'upload vers S3 avec métadonnées (magasin, planogramme, timestamp, géolocalisation)
+- [x] Créer l'endpoint /api/upload-photo avec multer
+- [x] Intégrer la géolocalisation automatique lors de la prise de photo
+- [ ] Afficher la galerie des photos uploadées
+- [ ] Tester l'upload et la récupération des photos
+
+## Système de synchronisation hors-ligne PWA
+- [x] Créer le service worker pour le cache des ressources
+- [x] Implémenter la stratégie de cache (Cache First pour assets, Network First pour API)
+- [x] Ajouter le stockage local IndexedDB pour les actions hors-ligne
+- [x] Implémenter la synchronisation automatique lors de la reconnexion (Background Sync API)
+- [x] Ajouter un indicateur de statut de connexion dans MobileLayout
+- [x] Créer le hook useServiceWorker pour gérer l'état en ligne/hors-ligne
+- [ ] Tester le mode hors-ligne et la synchronisation

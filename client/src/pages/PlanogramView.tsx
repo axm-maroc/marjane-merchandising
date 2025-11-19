@@ -321,10 +321,10 @@ export default function PlanogramView() {
                               <div className="p-3 bg-slate-50">
                                 <div className="text-sm text-slate-600 flex items-center gap-1">
                                   <Calendar className="w-4 h-4" />
-                                  {new Date(photo.takenAt).toLocaleDateString("fr-FR")}
+                                  {new Date(photo.timestamp).toLocaleDateString("fr-FR")}
                                 </div>
-                                {photo.notes && (
-                                  <p className="text-sm text-slate-700 mt-1">{photo.notes}</p>
+                                {photo.description && (
+                                  <p className="text-sm text-slate-700 mt-1">{photo.description}</p>
                                 )}
                               </div>
                             </div>

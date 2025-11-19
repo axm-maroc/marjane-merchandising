@@ -325,6 +325,33 @@ export const appRouter = router({
         return { shareToken, expiresAt };
       }),
   }),
+
+  // Photos terrain
+  photos: router({
+    upload: publicProcedure
+      .input(z.object({
+        planogramId: z.number().optional(),
+        storeId: z.number(),
+        userId: z.number(),
+        url: z.string(),
+        fileKey: z.string(),
+        latitude: z.string().optional(),
+        longitude: z.string().optional(),
+        description: z.string().optional(),
+        timestamp: z.date(),
+      }))
+      .mutation(async ({ input }) => {
+        return await db.savePlanogramPhoto(input);
+      }),
+    getUserPhotos: publicProcedure
+      .input(z.object({ 
+        userId: z.number(),
+        limit: z.number().default(20),
+      }))
+      .query(async ({ input }) => {
+        return await db.getUserPhotos(input.userId, input.limit);
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
