@@ -235,3 +235,12 @@
 - [x] Implémenter la génération automatique de commentaires descriptifs
 - [x] Ajouter la fonction savePlanogramVersion dans db.ts
 - [x] Sauvegarder automatiquement la version initiale lors de la création
+
+
+## Intégration de l'application mobile dans l'application principale
+- [x] Copier les pages mobiles dans client/src/pages/mobile/
+- [x] Copier les styles CSS mobiles
+- [x] Créer les routes /mobile/* dans App.tsx
+- [x] Créer le composant MobileLayout avec navigation bottom bar
+- [x] Ajouter un point d'entrée depuis la page d'accueil
+- [x] Tester l'accès et la navigation mobile

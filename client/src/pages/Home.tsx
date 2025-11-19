@@ -1,7 +1,7 @@
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Store, Package, LayoutGrid, TrendingUp, AlertTriangle, Share2, BarChart3 } from "lucide-react";
+import { Store, Package, LayoutGrid, TrendingUp, AlertTriangle, Share2, BarChart3, Smartphone } from "lucide-react";
 import { Link } from "wouter";
 import { APP_TITLE } from "@/const";
 
@@ -65,6 +65,14 @@ export default function Home() {
       href: "/recommendations",
       color: "text-indigo-600",
       bgColor: "bg-indigo-50",
+    },
+    {
+      icon: Smartphone,
+      title: "Application Mobile Terrain",
+      description: "Interface mobile pour merchandisers sur le terrain",
+      href: "/mobile",
+      color: "text-emerald-600",
+      bgColor: "bg-emerald-50",
     },
   ];
 

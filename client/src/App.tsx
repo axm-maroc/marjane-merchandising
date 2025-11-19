@@ -16,6 +16,12 @@ import Recommendations from "./pages/Recommendations";
 import CreatePlanogram from "./pages/CreatePlanogram";
 import PlanogramHistory from "./pages/PlanogramHistory";
 import Dashboard from "./pages/Dashboard";
+import MobileLayout from "./pages/mobile/MobileLayout";
+import MobileHome from "./pages/mobile/Home";
+import MobileTasks from "./pages/mobile/Tasks";
+import MobileCamera from "./pages/mobile/Camera";
+import MobileAnomalies from "./pages/mobile/Anomalies";
+import MobileProfile from "./pages/mobile/Profile";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -34,6 +40,44 @@ function Router() {
       <Route path="/forecasts" component={AIRecommendations} />
       <Route path="/anomalies" component={AnomalyDetection} />
       <Route path="/recommendations" component={Recommendations} />
+      
+      {/* Routes mobiles */}
+      <Route path="/mobile">
+        {() => (
+          <MobileLayout>
+            <MobileHome />
+          </MobileLayout>
+        )}
+      </Route>
+      <Route path="/mobile/tasks">
+        {() => (
+          <MobileLayout>
+            <MobileTasks />
+          </MobileLayout>
+        )}
+      </Route>
+      <Route path="/mobile/camera">
+        {() => (
+          <MobileLayout>
+            <MobileCamera />
+          </MobileLayout>
+        )}
+      </Route>
+      <Route path="/mobile/anomalies">
+        {() => (
+          <MobileLayout>
+            <MobileAnomalies />
+          </MobileLayout>
+        )}
+      </Route>
+      <Route path="/mobile/profile">
+        {() => (
+          <MobileLayout>
+            <MobileProfile />
+          </MobileLayout>
+        )}
+      </Route>
+      
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

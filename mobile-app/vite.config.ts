@@ -6,6 +6,10 @@ export default defineConfig({
   server: {
     port: 3001,
     host: true,
+    allowedHosts: [
+      '.manusvm.computer',
+      'localhost',
+    ],
     proxy: {
       '/api': {
         target: 'http://localhost:3000',
