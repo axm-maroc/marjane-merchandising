@@ -112,7 +112,7 @@ export default function HomePage() {
       </h3>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        <a href="/tasks" style={{ textDecoration: 'none' }}>
+        <a href="/mobile/tasks" style={{ textDecoration: 'none' }}>
           <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', transition: 'transform 0.2s' }}>
             <div style={{ padding: '0.75rem', background: '#dbeafe', borderRadius: '12px' }}>
               <CheckCircle size={24} color="#3b82f6" />
@@ -127,7 +127,7 @@ export default function HomePage() {
           </div>
         </a>
 
-        <a href="/camera" style={{ textDecoration: 'none' }}>
+        <a href="/mobile/camera" style={{ textDecoration: 'none' }}>
           <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer' }}>
             <div style={{ padding: '0.75rem', background: '#d1fae5', borderRadius: '12px' }}>
               <CheckCircle size={24} color="#10b981" />
@@ -142,7 +142,7 @@ export default function HomePage() {
           </div>
         </a>
 
-        <a href="/anomalies" style={{ textDecoration: 'none' }}>
+        <a href="/mobile/anomalies" style={{ textDecoration: 'none' }}>
           <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer' }}>
             <div style={{ padding: '0.75rem', background: '#fee2e2', borderRadius: '12px' }}>
               <AlertTriangle size={24} color="#ef4444" />

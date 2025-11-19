@@ -239,7 +239,7 @@ export default function TasksPage() {
                     padding: '0.5rem 1rem',
                     flex: 1
                   }}
-                  onClick={() => window.location.href = '/camera'}
+                  onClick={() => window.location.href = '/mobile/camera'}
                 >
                   Prendre une photo
                 </button>
