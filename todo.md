@@ -662,3 +662,21 @@
 - [ ] Ajouter les informations du magasin (nom, date, heure)
 - [ ] Permettre de choisir l'orientation (Portrait/Paysage)
 - [ ] Ajouter un bouton "Exporter PDF" dans le header
+
+
+## Nouvelles demandes utilisateur
+
+### Affichage du statut des planogrammes
+- [x] Ajouter des badges de statut (Brouillon/Actif/Archivé) dans le panneau Planogrammes de l'éditeur de zones
+- [x] Afficher le statut avec code couleur (gris=brouillon, vert=actif, rouge=archivé)
+- [x] Permettre de filtrer les planogrammes par statut dans l'éditeur de zones
+
+### Données de démonstration représentatives
+- [x] Créer un script de génération de données de démonstration
+- [x] Générer 12 magasins Marjane avec adresses réelles au Maroc
+- [x] Créer 10 zones par magasin avec dimensions réalistes
+- [x] Générer 195 planogrammes avec différents statuts
+- [x] Créer 239 emplacements positionnés dans les zones
+- [x] Ajouter 41 contrats de sponsoring pour plusieurs zones
+- [x] Générer des données d'historique de stock sur 6 mois
+- [x] Exécuter le script pour peupler la base de données

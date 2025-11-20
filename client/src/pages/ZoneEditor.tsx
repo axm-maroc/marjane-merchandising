@@ -891,9 +891,15 @@ export default function ZoneEditor() {
                           <div className="flex gap-2 mt-2 flex-wrap">
                             <Badge 
                               variant={planogram.status === 'active' ? 'default' : 'secondary'}
-                              className="text-xs"
+                              className={`text-xs ${
+                                planogram.status === 'active' 
+                                  ? 'bg-green-500 hover:bg-green-600' 
+                                  : planogram.status === 'draft'
+                                  ? 'bg-slate-400 hover:bg-slate-500'
+                                  : 'bg-red-500 hover:bg-red-600'
+                              }`}
                             >
-                              {planogram.status === 'active' ? 'Actif' : planogram.status === 'draft' ? 'Brouillon' : 'Archivé'}
+                              {planogram.status === 'active' ? '✅ Actif' : planogram.status === 'draft' ? '📝 Brouillon' : '📦 Archivé'}
                             </Badge>
                             <Badge variant="outline" className="text-xs">
                               v{planogram.version}
