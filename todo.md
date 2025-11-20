@@ -618,9 +618,9 @@
 ## Amélioration présentation et recommandations
 
 ### Amélioration présentation des blocs
-- [ ] Réorganiser le bloc Outils avec meilleur espacement
-- [ ] Ajouter des icônes plus grandes et visibles
-- [ ] Grouper les contrôles par catégorie (Dessin, Affichage, Fichier)
+- [x] Réorganiser le bloc Outils avec meilleur espacement (space-y-6)
+- [x] Ajouter des icônes plus grandes et visibles (5x5)
+- [x] Grouper les contrôles par catégorie (Dessin, Affichage, Fichier)
 - [ ] Améliorer le bloc Planogrammes avec cartes plus lisibles
 - [ ] Ajouter des filtres par statut dans le bloc Planogrammes
 
@@ -635,3 +635,29 @@
 - [ ] Historique des modifications de zones
 - [ ] Clic sur emplacement pour éditer directement
 - [ ] Indicateur de remplissage des étagères
+
+
+## Implémentation des 3 recommandations
+
+### 1. Filtres et Recherche
+- [x] Ajouter un champ de recherche dans le panneau Planogrammes
+- [ ] Ajouter un champ de recherche dans le panneau Emplacements
+- [x] Implémenter des filtres par statut (Actif/Brouillon/Archivé)
+- [ ] Ajouter un filtre par zone dans le panneau Emplacements
+- [ ] Persister les préférences de filtre dans localStorage
+
+### 2. Mode Plein Écran et Zoom
+- [ ] Ajouter un bouton "Plein écran" dans le header
+- [ ] Masquer les panneaux latéraux en mode plein écran
+- [ ] Implémenter le zoom avec canvas.scale()
+- [ ] Ajouter des contrôles de zoom (+10%, -10%, Reset 100%)
+- [ ] Supporter le zoom à la molette (Ctrl + Wheel)
+- [ ] Implémenter le pan (déplacement) avec la souris
+
+### 3. Export PDF
+- [ ] Installer la librairie jsPDF ou html2pdf
+- [ ] Créer une fonction d'export du canvas en image haute résolution
+- [ ] Générer une légende avec codes couleur et dimensions
+- [ ] Ajouter les informations du magasin (nom, date, heure)
+- [ ] Permettre de choisir l'orientation (Portrait/Paysage)
+- [ ] Ajouter un bouton "Exporter PDF" dans le header

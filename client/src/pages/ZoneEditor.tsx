@@ -69,9 +69,13 @@ export default function ZoneEditor() {
   const [showAssignDialog, setShowAssignDialog] = useState(false);
   const [selectedLocations, setSelectedLocations] = useState<number[]>([]);
   const [showCreatePlanogramDialog, setShowCreatePlanogramDialog] = useState(false);
-  const [selectedLocationForPlanogram, setSelectedLocationForPlanogram] = useState<any>(null);
+  const [selectedLocationForPlanogram, setSelectedLocationForPlanogram] = useState<number | null>(null);
   const [newPlanogramName, setNewPlanogramName] = useState('');
   const [newPlanogramDescription, setNewPlanogramDescription] = useState('');
+  const [planogramSearchQuery, setPlanogramSearchQuery] = useState("");
+  const [planogramStatusFilter, setPlanogramStatusFilter] = useState<string>("all");
+  const [locationSearchQuery, setLocationSearchQuery] = useState("");
+  const [locationZoneFilter, setLocationZoneFilter] = useState<number | null>(null);
   
   const updateZoneMutation = trpc.planogramLocations.updateZone.useMutation({
     onSuccess: () => {
@@ -714,70 +718,82 @@ export default function ZoneEditor() {
               <CardTitle>Outils</CardTitle>
               <CardDescription>Sélectionnez un outil pour dessiner</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>Outils de dessin</Label>
-                <div className="grid grid-cols-2 gap-2">
+            <CardContent className="space-y-6">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 pb-2 border-b">
+                  <Square className="w-4 h-4 text-blue-600" />
+                  <Label className="font-semibold">Outils de dessin</Label>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
                   <Button
                     variant={currentTool === 'select' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setCurrentTool('select')}
-                    className="flex items-center gap-2"
+                    className="flex flex-col items-center gap-1 h-auto py-3"
+                    title="Sélectionner et déplacer les zones"
                   >
-                    <Move className="w-4 h-4" />
-                    Sélectionner
+                    <Move className="w-5 h-5" />
+                    <span className="text-xs">Sélectionner</span>
                   </Button>
                   <Button
                     variant={currentTool === 'rectangle' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setCurrentTool('rectangle')}
-                    className="flex items-center gap-2"
+                    className="flex flex-col items-center gap-1 h-auto py-3"
+                    title="Dessiner une nouvelle zone"
                   >
-                    <Square className="w-4 h-4" />
-                    Rectangle
+                    <Square className="w-5 h-5" />
+                    <span className="text-xs">Rectangle</span>
                   </Button>
                   <Button
                     variant={currentTool === 'delete' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setCurrentTool('delete')}
-                    className="flex items-center gap-2"
+                    className="flex flex-col items-center gap-1 h-auto py-3"
+                    title="Supprimer une zone"
                   >
-                    <Trash2 className="w-4 h-4" />
-                    Supprimer
+                    <Trash2 className="w-5 h-5" />
+                    <span className="text-xs">Supprimer</span>
                   </Button>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label>Affichage</Label>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowGrid(!showGrid)}
-                  >
-                    <Grid3x3 className="w-4 h-4 mr-2" />
-                    {showGrid ? 'Masquer' : 'Afficher'} grille
-                  </Button>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 pb-2 border-b">
+                  <Eye className="w-4 h-4 text-green-600" />
+                  <Label className="font-semibold">Affichage</Label>
                 </div>
+                <Button
+                  variant={showGrid ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setShowGrid(!showGrid)}
+                  className="w-full justify-start"
+                >
+                  <Grid3x3 className="w-4 h-4 mr-2" />
+                  {showGrid ? '✓ Grille visible' : 'Afficher grille'}
+                </Button>
               </div>
 
-              <div className="space-y-2">
-                <Label>Plan de magasin</Label>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 pb-2 border-b">
+                  <Upload className="w-4 h-4 text-purple-600" />
+                  <Label className="font-semibold">Plan de magasin</Label>
+                </div>
                 <div className="flex flex-col gap-2">
                   <Input
                     type="file"
                     accept="image/*"
                     onChange={handleImageUpload}
-                    className="text-sm"
+                    className="text-xs cursor-pointer"
                   />
                   {backgroundImage && (
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setBackgroundImage(null)}
+                      className="text-red-600 hover:text-red-700"
                     >
-                      Retirer le plan
+                      ✕ Retirer le plan
                     </Button>
                   )}
                 </div>
@@ -786,7 +802,7 @@ export default function ZoneEditor() {
               <div className="pt-4 border-t">
                 <Button
                   onClick={handleSaveZones}
-                  className="w-full"
+                  className="w-full bg-blue-600 hover:bg-blue-700"
                 >
                   <Save className="w-4 h-4 mr-2" />
                   Enregistrer les zones
@@ -818,8 +834,36 @@ export default function ZoneEditor() {
                 Créer un planogramme
               </Button>
               
+              {/* Filtres de recherche */}
+              <div className="space-y-2 mb-4">
+                <Input
+                  placeholder="Rechercher un planogramme..."
+                  value={planogramSearchQuery}
+                  onChange={(e) => setPlanogramSearchQuery(e.target.value)}
+                  className="text-sm"
+                />
+                <select
+                  value={planogramStatusFilter}
+                  onChange={(e) => setPlanogramStatusFilter(e.target.value)}
+                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-md"
+                >
+                  <option value="all">Tous les statuts</option>
+                  <option value="active">Actif</option>
+                  <option value="draft">Brouillon</option>
+                  <option value="archived">Archivé</option>
+                </select>
+              </div>
+              
               <div className="space-y-3 max-h-[600px] overflow-y-auto">
-                {allPlanograms?.map(planogram => {
+                {allPlanograms
+                  ?.filter(planogram => {
+                    // Filtre par recherche
+                    const matchesSearch = planogram.name.toLowerCase().includes(planogramSearchQuery.toLowerCase());
+                    // Filtre par statut
+                    const matchesStatus = planogramStatusFilter === "all" || planogram.status === planogramStatusFilter;
+                    return matchesSearch && matchesStatus;
+                  })
+                  .map(planogram => {
                   const location = planogramLocations?.find(loc => loc.id === planogram.locationId);
                   const zone = location?.zoneId ? existingZones?.find(z => z.id === location.zoneId) : null;
                   
