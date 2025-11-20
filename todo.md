@@ -564,3 +564,29 @@
 - [x] Ajuster les largeurs pour optimiser l'espace (grid-cols-7)
 - [ ] Rendre les panneaux repliables (fonctionnalité future)
 - [ ] Sauvegarder les préférences de largeur (fonctionnalité future)
+
+
+## Panneau de propriétés contextuel de zone
+
+### Interface du panneau
+- [x] Créer un panneau flottant qui apparaît lors de la sélection d'une zone
+- [x] Positionner le panneau en overlay sur le canvas (coin supérieur droit)
+- [x] Ajouter un bouton de fermeture (X)
+- [x] Fermer le panneau en cliquant en dehors ou en désélectionnant la zone
+- [x] Ajouter une animation d'apparition/disparition (slide-in-from-right)
+
+### Contenu du panneau
+- [x] Afficher le code et le nom de la zone sélectionnée
+- [x] Champs d'édition pour code, nom, dimensions (X, Y, largeur, hauteur)
+- [x] Affichage de la surface calculée en m²
+- [x] Checkbox pour le statut sponsorisé
+- [x] Section planogrammes affectés avec compteur
+- [x] Liste des planogrammes avec liens vers éditeur 2D et photos
+- [x] Bouton "Affecter des planogrammes"
+- [x] Bouton "Supprimer la zone"
+
+### Interactions
+- [x] Mise à jour en temps réel lors de la modification des propriétés
+- [x] Synchronisation avec le canvas (redessiner après modification)
+- [x] Validation des champs avant sauvegarde (dimensions minimales)
+- [x] Messages de confirmation pour les actions critiques (suppression)

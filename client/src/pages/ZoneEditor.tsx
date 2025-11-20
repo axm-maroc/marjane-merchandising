@@ -1112,6 +1112,240 @@ export default function ZoneEditor() {
           </Card>
         </div>
       </main>
+      
+      {/* Panneau de propriétés contextuel */}
+      {selectedZone && (
+        <div className="fixed top-24 right-8 w-96 bg-white rounded-lg shadow-2xl border border-slate-200 z-50 animate-in slide-in-from-right duration-200">
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-slate-900">Propriétés de la Zone</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedZone(null)}
+                className="h-8 w-8 p-0"
+              >
+                <Plus className="w-4 h-4 rotate-45" />
+              </Button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="ctx-zone-code">Code</Label>
+                <Input
+                  id="ctx-zone-code"
+                  value={selectedZone.code}
+                  onChange={(e) => updateSelectedZone({ code: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="ctx-zone-name">Nom</Label>
+                <Input
+                  id="ctx-zone-name"
+                  value={selectedZone.name}
+                  onChange={(e) => updateSelectedZone({ name: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label htmlFor="ctx-zone-x">Position X</Label>
+                  <Input
+                    id="ctx-zone-x"
+                    type="number"
+                    value={Math.round(selectedZone.x)}
+                    onChange={(e) => updateSelectedZone({ x: parseInt(e.target.value) || 0 })}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="ctx-zone-y">Position Y</Label>
+                  <Input
+                    id="ctx-zone-y"
+                    type="number"
+                    value={Math.round(selectedZone.y)}
+                    onChange={(e) => updateSelectedZone({ y: parseInt(e.target.value) || 0 })}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label htmlFor="ctx-zone-width">Largeur</Label>
+                  <Input
+                    id="ctx-zone-width"
+                    type="number"
+                    value={Math.round(selectedZone.width)}
+                    onChange={(e) => updateSelectedZone({ width: parseInt(e.target.value) || 50 })}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="ctx-zone-height">Hauteur</Label>
+                  <Input
+                    id="ctx-zone-height"
+                    type="number"
+                    value={Math.round(selectedZone.height)}
+                    onChange={(e) => updateSelectedZone({ height: parseInt(e.target.value) || 50 })}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <Label>Surface estimée</Label>
+                <div className="mt-1 text-lg font-semibold text-slate-900">
+                  {Math.round((selectedZone.width * selectedZone.height) / 100)} m²
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="ctx-zone-sponsored"
+                  checked={selectedZone.isSponsored}
+                  onChange={(e) => updateSelectedZone({ 
+                    isSponsored: e.target.checked,
+                    color: e.target.checked ? '#10b981' : '#3b82f6'
+                  })}
+                  className="w-4 h-4"
+                />
+                <Label htmlFor="ctx-zone-sponsored">Zone sponsorisée</Label>
+              </div>
+              
+              {/* Planogrammes affectés */}
+              <div className="pt-4 border-t">
+                <div className="flex items-center justify-between mb-3">
+                  <Label className="flex items-center gap-2">
+                    <LayoutGrid className="w-4 h-4" />
+                    Planogrammes
+                  </Label>
+                  <Badge variant="secondary">
+                    {planogramLocations?.filter(loc => {
+                      const dbZone = existingZones?.find(z => z.code === selectedZone.code);
+                      return dbZone && loc.zoneId === dbZone.id;
+                    }).length || 0}
+                  </Badge>
+                </div>
+                
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {planogramLocations
+                    ?.filter(loc => {
+                      const dbZone = existingZones?.find(z => z.code === selectedZone.code);
+                      return dbZone && loc.zoneId === dbZone.id;
+                    })
+                    .map(location => {
+                      const planogram = allPlanograms?.find(p => p.locationId === location.id);
+                      return (
+                        <div key={location.id} className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex-1">
+                              <div className="font-medium text-sm text-slate-900">{location.name}</div>
+                              {planogram && (
+                                <div className="text-xs text-slate-600 mt-1">
+                                  {planogram.name} (v{planogram.version})
+                                </div>
+                              )}
+                            </div>
+                            {planogram && (
+                              <Badge variant={planogram.status === 'active' ? 'default' : 'secondary'} className="text-xs">
+                                {planogram.status === 'active' ? 'Actif' : planogram.status === 'draft' ? 'Brouillon' : 'Archivé'}
+                              </Badge>
+                            )}
+                          </div>
+                          
+                          <div className="flex gap-2 mt-2">
+                            {planogram ? (
+                              <>
+                                <Link href={`/planograms/location/${location.id}`}>
+                                  <Button variant="outline" size="sm" className="flex-1">
+                                    <Eye className="w-3 h-3 mr-1" />
+                                    Éditeur 2D
+                                  </Button>
+                                </Link>
+                                <Link href={`/planograms/${planogram.id}/photos`}>
+                                  <Button variant="outline" size="sm" className="flex-1">
+                                    <Camera className="w-3 h-3 mr-1" />
+                                    Photos
+                                  </Button>
+                                </Link>
+                              </>
+                            ) : (
+                              <Button 
+                                variant="default" 
+                                size="sm" 
+                                className="w-full"
+                                onClick={() => {
+                                  setSelectedLocationForPlanogram(location);
+                                  setShowCreatePlanogramDialog(true);
+                                }}
+                              >
+                                <Plus className="w-3 h-3 mr-1" />
+                                Créer planogramme
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  
+                  {planogramLocations?.filter(loc => {
+                    const dbZone = existingZones?.find(z => z.code === selectedZone.code);
+                    return dbZone && loc.zoneId === dbZone.id;
+                  }).length === 0 && (
+                    <div className="text-center text-sm text-slate-500 py-4">
+                      Aucun planogramme affecté à cette zone
+                    </div>
+                  )}
+                </div>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full mt-3"
+                  onClick={() => {
+                    toast.info("Utilisez le panneau Emplacements pour affecter des planogrammes");
+                  }}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Affecter des planogrammes
+                </Button>
+              </div>
+              
+              {/* Actions */}
+              <div className="pt-4 border-t flex gap-2">
+                <Button
+                  variant="default"
+                  className="flex-1"
+                  onClick={() => {
+                    toast.success("Propriétés de la zone mises à jour");
+                    // Les modifications sont déjà appliquées en temps réel sur le canvas
+                  }}
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  Sauvegarder
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    if (confirm("Êtes-vous sûr de vouloir supprimer cette zone ?")) {
+                      setZones(zones.filter(z => z.id !== selectedZone.id));
+                      setSelectedZone(null);
+                      toast.success("Zone supprimée");
+                    }
+                  }}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
