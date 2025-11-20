@@ -980,8 +980,48 @@ export default function ZoneEditor() {
               </CardDescription>
             </CardHeader>
             <CardContent>
+              {/* Filtres de recherche */}
+              <div className="space-y-2 mb-4">
+                <Input
+                  placeholder="Rechercher un emplacement..."
+                  value={locationSearchQuery}
+                  onChange={(e) => setLocationSearchQuery(e.target.value)}
+                  className="text-sm"
+                />
+                <select
+                  value={locationZoneFilter || ""}
+                  onChange={(e) => setLocationZoneFilter(e.target.value ? parseInt(e.target.value) : null)}
+                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-md"
+                >
+                  <option value="">Toutes les zones</option>
+                  {existingZones?.map(zone => (
+                    <option key={zone.id} value={zone.id}>
+                      {zone.code} - {zone.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              {/* Compteur de résultats */}
+              <div className="text-sm text-slate-600 mb-2">
+                {planogramLocations
+                  ?.filter(location => {
+                    const matchesSearch = location.name.toLowerCase().includes(locationSearchQuery.toLowerCase());
+                    const matchesZone = locationZoneFilter === null || location.zoneId === locationZoneFilter;
+                    return matchesSearch && matchesZone;
+                  }).length || 0} emplacement(s) trouvé(s)
+              </div>
+              
               <div className="space-y-3 max-h-[700px] overflow-y-auto">
-                {planogramLocations?.map(location => {
+                {planogramLocations
+                  ?.filter(location => {
+                    // Filtre par recherche (nom de l'emplacement)
+                    const matchesSearch = location.name.toLowerCase().includes(locationSearchQuery.toLowerCase());
+                    // Filtre par zone
+                    const matchesZone = locationZoneFilter === null || location.zoneId === locationZoneFilter;
+                    return matchesSearch && matchesZone;
+                  })
+                  .map(location => {
                   const planogram = allPlanograms?.find(p => p.locationId === location.id);
                   const zone = location.zoneId ? existingZones?.find(z => z.id === location.zoneId) : null;
                   const isPositioned = location.positionX !== null && location.positionY !== null;

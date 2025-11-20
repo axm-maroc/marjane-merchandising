@@ -641,9 +641,10 @@
 
 ### 1. Filtres et Recherche
 - [x] Ajouter un champ de recherche dans le panneau Planogrammes
-- [ ] Ajouter un champ de recherche dans le panneau Emplacements
+- [x] Ajouter un champ de recherche dans le panneau Emplacements
 - [x] Implémenter des filtres par statut (Actif/Brouillon/Archivé)
-- [ ] Ajouter un filtre par zone dans le panneau Emplacements
+- [x] Ajouter un filtre par zone dans le panneau Emplacements
+- [x] Ajouter un compteur de résultats pour les emplacements filtrés
 - [ ] Persister les préférences de filtre dans localStorage
 
 ### 2. Mode Plein Écran et Zoom
