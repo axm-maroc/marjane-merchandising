@@ -453,3 +453,36 @@
 - [x] Créer la navigation vers /planograms/location/:id pour l'éditeur 2D
 - [x] Créer la navigation vers la vue photo du planogramme
 - [ ] Afficher un aperçu miniature du planogramme dans la liste
+
+
+## Positionnement visuel des emplacements dans l'éditeur de zones
+
+### Schéma de base de données
+- [x] Ajouter les champs positionX et positionY dans planogramLocations
+- [x] Créer une migration pour ajouter ces colonnes
+- [x] Mettre à jour les types TypeScript
+
+### Interface utilisateur
+- [x] Créer un panneau latéral "Emplacements Disponibles" dans ZoneEditor
+- [x] Afficher la liste des emplacements du magasin avec leurs planogrammes
+- [x] Filtrer les emplacements par zone (affectés/non affectés)
+- [x] Ajouter des badges visuels (dimensions, statut)
+
+### Drag-and-Drop
+- [x] Implémenter le drag depuis la liste des emplacements
+- [x] Détecter le drop sur une zone du canvas
+- [x] Calculer les coordonnées relatives à la zone
+- [x] Mettre à jour positionX, positionY et zoneId dans la base
+- [x] Afficher un feedback visuel pendant le drag (curseur move)
+
+### Affichage sur canvas
+- [x] Dessiner les emplacements positionnés comme des rectangles dans les zones
+- [x] Afficher le nom de l'emplacement et du planogramme
+- [x] Utiliser des couleurs différentes selon le statut (bleu actif, gris brouillon)
+- [ ] Permettre de déplacer un emplacement déjà positionné (fonctionnalité future)
+- [ ] Permettre de retirer un emplacement d'une zone (fonctionnalité future)
+
+### Procédures backend
+- [x] Créer updatePlanogramLocationPosition dans db.ts
+- [x] Exposer la procédure dans routers.ts
+- [x] Gérer la mise à jour simultanée de zoneId et position

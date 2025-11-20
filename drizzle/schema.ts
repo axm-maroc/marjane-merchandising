@@ -106,6 +106,8 @@ export const planogramLocations = mysqlTable("planogramLocations", {
   shelfWidth: int("shelfWidth").default(2000).notNull(), // Largeur en mm
   shelfHeight: int("shelfHeight").default(300).notNull(), // Hauteur par étagère en mm
   shelfDepth: int("shelfDepth").default(400).notNull(), // Profondeur en mm
+  positionX: int("positionX"), // Position X sur le canvas de l'éditeur de zones (en pixels)
+  positionY: int("positionY"), // Position Y sur le canvas de l'éditeur de zones (en pixels)
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

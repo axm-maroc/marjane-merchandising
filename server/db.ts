@@ -200,6 +200,22 @@ export async function updatePlanogramLocationZone(locationId: number, zoneId: nu
   return { success: true };
 }
 
+export async function updatePlanogramLocationPosition(
+  locationId: number, 
+  positionX: number, 
+  positionY: number, 
+  zoneId: number | null
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(planogramLocations)
+    .set({ positionX, positionY, zoneId })
+    .where(eq(planogramLocations.id, locationId));
+  
+  return { success: true };
+}
+
 // ===== PLANOGRAMS =====
 export async function getPlanogramsByLocation(locationId: number) {
   const db = await getDb();

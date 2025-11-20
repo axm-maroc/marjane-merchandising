@@ -80,6 +80,15 @@ export default function ZoneEditor() {
     }
   });
   
+  const updatePositionMutation = trpc.planogramLocations.updatePosition.useMutation({
+    onSuccess: () => {
+      toast.success("Émplacement positionné avec succès");
+    },
+    onError: (error) => {
+      toast.error("Erreur lors du positionnement: " + error.message);
+    }
+  });
+  
   // Charger les zones existantes
   useEffect(() => {
     if (existingZones) {
@@ -119,12 +128,14 @@ export default function ZoneEditor() {
         ctx.globalAlpha = 1;
         drawGrid(ctx);
         drawZones(ctx);
+        drawPlanogramLocations(ctx);
       };
     } else {
       drawGrid(ctx);
       drawZones(ctx);
+      drawPlanogramLocations(ctx);
     }
-  }, [zones, selectedZone, backgroundImage, showGrid, zoom]);
+  }, [zones, selectedZone, backgroundImage, showGrid, zoom, planogramLocations, existingZones, allPlanograms]);
   
   const drawGrid = (ctx: CanvasRenderingContext2D) => {
     if (!showGrid) return;
@@ -231,6 +242,64 @@ export default function ZoneEditor() {
             handleSize
           );
         });
+      }
+    });
+  };
+  
+  const drawPlanogramLocations = (ctx: CanvasRenderingContext2D) => {
+    // Dessiner les emplacements positionnés dans les zones
+    planogramLocations?.forEach(location => {
+      if (!location.positionX || !location.positionY || !location.zoneId) return;
+      
+      // Trouver la zone correspondante
+      const dbZone = existingZones?.find(z => z.id === location.zoneId);
+      if (!dbZone) return;
+      
+      const zone = zones.find(z => z.code === dbZone.code);
+      if (!zone) return;
+      
+      // Calculer la position absolue sur le canvas
+      const absX = zone.x + location.positionX;
+      const absY = zone.y + location.positionY;
+      
+      // Dimensions de l'emplacement (proportionnelles à la largeur réelle)
+      const width = Math.min(location.shelfWidth / 20, zone.width - location.positionX - 10);
+      const height = 40;
+      
+      // Trouver le planogramme associé
+      const planogram = allPlanograms?.find(p => p.locationId === location.id);
+      const isActive = planogram?.status === 'active';
+      
+      // Couleur selon le statut
+      const bgColor = isActive ? '#3b82f6' : '#94a3b8';
+      const textColor = '#ffffff';
+      
+      // Dessiner le rectangle de l'emplacement
+      ctx.fillStyle = bgColor + 'CC'; // Avec transparence
+      ctx.fillRect(absX, absY, width, height);
+      
+      // Bordure
+      ctx.strokeStyle = bgColor;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(absX, absY, width, height);
+      
+      // Nom de l'emplacement
+      ctx.fillStyle = textColor;
+      ctx.font = 'bold 11px sans-serif';
+      ctx.fillText(
+        location.name.length > 15 ? location.name.substring(0, 15) + '...' : location.name,
+        absX + 5,
+        absY + 15
+      );
+      
+      // Nom du planogramme (si existe)
+      if (planogram) {
+        ctx.font = '10px sans-serif';
+        ctx.fillText(
+          planogram.name.length > 15 ? planogram.name.substring(0, 15) + '...' : planogram.name,
+          absX + 5,
+          absY + 30
+        );
       }
     });
   };
@@ -400,6 +469,7 @@ export default function ZoneEditor() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawGrid(ctx);
       drawZones(ctx);
+      drawPlanogramLocations(ctx);
       
       // Dessiner l'aperçu
       const width = x - startPoint.x;
@@ -466,6 +536,50 @@ export default function ZoneEditor() {
     }
   };
   
+  const handleCanvasDrop = (e: React.DragEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    
+    const locationId = parseInt(e.dataTransfer.getData('locationId'));
+    if (!locationId) return;
+    
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // Trouver la zone sous le curseur
+    const targetZone = zones.find(zone => 
+      x >= zone.x && x <= zone.x + zone.width &&
+      y >= zone.y && y <= zone.y + zone.height
+    );
+    
+    if (!targetZone) {
+      toast.error("Émplacement doit être déposé dans une zone");
+      return;
+    }
+    
+    // Trouver la zone dans la base de données
+    const dbZone = existingZones?.find(z => z.code === targetZone.code);
+    if (!dbZone) {
+      toast.error("Zone non trouvée dans la base de données");
+      return;
+    }
+    
+    // Calculer les coordonnées relatives à la zone
+    const relativeX = Math.round(x - targetZone.x);
+    const relativeY = Math.round(y - targetZone.y);
+    
+    // Mettre à jour la position dans la base de données
+    updatePositionMutation.mutate({
+      locationId,
+      positionX: relativeX,
+      positionY: relativeY,
+      zoneId: dbZone.id
+    });
+  };
+  
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -518,7 +632,7 @@ export default function ZoneEditor() {
       </header>
 
       <main className="container py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           {/* Barre d'outils */}
           <Card className="lg:col-span-1">
             <CardHeader>
@@ -606,6 +720,80 @@ export default function ZoneEditor() {
             </CardContent>
           </Card>
 
+          {/* Panneau Emplacements Disponibles */}
+          <Card className="lg:col-span-1">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <LayoutGrid className="w-5 h-5" />
+                Emplacements
+              </CardTitle>
+              <CardDescription>
+                Glissez-déposez les emplacements dans les zones
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                {planogramLocations
+                  ?.filter(loc => !loc.positionX && !loc.positionY) // Emplacements non positionnés
+                  .map(location => {
+                    const planogram = allPlanograms?.find(p => p.locationId === location.id);
+                    const zone = existingZones?.find(z => z.id === location.zoneId);
+                    
+                    return (
+                      <div
+                        key={location.id}
+                        draggable
+                        onDragStart={(e) => {
+                          e.dataTransfer.setData('locationId', location.id.toString());
+                          e.dataTransfer.effectAllowed = 'move';
+                        }}
+                        className="p-3 bg-white border-2 border-slate-200 rounded-lg cursor-move hover:border-blue-400 hover:shadow-md transition-all"
+                      >
+                        <div className="flex items-start gap-2">
+                          <Move className="w-4 h-4 text-slate-400 mt-1 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-sm text-slate-900 truncate">
+                              {location.name}
+                            </div>
+                            {planogram && (
+                              <div className="text-xs text-slate-600 mt-1 truncate">
+                                {planogram.name}
+                              </div>
+                            )}
+                            <div className="flex gap-2 mt-2 flex-wrap">
+                              <Badge variant="outline" className="text-xs">
+                                {location.shelfWidth}mm
+                              </Badge>
+                              {zone && (
+                                <Badge variant="secondary" className="text-xs">
+                                  {zone.code}
+                                </Badge>
+                              )}
+                              {planogram && (
+                                <Badge 
+                                  variant={planogram.status === 'active' ? 'default' : 'secondary'}
+                                  className="text-xs"
+                                >
+                                  {planogram.status === 'active' ? 'Actif' : 'Brouillon'}
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                
+                {planogramLocations?.filter(loc => !loc.positionX && !loc.positionY).length === 0 && (
+                  <div className="text-center text-slate-500 py-8">
+                    <LayoutGrid className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                    <p className="text-sm">Tous les emplacements sont positionnés</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Canvas */}
           <div className="lg:col-span-2">
             <Card>
@@ -624,6 +812,11 @@ export default function ZoneEditor() {
                     onMouseDown={handleCanvasMouseDown}
                     onMouseMove={handleCanvasMouseMove}
                     onMouseUp={handleCanvasMouseUp}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      e.dataTransfer.dropEffect = 'move';
+                    }}
+                    onDrop={handleCanvasDrop}
                     className="cursor-crosshair"
                     style={{ maxWidth: '100%', height: 'auto' }}
                   />
