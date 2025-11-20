@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Plus, Building2, DollarSign, Calendar, AlertCircle, Edit, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, Building2, DollarSign, Calendar, AlertCircle, Edit, Trash2, Grid3x3 } from "lucide-react";
 import { Link } from "wouter";
 import { toast } from "sonner";
 
@@ -114,13 +114,20 @@ export default function StoreZones() {
           </div>
         </div>
         
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Nouvelle Zone
+        <div className="flex gap-2">
+          <Link href={`/stores/${storeId}/zones/editor`}>
+            <Button variant="outline">
+              <Grid3x3 className="mr-2 h-4 w-4" />
+              Éditeur Visuel
             </Button>
-          </DialogTrigger>
+          </Link>
+          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Nouvelle Zone
+              </Button>
+            </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Créer une nouvelle zone</DialogTitle>
@@ -169,6 +176,7 @@ export default function StoreZones() {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
       
       {zones.length === 0 ? (

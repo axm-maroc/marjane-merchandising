@@ -36,6 +36,7 @@ export default function CreatePlanogram() {
   
   // Step 1: Basic Info
   const [storeId, setStoreId] = useState<number | null>(null);
+  const [zoneId, setZoneId] = useState<number | null>(null);
   const [name, setName] = useState("");
   const [location, setLocationValue] = useState("");
   
@@ -52,6 +53,10 @@ export default function CreatePlanogram() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const { data: stores } = trpc.stores.list.useQuery();
+  const { data: zones } = trpc.zones.byStore.useQuery(
+    { storeId: storeId || 0 },
+    { enabled: !!storeId }
+  );
   const { data: products } = trpc.products.list.useQuery();
   // const createMutation = trpc.planogramLocations.create.useMutation(); // TODO: Implement create mutation
 
@@ -195,6 +200,25 @@ export default function CreatePlanogram() {
                     ))}
                   </select>
                 </div>
+
+                {storeId && (
+                  <div>
+                    <Label htmlFor="zone" className="text-slate-700">Zone (optionnel)</Label>
+                    <select
+                      id="zone"
+                      value={zoneId || ""}
+                      onChange={(e) => setZoneId(e.target.value ? parseInt(e.target.value) : null)}
+                      className="w-full mt-2 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    >
+                      <option value="">Aucune zone spécifique</option>
+                      {zones?.map((zone) => (
+                        <option key={zone.id} value={zone.id}>
+                          {zone.code} - {zone.name} {zone.isSponsored ? '(Sponsorisée)' : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
 
                 <div>
                   <Label htmlFor="name" className="text-slate-700">Nom du Planogramme *</Label>

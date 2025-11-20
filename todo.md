@@ -361,3 +361,49 @@
 - [ ] Implémenter l'export Excel/PDF des rapports financiers
 - [ ] Ajouter des KPIs : taux d'occupation des zones, revenu moyen par m², taux de renouvellement
 - [ ] Créer une timeline visuelle des contrats (Gantt chart)
+
+
+## Corrections et Interface Graphique des Zones
+
+### Réintégration des corrections
+- [ ] Créer les zones de test dans la base de données
+- [ ] Vérifier le filtre zone dans le module Suivi des Stocks
+- [ ] Ajouter le sélecteur de zone dans la création de planogrammes
+- [ ] S'assurer que le bouton "Gérer les Zones" est accessible
+
+### Interface graphique de dessin de zones
+- [ ] Créer un canvas interactif pour dessiner le plan du magasin
+- [ ] Permettre de dessiner des zones rectangulaires par glisser-déposer
+- [ ] Ajouter la possibilité de redimensionner les zones
+- [ ] Permettre de déplacer les zones sur le plan
+- [ ] Ajouter un code couleur pour les zones sponsorisées vs libres
+- [ ] Afficher les informations de zone au survol (nom, surface, sponsor)
+- [ ] Sauvegarder les coordonnées et dimensions des zones
+- [ ] Permettre la suppression de zones par clic
+- [ ] Ajouter une grille de fond pour faciliter l'alignement
+- [ ] Implémenter le zoom et le pan pour les grands magasins
+
+
+## Restauration et amélioration du système de zones
+
+### Corrections d'intégration des zones (réappliquées)
+- [x] Créer les zones de test dans la base de données
+- [x] Créer les contrats de sponsoring de test
+- [x] Vérifier que le filtre Zone est visible dans StockTracking.tsx
+- [x] Ajouter le sélecteur de zone dans CreatePlanogram.tsx
+- [ ] Vérifier que le bouton "Gérer les Zones" est accessible depuis chaque magasin
+
+### Interface graphique de dessin de zones
+- [x] Créer une nouvelle page ZoneEditor.tsx pour l'éditeur visuel
+- [x] Implémenter un canvas interactif pour dessiner le plan du magasin
+- [x] Ajouter des outils de dessin (rectangle, sélection, suppression)
+- [x] Permettre le dessin de zones par glisser-déposer
+- [x] Ajouter le déplacement des zones par drag-and-drop
+- [x] Ajouter le redimensionnement des zones par glisser-déposer (8 poignées)
+- [x] Implémenter le code couleur (zones sponsorisées vs libres)
+- [x] Rendre les zones cliquables pour édition rapide
+- [x] Ajouter des outils de mesure et dimensionnement visuel
+- [x] Permettre l'upload d'un plan de magasin en arrière-plan
+- [x] Sauvegarder les coordonnées des zones dans la base de données (via procédures tRPC)
+- [x] Ajouter une route /stores/:id/zones/editor dans App.tsx
+- [x] Créer un bouton d'accès à l'éditeur depuis la page StoreZones.tsx
