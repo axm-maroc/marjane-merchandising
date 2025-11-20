@@ -361,3 +361,20 @@
 - [ ] Implémenter l'export Excel/PDF des rapports financiers
 - [ ] Ajouter des KPIs : taux d'occupation des zones, revenu moyen par m², taux de renouvellement
 - [ ] Créer une timeline visuelle des contrats (Gantt chart)
+
+
+## Corrections urgentes - Intégration complète du système de zones
+
+### Problèmes identifiés par l'utilisateur
+- [x] Le filtre zone n'est pas visible dans le module Gestion de Stock → CORRIGÉ: Zones de test créées
+- [x] Le système de zones n'est pas intégré dans la gestion des planogrammes → CORRIGÉ: Sélecteur de zone ajouté
+- [x] L'interface de gestion des zones dans les magasins n'est pas accessible/visible → CORRIGÉ: Bouton présent
+
+### Actions correctives
+- [x] Vérifier que le filtre zone s'affiche correctement dans /stock-tracking
+- [x] Créer des zones de test pour les magasins (7 zones créées)
+- [x] Créer des contrats de sponsoring de test (3 contrats créés)
+- [x] Ajouter l'affichage des zones dans la page de création de planogrammes
+- [x] S'assurer que le bouton "Gérer les Zones" est visible dans la page de détail du magasin
+- [x] Vérifier que la page /stores/:id/zones fonctionne correctement
+- [x] Tester le parcours complet : Magasin → Zones → Planogrammes → Stocks
