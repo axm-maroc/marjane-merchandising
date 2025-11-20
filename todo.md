@@ -430,3 +430,26 @@
 - [x] Filtrer les planogrammes par zone sélectionnée
 - [x] Filtrer les produits par planogramme sélectionné
 - [x] Tester le filtrage en cascade complet
+
+
+## Intégration des planogrammes dans les zones
+
+### Affichage des planogrammes dans l'éditeur de zones
+- [x] Charger les planogrammes affectés à chaque zone
+- [x] Afficher la liste des planogrammes dans le panneau de propriétés de la zone sélectionnée
+- [x] Afficher un badge avec le nombre de planogrammes sur chaque rectangle de zone
+- [x] Créer une vue modale pour voir tous les planogrammes d'une zone (intégré dans le panneau)
+
+### Interface d'affectation de planogrammes
+- [x] Ajouter un bouton "Affecter des Planogrammes" dans le panneau de propriétés
+- [x] Créer une modale pour sélectionner les planogrammes à affecter
+- [x] Filtrer les planogrammes disponibles (non affectés ou du même magasin)
+- [x] Permettre de désaffecter un planogramme d'une zone (via la modale)
+- [x] Mettre à jour le zoneId dans planogramLocations lors de l'affectation
+
+### Liens vers éditeur 2D et photos
+- [x] Ajouter un bouton "Éditeur 2D" pour chaque planogramme dans la liste
+- [x] Ajouter un bouton "Photos" pour chaque planogramme dans la liste
+- [x] Créer la navigation vers /planograms/location/:id pour l'éditeur 2D
+- [x] Créer la navigation vers la vue photo du planogramme
+- [ ] Afficher un aperçu miniature du planogramme dans la liste

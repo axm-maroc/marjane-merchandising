@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { 
   ArrowLeft, 
   Square, 
@@ -16,7 +18,11 @@ import {
   ZoomOut,
   Move,
   Ruler,
-  Grid3x3
+  Grid3x3,
+  LayoutGrid,
+  Eye,
+  Camera,
+  Plus
 } from "lucide-react";
 import { Link, useParams } from "wouter";
 import { useState, useRef, useEffect } from "react";
@@ -42,6 +48,8 @@ export default function ZoneEditor() {
   
   const { data: store } = trpc.stores.getById.useQuery({ id: storeId });
   const { data: existingZones } = trpc.zones.byStore.useQuery({ storeId });
+  const { data: planogramLocations } = trpc.planogramLocations.byStore.useQuery({ storeId });
+  const { data: allPlanograms } = trpc.planograms.byStore.useQuery({ storeId });
   
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [zones, setZones] = useState<Zone[]>([]);
@@ -58,6 +66,19 @@ export default function ZoneEditor() {
   const [zoom, setZoom] = useState(1);
   const [showGrid, setShowGrid] = useState(true);
   const [canvasSize] = useState({ width: 1200, height: 800 });
+  const [showAssignDialog, setShowAssignDialog] = useState(false);
+  const [selectedLocations, setSelectedLocations] = useState<number[]>([]);
+  
+  const updateZoneMutation = trpc.planogramLocations.updateZone.useMutation({
+    onSuccess: () => {
+      toast.success("Planogrammes affectés avec succès");
+      setShowAssignDialog(false);
+      setSelectedLocations([]);
+    },
+    onError: (error) => {
+      toast.error("Erreur lors de l'affectation: " + error.message);
+    }
+  });
   
   // Charger les zones existantes
   useEffect(() => {
@@ -146,6 +167,31 @@ export default function ZoneEditor() {
       ctx.fillText(zone.code, zone.x + 10, zone.y + 25);
       ctx.font = '12px sans-serif';
       ctx.fillText(zone.name, zone.x + 10, zone.y + 45);
+      
+      // Compter les planogrammes de cette zone
+      const dbZone = existingZones?.find(z => z.code === zone.code);
+      const planogramCount = dbZone 
+        ? planogramLocations?.filter(loc => loc.zoneId === dbZone.id).length || 0
+        : 0;
+      
+      // Badge avec nombre de planogrammes
+      if (planogramCount > 0) {
+        const badgeX = zone.x + zone.width - 35;
+        const badgeY = zone.y + 10;
+        
+        // Fond du badge
+        ctx.fillStyle = '#3b82f6';
+        ctx.beginPath();
+        ctx.roundRect(badgeX, badgeY, 30, 20, 4);
+        ctx.fill();
+        
+        // Texte du badge
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(planogramCount.toString(), badgeX + 15, badgeY + 14);
+        ctx.textAlign = 'left';
+      }
       
       // Badge sponsorisé
       if (zone.isSponsored) {
@@ -698,6 +744,209 @@ export default function ZoneEditor() {
                       className="w-4 h-4"
                     />
                     <Label htmlFor="zone-sponsored">Zone sponsorisée</Label>
+                  </div>
+                  
+                  {/* Planogrammes affectés à cette zone */}
+                  <div className="pt-4 border-t">
+                    <div className="flex items-center justify-between mb-3">
+                      <Label className="flex items-center gap-2">
+                        <LayoutGrid className="w-4 h-4" />
+                        Planogrammes
+                      </Label>
+                      <Badge variant="secondary">
+                        {planogramLocations?.filter(loc => {
+                          // Trouver la zone correspondante dans existingZones
+                          const dbZone = existingZones?.find(z => z.code === selectedZone.code);
+                          return dbZone && loc.zoneId === dbZone.id;
+                        }).length || 0}
+                      </Badge>
+                    </div>
+                    
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {planogramLocations
+                        ?.filter(loc => {
+                          const dbZone = existingZones?.find(z => z.code === selectedZone.code);
+                          return dbZone && loc.zoneId === dbZone.id;
+                        })
+                        .map(location => {
+                          const planogram = allPlanograms?.find(p => p.locationId === location.id);
+                          return (
+                            <div key={location.id} className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                              <div className="flex items-start justify-between mb-2">
+                                <div className="flex-1">
+                                  <div className="font-medium text-sm text-slate-900">{location.name}</div>
+                                  {planogram && (
+                                    <div className="text-xs text-slate-600 mt-1">
+                                      {planogram.name} (v{planogram.version})
+                                    </div>
+                                  )}
+                                </div>
+                                {planogram && (
+                                  <Badge variant={planogram.status === 'active' ? 'default' : 'secondary'} className="text-xs">
+                                    {planogram.status === 'active' ? 'Actif' : planogram.status === 'draft' ? 'Brouillon' : 'Archivé'}
+                                  </Badge>
+                                )}
+                              </div>
+                              
+                              <div className="flex gap-2 mt-2">
+                                <Link href={`/planograms/location/${location.id}`}>
+                                  <Button variant="outline" size="sm" className="flex-1">
+                                    <Eye className="w-3 h-3 mr-1" />
+                                    Éditeur 2D
+                                  </Button>
+                                </Link>
+                                {planogram && (
+                                  <Link href={`/planograms/${planogram.id}/photos`}>
+                                    <Button variant="outline" size="sm" className="flex-1">
+                                      <Camera className="w-3 h-3 mr-1" />
+                                      Photos
+                                    </Button>
+                                  </Link>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      
+                      {planogramLocations?.filter(loc => {
+                        const dbZone = existingZones?.find(z => z.code === selectedZone.code);
+                        return dbZone && loc.zoneId === dbZone.id;
+                      }).length === 0 && (
+                        <div className="text-center text-sm text-slate-500 py-4">
+                          Aucun planogramme affecté à cette zone
+                        </div>
+                      )}
+                    </div>
+                    
+                    <Dialog open={showAssignDialog} onOpenChange={setShowAssignDialog}>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full mt-3"
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Affecter des planogrammes
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle>Affecter des planogrammes à la zone</DialogTitle>
+                          <DialogDescription>
+                            Sélectionnez les planogrammes à affecter à la zone <strong>{selectedZone.code} - {selectedZone.name}</strong>
+                          </DialogDescription>
+                        </DialogHeader>
+                        
+                        <div className="space-y-4 mt-4">
+                          {planogramLocations
+                            ?.filter(loc => {
+                              // Afficher les emplacements non affectés ou déjà affectés à cette zone
+                              const dbZone = existingZones?.find(z => z.code === selectedZone.code);
+                              return !loc.zoneId || (dbZone && loc.zoneId === dbZone.id);
+                            })
+                            .map(location => {
+                              const planogram = allPlanograms?.find(p => p.locationId === location.id);
+                              const dbZone = existingZones?.find(z => z.code === selectedZone.code);
+                              const isCurrentlyAssigned = dbZone && location.zoneId === dbZone.id;
+                              const isSelected = selectedLocations.includes(location.id);
+                              
+                              return (
+                                <div
+                                  key={location.id}
+                                  className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                                    isSelected ? 'border-blue-500 bg-blue-50' : 'border-slate-200 hover:border-slate-300'
+                                  }`}
+                                  onClick={() => {
+                                    if (isSelected) {
+                                      setSelectedLocations(selectedLocations.filter(id => id !== location.id));
+                                    } else {
+                                      setSelectedLocations([...selectedLocations, location.id]);
+                                    }
+                                  }}
+                                >
+                                  <div className="flex items-start gap-3">
+                                    <Checkbox
+                                      checked={isSelected}
+                                      onCheckedChange={(checked) => {
+                                        if (checked) {
+                                          setSelectedLocations([...selectedLocations, location.id]);
+                                        } else {
+                                          setSelectedLocations(selectedLocations.filter(id => id !== location.id));
+                                        }
+                                      }}
+                                    />
+                                    <div className="flex-1">
+                                      <div className="flex items-center justify-between">
+                                        <div>
+                                          <div className="font-medium text-slate-900">{location.name}</div>
+                                          {planogram && (
+                                            <div className="text-sm text-slate-600 mt-1">
+                                              {planogram.name} (v{planogram.version})
+                                            </div>
+                                          )}
+                                        </div>
+                                        <div className="flex gap-2">
+                                          {isCurrentlyAssigned && (
+                                            <Badge variant="secondary">Déjà affecté</Badge>
+                                          )}
+                                          {planogram && (
+                                            <Badge variant={planogram.status === 'active' ? 'default' : 'secondary'}>
+                                              {planogram.status === 'active' ? 'Actif' : planogram.status === 'draft' ? 'Brouillon' : 'Archivé'}
+                                            </Badge>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          
+                          {planogramLocations?.filter(loc => {
+                            const dbZone = existingZones?.find(z => z.code === selectedZone.code);
+                            return !loc.zoneId || (dbZone && loc.zoneId === dbZone.id);
+                          }).length === 0 && (
+                            <div className="text-center text-slate-500 py-8">
+                              Tous les planogrammes sont déjà affectés à d'autres zones
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="flex gap-2 mt-6">
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setShowAssignDialog(false);
+                              setSelectedLocations([]);
+                            }}
+                            className="flex-1"
+                          >
+                            Annuler
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              const dbZone = existingZones?.find(z => z.code === selectedZone.code);
+                              if (!dbZone) {
+                                toast.error("Zone non trouvée dans la base de données");
+                                return;
+                              }
+                              
+                              // Affecter tous les emplacements sélectionnés
+                              selectedLocations.forEach(locationId => {
+                                updateZoneMutation.mutate({
+                                  locationId,
+                                  zoneId: dbZone.id
+                                });
+                              });
+                            }}
+                            disabled={selectedLocations.length === 0 || updateZoneMutation.isPending}
+                            className="flex-1"
+                          >
+                            Affecter {selectedLocations.length > 0 ? `(${selectedLocations.length})` : ''}
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                   
                   <Button

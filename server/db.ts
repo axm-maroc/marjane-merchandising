@@ -189,6 +189,17 @@ export async function createPlanogramLocation(data: {
   return planogram;
 }
 
+export async function updatePlanogramLocationZone(locationId: number, zoneId: number | null) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(planogramLocations)
+    .set({ zoneId })
+    .where(eq(planogramLocations.id, locationId));
+  
+  return { success: true };
+}
+
 // ===== PLANOGRAMS =====
 export async function getPlanogramsByLocation(locationId: number) {
   const db = await getDb();

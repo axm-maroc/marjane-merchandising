@@ -72,6 +72,14 @@ export const appRouter = router({
       .query(async ({ input }) => {
         return await db.getPlanogramLocationById(input.id);
       }),
+    updateZone: publicProcedure
+      .input(z.object({ 
+        locationId: z.number(),
+        zoneId: z.number().nullable()
+      }))
+      .mutation(async ({ input }) => {
+        return await db.updatePlanogramLocationZone(input.locationId, input.zoneId);
+      }),
   }),
 
   // Planograms
