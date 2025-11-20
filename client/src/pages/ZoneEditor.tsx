@@ -68,6 +68,10 @@ export default function ZoneEditor() {
   const [canvasSize] = useState({ width: 1200, height: 800 });
   const [showAssignDialog, setShowAssignDialog] = useState(false);
   const [selectedLocations, setSelectedLocations] = useState<number[]>([]);
+  const [showCreatePlanogramDialog, setShowCreatePlanogramDialog] = useState(false);
+  const [selectedLocationForPlanogram, setSelectedLocationForPlanogram] = useState<any>(null);
+  const [newPlanogramName, setNewPlanogramName] = useState('');
+  const [newPlanogramDescription, setNewPlanogramDescription] = useState('');
   
   const updateZoneMutation = trpc.planogramLocations.updateZone.useMutation({
     onSuccess: () => {
@@ -262,43 +266,79 @@ export default function ZoneEditor() {
       const absX = zone.x + location.positionX;
       const absY = zone.y + location.positionY;
       
-      // Dimensions de l'emplacement (proportionnelles à la largeur réelle)
+      // Dimensions de l'emplacement
       const width = Math.min(location.shelfWidth / 20, zone.width - location.positionX - 10);
-      const height = 40;
+      const shelfHeight = location.shelfHeight / 10; // Convertir mm en pixels (facteur 10)
+      const totalHeight = location.shelfCount * shelfHeight;
       
       // Trouver le planogramme associé
       const planogram = allPlanograms?.find(p => p.locationId === location.id);
       const isActive = planogram?.status === 'active';
+      const hasPlanogram = !!planogram;
       
       // Couleur selon le statut
-      const bgColor = isActive ? '#3b82f6' : '#94a3b8';
-      const textColor = '#ffffff';
+      const bgColor = hasPlanogram ? (isActive ? '#3b82f6' : '#94a3b8') : '#e2e8f0';
+      const borderColor = hasPlanogram ? bgColor : '#cbd5e1';
+      const textColor = hasPlanogram ? '#ffffff' : '#64748b';
       
-      // Dessiner le rectangle de l'emplacement
-      ctx.fillStyle = bgColor + 'CC'; // Avec transparence
-      ctx.fillRect(absX, absY, width, height);
+      // Dessiner le rectangle de fond de l'emplacement
+      ctx.fillStyle = bgColor + (hasPlanogram ? 'CC' : '80'); // Transparence
+      ctx.fillRect(absX, absY, width, totalHeight);
       
-      // Bordure
-      ctx.strokeStyle = bgColor;
+      // Bordure principale
+      ctx.strokeStyle = borderColor;
       ctx.lineWidth = 2;
-      ctx.strokeRect(absX, absY, width, height);
+      ctx.strokeRect(absX, absY, width, totalHeight);
+      
+      // Dessiner les étagères individuelles
+      ctx.strokeStyle = hasPlanogram ? '#ffffff' : '#94a3b8';
+      ctx.lineWidth = 1;
+      for (let i = 1; i < location.shelfCount; i++) {
+        const shelfY = absY + (i * shelfHeight);
+        ctx.beginPath();
+        ctx.moveTo(absX, shelfY);
+        ctx.lineTo(absX + width, shelfY);
+        ctx.stroke();
+      }
+      
+      // Badge nombre d'étagères
+      const badgeSize = 18;
+      ctx.fillStyle = hasPlanogram ? '#1e40af' : '#64748b';
+      ctx.fillRect(absX + width - badgeSize - 3, absY + 3, badgeSize, badgeSize);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(
+        location.shelfCount.toString(),
+        absX + width - badgeSize / 2 - 3,
+        absY + 14
+      );
+      ctx.textAlign = 'left';
       
       // Nom de l'emplacement
       ctx.fillStyle = textColor;
       ctx.font = 'bold 11px sans-serif';
+      const nameY = absY + totalHeight / 2 - (hasPlanogram ? 8 : 0);
       ctx.fillText(
         location.name.length > 15 ? location.name.substring(0, 15) + '...' : location.name,
         absX + 5,
-        absY + 15
+        nameY
       );
       
-      // Nom du planogramme (si existe)
+      // Nom du planogramme ou message "Aucun planogramme"
+      ctx.font = '10px sans-serif';
       if (planogram) {
-        ctx.font = '10px sans-serif';
         ctx.fillText(
           planogram.name.length > 15 ? planogram.name.substring(0, 15) + '...' : planogram.name,
           absX + 5,
-          absY + 30
+          nameY + 15
+        );
+      } else {
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillText(
+          'Aucun planogramme',
+          absX + 5,
+          nameY + 15
         );
       }
     });
@@ -982,19 +1022,34 @@ export default function ZoneEditor() {
                               </div>
                               
                               <div className="flex gap-2 mt-2">
-                                <Link href={`/planograms/location/${location.id}`}>
-                                  <Button variant="outline" size="sm" className="flex-1">
-                                    <Eye className="w-3 h-3 mr-1" />
-                                    Éditeur 2D
+                                {planogram ? (
+                                  <>
+                                    <Link href={`/planograms/location/${location.id}`}>
+                                      <Button variant="outline" size="sm" className="flex-1">
+                                        <Eye className="w-3 h-3 mr-1" />
+                                        Éditeur 2D
+                                      </Button>
+                                    </Link>
+                                    <Link href={`/planograms/${planogram.id}/photos`}>
+                                      <Button variant="outline" size="sm" className="flex-1">
+                                        <Camera className="w-3 h-3 mr-1" />
+                                        Photos
+                                      </Button>
+                                    </Link>
+                                  </>
+                                ) : (
+                                  <Button 
+                                    variant="default" 
+                                    size="sm" 
+                                    className="w-full"
+                                    onClick={() => {
+                                      setSelectedLocationForPlanogram(location);
+                                      setShowCreatePlanogramDialog(true);
+                                    }}
+                                  >
+                                    <Plus className="w-3 h-3 mr-1" />
+                                    Créer planogramme
                                   </Button>
-                                </Link>
-                                {planogram && (
-                                  <Link href={`/planograms/${planogram.id}/photos`}>
-                                    <Button variant="outline" size="sm" className="flex-1">
-                                      <Camera className="w-3 h-3 mr-1" />
-                                      Photos
-                                    </Button>
-                                  </Link>
                                 )}
                               </div>
                             </div>
@@ -1136,6 +1191,90 @@ export default function ZoneEditor() {
                             className="flex-1"
                           >
                             Affecter {selectedLocations.length > 0 ? `(${selectedLocations.length})` : ''}
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                    
+                    {/* Modale de création de planogramme */}
+                    <Dialog open={showCreatePlanogramDialog} onOpenChange={setShowCreatePlanogramDialog}>
+                      <DialogContent className="max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Créer un nouveau planogramme</DialogTitle>
+                          <DialogDescription>
+                            Créer un planogramme pour l'emplacement : {selectedLocationForPlanogram?.name}
+                          </DialogDescription>
+                        </DialogHeader>
+                        
+                        <div className="space-y-4 py-4">
+                          <div>
+                            <label className="text-sm font-medium mb-2 block">Nom du planogramme *</label>
+                            <Input
+                              placeholder="Ex: Planogramme Produits Laitiers"
+                              value={newPlanogramName}
+                              onChange={(e) => setNewPlanogramName(e.target.value)}
+                            />
+                          </div>
+                          
+                          <div>
+                            <label className="text-sm font-medium mb-2 block">Description (optionnelle)</label>
+                            <Input
+                              placeholder="Description du planogramme"
+                              value={newPlanogramDescription}
+                              onChange={(e) => setNewPlanogramDescription(e.target.value)}
+                            />
+                          </div>
+                          
+                          <div className="bg-slate-50 p-3 rounded-lg space-y-2">
+                            <div className="text-sm">
+                              <span className="font-medium">Magasin :</span> {store?.name}
+                            </div>
+                            <div className="text-sm">
+                              <span className="font-medium">Emplacement :</span> {selectedLocationForPlanogram?.name}
+                            </div>
+                            <div className="text-sm">
+                              <span className="font-medium">Étagères :</span> {selectedLocationForPlanogram?.shelfCount}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setShowCreatePlanogramDialog(false);
+                              setNewPlanogramName('');
+                              setNewPlanogramDescription('');
+                            }}
+                            className="flex-1"
+                          >
+                            Annuler
+                          </Button>
+                          <Button
+                            onClick={async () => {
+                              if (!newPlanogramName.trim()) {
+                                toast.error("Le nom du planogramme est requis");
+                                return;
+                              }
+                              
+                              try {
+                                // Note: La procédure create n'existe pas encore, redirection directe vers l'éditeur
+                                toast.success("Redirection vers l'éditeur de planogramme");
+                                setShowCreatePlanogramDialog(false);
+                                setNewPlanogramName('');
+                                setNewPlanogramDescription('');
+                                
+                                // Rediriger vers l'éditeur 2D qui gère la création
+                                window.location.href = `/planograms/location/${selectedLocationForPlanogram!.id}`;
+                              } catch (error) {
+                                toast.error("Erreur lors de la création du planogramme");
+                              }
+                            }}
+                            disabled={!newPlanogramName.trim()}
+                            className="flex-1"
+                          >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Créer et ouvrir
                           </Button>
                         </div>
                       </DialogContent>

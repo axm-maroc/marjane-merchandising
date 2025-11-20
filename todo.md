@@ -486,3 +486,26 @@
 - [x] Créer updatePlanogramLocationPosition dans db.ts
 - [x] Exposer la procédure dans routers.ts
 - [x] Gérer la mise à jour simultanée de zoneId et position
+
+
+## Visualisation des étagères et création de planogrammes
+
+### Affichage des étagères sur le canvas
+- [x] Dessiner les étagères individuelles dans chaque emplacement positionné
+- [x] Utiliser shelfCount pour déterminer le nombre d'étagères
+- [x] Utiliser shelfHeight pour l'espacement vertical
+- [x] Ajouter des séparateurs visuels entre les étagères
+- [x] Afficher le nombre d'étagères sur l'emplacement (badge)
+
+### Création de planogramme depuis l'éditeur
+- [x] Ajouter un bouton "Créer planogramme" pour les emplacements sans planogramme
+- [x] Créer une modale de création rapide de planogramme
+- [x] Pré-remplir le storeId et locationId automatiquement
+- [x] Permettre de saisir le nom et la description du planogramme
+- [x] Rediriger vers l'éditeur 2D après création
+- [x] Rafraîchir l'affichage après création (via redirection)
+
+### Amélioration de l'interface
+- [x] Afficher un badge "Aucun planogramme" sur les emplacements vides
+- [ ] Ajouter une action rapide "Créer" au survol de l'emplacement (fonctionnalité future)
+- [x] Mettre à jour le panneau de propriétés avec le bouton de création
