@@ -49,11 +49,50 @@ export default function StockTracking() {
   );
   
   // Charger les planogrammes du magasin sélectionné
-  const { data: planograms } = trpc.planograms.byStore.useQuery(
+  const { data: allPlanograms } = trpc.planograms.byStore.useQuery(
     { storeId: selectedStoreId || 0 },
     { enabled: !!selectedStoreId }
   );
+  
+  // Charger les emplacements pour obtenir les zoneId
+  const { data: planogramLocations } = trpc.planogramLocations.byStore.useQuery(
+    { storeId: selectedStoreId || 0 },
+    { enabled: !!selectedStoreId }
+  );
+  
+  // Filtrer les planogrammes par zone si une zone est sélectionnée
+  const planograms = useMemo(() => {
+    if (!allPlanograms || !planogramLocations) return [];
+    
+    // Si aucune zone sélectionnée ou "Toutes les zones", retourner tous les planogrammes
+    if (!selectedZoneId || selectedZoneId === 0) return allPlanograms;
+    
+    // Filtrer les planogrammes dont le locationId correspond à une location avec le bon zoneId
+    const locationsInZone = planogramLocations
+      .filter(loc => loc.zoneId === selectedZoneId)
+      .map(loc => loc.id);
+    
+    return allPlanograms.filter(p => locationsInZone.includes(p.locationId));
+  }, [allPlanograms, planogramLocations, selectedZoneId]);
 
+  // Charger les produits du planogramme sélectionné
+  const { data: planogramProductsData } = trpc.planograms.getProducts.useQuery(
+    { planogramId: selectedPlanogramId || 0 },
+    { enabled: !!selectedPlanogramId }
+  );
+  
+  // Filtrer les produits par planogramme si un planogramme est sélectionné
+  const filteredProducts = useMemo(() => {
+    if (!products) return [];
+    
+    // Si aucun planogramme sélectionné, retourner tous les produits
+    if (!selectedPlanogramId || !planogramProductsData) return products;
+    
+    // Filtrer les produits qui sont dans le planogramme
+    const productIdsInPlanogram = planogramProductsData.map((pp: any) => pp.productId);
+    return products.filter(p => productIdsInPlanogram.includes(p.id));
+  }, [products, planogramProductsData, selectedPlanogramId]);
+  
   // Auto-select first store, zone, planogram and product
   useMemo(() => {
     if (!selectedStoreId && stores && stores.length > 0) {
@@ -65,10 +104,10 @@ export default function StockTracking() {
     if (!selectedPlanogramId && planograms && planograms.length > 0) {
       setSelectedPlanogramId(planograms[0].id);
     }
-    if (!selectedProductId && products && products.length > 0) {
-      setSelectedProductId(products[0].id);
+    if (!selectedProductId && filteredProducts && filteredProducts.length > 0) {
+      setSelectedProductId(filteredProducts[0].id);
     }
-  }, [stores, zones, planograms, products, selectedStoreId, selectedZoneId, selectedPlanogramId, selectedProductId]);
+  }, [stores, zones, planograms, filteredProducts, selectedStoreId, selectedZoneId, selectedPlanogramId, selectedProductId]);
 
   const { data: stockHistory } = trpc.stock.history.useQuery(
     {
@@ -310,7 +349,7 @@ export default function StockTracking() {
                     <SelectValue placeholder="Sélectionnez un produit" />
                   </SelectTrigger>
                   <SelectContent>
-                    {products?.map((product) => (
+                    {filteredProducts?.map((product) => (
                       <SelectItem key={product.id} value={product.id.toString()}>
                         {product.name}
                       </SelectItem>

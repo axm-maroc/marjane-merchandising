@@ -407,3 +407,26 @@
 - [x] Sauvegarder les coordonnées des zones dans la base de données (via procédures tRPC)
 - [x] Ajouter une route /stores/:id/zones/editor dans App.tsx
 - [x] Créer un bouton d'accès à l'éditeur depuis la page StoreZones.tsx
+
+
+## Améliorations de l'éditeur de zones et filtres
+
+### Améliorer l'accès à l'éditeur de zones
+- [x] Ajouter un bouton "Gérer les Zones" bien visible dans la page de détail de chaque magasin
+- [x] Créer une section "Zones du Magasin" dans StoreDetail.tsx
+- [x] Afficher un aperçu visuel des zones existantes dans la page du magasin
+- [x] Permettre de cliquer sur une zone pour la modifier
+
+### Lier les planogrammes aux zones
+- [x] Ajouter le champ zoneId dans la table planogramLocations (déjà existant)
+- [x] Créer une migration pour ajouter la colonne zoneId (déjà fait)
+- [x] Modifier la création de planogramme pour permettre l'affectation à une zone (déjà fait)
+- [ ] Créer une interface pour affecter/réaffecter des planogrammes à des zones
+- [ ] Afficher les planogrammes affectés à chaque zone dans l'éditeur
+
+### Corriger le filtre dans Suivi des Stocks
+- [x] Vérifier l'ordre actuel des filtres dans StockTracking.tsx
+- [x] S'assurer que l'ordre est: Magasin → Zone → Planogramme → Produit
+- [x] Filtrer les planogrammes par zone sélectionnée
+- [x] Filtrer les produits par planogramme sélectionné
+- [x] Tester le filtrage en cascade complet
