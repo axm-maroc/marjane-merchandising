@@ -144,6 +144,31 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         return await db.restorePlanogramVersion(input.planogramId, input.version, input.comment);
       }),
+    createSimple: publicProcedure
+      .input(z.object({
+        locationId: z.number(),
+        name: z.string(),
+        description: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        // Récupérer les informations de l'emplacement
+        const location = await db.getPlanogramLocationById(input.locationId);
+        if (!location) {
+          throw new Error("Emplacement introuvable");
+        }
+        
+        // Créer le planogramme avec les dimensions de l'emplacement
+        const planogram = await db.createPlanogramLocation({
+          storeId: location.storeId,
+          name: input.name,
+          location: location.name,
+          width: location.shelfWidth,
+          height: location.shelfHeight * location.shelfCount,
+          depth: location.shelfDepth,
+        });
+        
+        return planogram;
+      }),
     create: publicProcedure
       .input(z.object({
         storeId: z.number(),

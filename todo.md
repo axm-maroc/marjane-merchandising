@@ -590,3 +590,48 @@
 - [x] Synchronisation avec le canvas (redessiner après modification)
 - [x] Validation des champs avant sauvegarde (dimensions minimales)
 - [x] Messages de confirmation pour les actions critiques (suppression)
+
+
+## Correction création de planogramme et amélioration présentation
+
+### Correction de la création de planogramme
+- [x] Diagnostiquer pourquoi la création de planogramme ne fonctionne pas
+- [x] Vérifier la procédure tRPC planograms.create
+- [x] Corriger la redirection vers l'éditeur 2D (ajout de createSimple)
+- [x] Tester le flux complet de création
+
+### Réorganisation avec onglets
+- [ ] Créer un système d'onglets pour les panneaux latéraux
+- [ ] Onglet "Outils" : Outils de dessin et paramètres du canvas
+- [ ] Onglet "Planogrammes" : Liste des planogrammes avec création
+- [ ] Onglet "Emplacements" : Liste des emplacements avec détails étagères
+- [ ] Ajouter des icônes pour chaque onglet
+
+### Amélioration du formatage
+- [ ] Optimiser l'espacement entre les éléments
+- [ ] Améliorer l'alignement des cartes et boutons
+- [ ] Uniformiser les tailles de police et les couleurs
+- [ ] Ajouter des séparateurs visuels entre les sections
+- [ ] Améliorer la lisibilité des badges et labels
+
+
+## Amélioration présentation et recommandations
+
+### Amélioration présentation des blocs
+- [ ] Réorganiser le bloc Outils avec meilleur espacement
+- [ ] Ajouter des icônes plus grandes et visibles
+- [ ] Grouper les contrôles par catégorie (Dessin, Affichage, Fichier)
+- [ ] Améliorer le bloc Planogrammes avec cartes plus lisibles
+- [ ] Ajouter des filtres par statut dans le bloc Planogrammes
+
+### Recommandations futures
+- [ ] Panneau de propriétés de zone contextuel (flottant)
+- [ ] Filtres et recherche dans les panneaux latéraux
+- [ ] Mode plein écran et zoom sur le canvas
+- [ ] Visualisation 3D des zones
+- [ ] Heatmap de performance par zone
+- [ ] Duplication de configuration entre magasins
+- [ ] Export PDF du plan de magasin
+- [ ] Historique des modifications de zones
+- [ ] Clic sur emplacement pour éditer directement
+- [ ] Indicateur de remplissage des étagères
