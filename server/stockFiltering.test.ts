@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { appRouter } from "./routers";
 import type { TrpcContext } from "./_core/context";
+import { getTestStoreId } from "./_test/helpers";
 
 type AuthenticatedUser = NonNullable<TrpcContext["user"]>;
 
@@ -35,8 +36,9 @@ describe("Stock Filtering - Cascade Logic", () => {
   it("devrait récupérer les zones d'un magasin", async () => {
     const { ctx } = createAuthContext();
     const caller = appRouter.createCaller(ctx);
+    const storeId = await getTestStoreId();
 
-    const zones = await caller.zones.byStore({ storeId: 1 });
+    const zones = await caller.zones.byStore({ storeId });
 
     expect(zones).toBeDefined();
     expect(Array.isArray(zones)).toBe(true);
@@ -46,8 +48,9 @@ describe("Stock Filtering - Cascade Logic", () => {
   it("devrait récupérer les planogrammes d'un magasin", async () => {
     const { ctx } = createAuthContext();
     const caller = appRouter.createCaller(ctx);
+    const storeId = await getTestStoreId();
 
-    const planograms = await caller.planograms.byStore({ storeId: 1 });
+    const planograms = await caller.planograms.byStore({ storeId });
 
     expect(planograms).toBeDefined();
     expect(Array.isArray(planograms)).toBe(true);
@@ -57,7 +60,8 @@ describe("Stock Filtering - Cascade Logic", () => {
     const { ctx } = createAuthContext();
     const caller = appRouter.createCaller(ctx);
 
-    const locations = await caller.planogramLocations.byStore({ storeId: 1 });
+    const storeId = await getTestStoreId();
+    const locations = await caller.planogramLocations.byStore({ storeId });
 
     expect(locations).toBeDefined();
     expect(Array.isArray(locations)).toBe(true);
@@ -74,14 +78,15 @@ describe("Stock Filtering - Cascade Logic", () => {
     const caller = appRouter.createCaller(ctx);
 
     // Récupérer les zones
-    const zones = await caller.zones.byStore({ storeId: 1 });
+    const storeId = await getTestStoreId();
+    const zones = await caller.zones.byStore({ storeId });
     expect(zones.length).toBeGreaterThan(0);
 
     // Récupérer les emplacements
-    const locations = await caller.planogramLocations.byStore({ storeId: 1 });
+    const locations = await caller.planogramLocations.byStore({ storeId });
     
     // Récupérer les planogrammes
-    const allPlanograms = await caller.planograms.byStore({ storeId: 1 });
+    const allPlanograms = await caller.planograms.byStore({ storeId });
     
     // Filtrer les emplacements par zone
     const zone = zones[0];
@@ -102,7 +107,8 @@ describe("Stock Filtering - Cascade Logic", () => {
     const caller = appRouter.createCaller(ctx);
 
     // Récupérer les planogrammes
-    const planograms = await caller.planograms.byStore({ storeId: 1 });
+    const storeId = await getTestStoreId();
+    const planograms = await caller.planograms.byStore({ storeId });
     
     if (planograms.length > 0) {
       const planogram = planograms[0];
@@ -129,10 +135,11 @@ describe("Zone Management in Store Detail", () => {
     const { ctx } = createAuthContext();
     const caller = appRouter.createCaller(ctx);
 
-    const store = await caller.stores.getById({ id: 1 });
+    const storeId = await getTestStoreId();
+    const store = await caller.stores.getById({ id: storeId });
 
     expect(store).toBeDefined();
-    expect(store?.id).toBe(1);
+    expect(store?.id).toBe(storeId);
     expect(store).toHaveProperty('name');
     expect(store).toHaveProperty('address');
   });
@@ -141,7 +148,8 @@ describe("Zone Management in Store Detail", () => {
     const { ctx } = createAuthContext();
     const caller = appRouter.createCaller(ctx);
 
-    const zones = await caller.zones.byStore({ storeId: 1 });
+    const storeId = await getTestStoreId();
+    const zones = await caller.zones.byStore({ storeId });
 
     expect(zones).toBeDefined();
     
@@ -169,11 +177,12 @@ describe("Planogram Zone Assignment", () => {
     const caller = appRouter.createCaller(ctx);
 
     // Récupérer les zones
-    const zones = await caller.zones.byStore({ storeId: 1 });
+    const storeId = await getTestStoreId();
+    const zones = await caller.zones.byStore({ storeId });
     expect(zones.length).toBeGreaterThan(0);
     
     // Récupérer les emplacements
-    const locations = await caller.planogramLocations.byStore({ storeId: 1 });
+    const locations = await caller.planogramLocations.byStore({ storeId });
     expect(locations).toBeDefined();
     
     // Vérifier que certains emplacements ont une zone assignée

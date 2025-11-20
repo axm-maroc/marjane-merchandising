@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { appRouter } from "./routers";
 import type { TrpcContext } from "./_core/context";
+import { getTestStoreId } from "./_test/helpers";
 
 type AuthenticatedUser = NonNullable<TrpcContext["user"]>;
 
@@ -35,8 +36,9 @@ describe("Zone Editor - Zones Management", () => {
   it("devrait récupérer les zones d'un magasin", async () => {
     const { ctx } = createAuthContext();
     const caller = appRouter.createCaller(ctx);
+    const storeId = await getTestStoreId();
 
-    const zones = await caller.zones.byStore({ storeId: 1 });
+    const zones = await caller.zones.byStore({ storeId });
 
     expect(zones).toBeDefined();
     expect(Array.isArray(zones)).toBe(true);

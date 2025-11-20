@@ -680,3 +680,12 @@
 - [x] Ajouter 41 contrats de sponsoring pour plusieurs zones
 - [x] Générer des données d'historique de stock sur 6 mois
 - [x] Exécuter le script pour peupler la base de données
+
+
+## Nettoyage de la base de données
+- [x] Créer un script de nettoyage pour supprimer les anciens magasins de test
+- [x] Créer un script de réinitialisation complète (reset-database.mjs)
+- [x] Supprimer tous les magasins sauf les 12 magasins Marjane réels
+- [x] Supprimer les données associées (zones, emplacements, planogrammes, stocks)
+- [x] Vérifier que seules les données Marjane réelles restent
+- [x] Exécuter le script de nettoyage et régénération
