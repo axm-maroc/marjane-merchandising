@@ -509,3 +509,58 @@
 - [x] Afficher un badge "Aucun planogramme" sur les emplacements vides
 - [ ] Ajouter une action rapide "Créer" au survol de l'emplacement (fonctionnalité future)
 - [x] Mettre à jour le panneau de propriétés avec le bouton de création
+
+
+## Interactivité des emplacements sur le canvas
+
+### Détection des clics
+- [x] Détecter les clics sur les emplacements dans handleCanvasMouseDown
+- [x] Calculer si le clic est à l'intérieur d'un emplacement
+- [x] Identifier l'emplacement cliqué
+- [x] Distinguer le clic sur emplacement du clic sur zone
+
+### Feedback visuel
+- [ ] Changer le curseur en pointer au survol des emplacements
+- [ ] Ajouter une bordure highlight au survol
+- [ ] Redessiner le canvas lors du survol pour afficher le highlight
+- [ ] Gérer l'état de l'emplacement survolé
+
+### Navigation selon le statut
+- [x] Si emplacement a un planogramme → rediriger vers l'éditeur 2D
+- [x] Si emplacement sans planogramme → ouvrir la modale de création
+- [x] Construire l'URL correcte pour la redirection
+- [x] Pré-remplir la modale avec les informations de l'emplacement
+
+### Amélioration UX
+- [ ] Ajouter un tooltip au survol montrant le nom de l'emplacement
+- [ ] Désactiver le clic pendant le mode dessin de zone
+- [ ] Empêcher le conflit avec le drag-and-drop existant
+
+
+## Réorganisation de l'interface de l'éditeur visuel
+
+### Panneau Planogrammes (gauche)
+- [x] Créer un nouveau panneau à gauche du canvas
+- [x] Lister tous les planogrammes du magasin
+- [x] Afficher le nom, version et statut de chaque planogramme
+- [x] Ajouter un bouton "Créer un planogramme" en haut du panneau
+- [x] Permettre de cliquer sur un planogramme pour voir ses détails (ouvre l'éditeur 2D)
+- [ ] Filtrer les planogrammes par statut (Actif, Brouillon, Archivé) - fonctionnalité future
+
+### Panneau Emplacements avec étagères (droite)
+- [x] Renommer le panneau actuel en "Emplacements"
+- [x] Afficher la liste de tous les emplacements du magasin
+- [x] Pour chaque emplacement, montrer :
+  - [x] Nombre d'étagères
+  - [x] Dimensions (largeur, hauteur, profondeur)
+  - [x] Zone affectée
+  - [x] Planogramme associé (si existe)
+  - [x] Statut de positionnement (positionné ou non)
+- [x] Ajouter une icône d'étagères pour visualiser (bloc détaillé)
+- [x] Permettre de cliquer pour positionner l'emplacement (drag-and-drop)
+
+### Layout à 3 colonnes
+- [x] Réorganiser le layout : Outils+Planogrammes | Canvas | Emplacements
+- [x] Ajuster les largeurs pour optimiser l'espace (grid-cols-7)
+- [ ] Rendre les panneaux repliables (fonctionnalité future)
+- [ ] Sauvegarder les préférences de largeur (fonctionnalité future)

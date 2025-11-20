@@ -380,6 +380,41 @@ export default function ZoneEditor() {
         }
       }
       
+      // Vérifier si on clique sur un emplacement de planogramme
+      const clickedLocation = planogramLocations?.find(location => {
+        if (!location.positionX || !location.positionY || !location.zoneId) return false;
+        
+        const dbZone = existingZones?.find(z => z.id === location.zoneId);
+        if (!dbZone) return false;
+        
+        const zone = zones.find(z => z.code === dbZone.code);
+        if (!zone) return false;
+        
+        const absX = zone.x + location.positionX;
+        const absY = zone.y + location.positionY;
+        const width = Math.min(location.shelfWidth / 20, zone.width - location.positionX - 10);
+        const shelfHeight = location.shelfHeight / 10;
+        const totalHeight = location.shelfCount * shelfHeight;
+        
+        return x >= absX && x <= absX + width &&
+               y >= absY && y <= absY + totalHeight;
+      });
+      
+      if (clickedLocation) {
+        // Clic sur un emplacement - ouvrir l'éditeur ou la modale de création
+        const planogram = allPlanograms?.find(p => p.locationId === clickedLocation.id);
+        
+        if (planogram) {
+          // Rediriger vers l'éditeur 2D
+          window.location.href = `/planograms/location/${clickedLocation.id}`;
+        } else {
+          // Ouvrir la modale de création
+          setSelectedLocationForPlanogram(clickedLocation);
+          setShowCreatePlanogramDialog(true);
+        }
+        return;
+      }
+      
       // Vérifier si on clique sur une zone pour la déplacer
       const clickedZone = zones.find(zone => 
         x >= zone.x && x <= zone.x + zone.width &&
@@ -672,7 +707,7 @@ export default function ZoneEditor() {
       </header>
 
       <main className="container py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-7 gap-6">
           {/* Barre d'outils */}
           <Card className="lg:col-span-1">
             <CardHeader>
@@ -760,74 +795,82 @@ export default function ZoneEditor() {
             </CardContent>
           </Card>
 
-          {/* Panneau Emplacements Disponibles */}
+          {/* Panneau Planogrammes */}
           <Card className="lg:col-span-1">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <LayoutGrid className="w-5 h-5" />
-                Emplacements
+                Planogrammes
               </CardTitle>
               <CardDescription>
-                Glissez-déposez les emplacements dans les zones
+                Tous les planogrammes du magasin
               </CardDescription>
             </CardHeader>
             <CardContent>
+              <Button 
+                className="w-full mb-4"
+                onClick={() => {
+                  // Ouvrir une modale de création de planogramme global
+                  toast.info("Fonctionnalité à venir : création de planogramme depuis l'éditeur");
+                }}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Créer un planogramme
+              </Button>
+              
               <div className="space-y-3 max-h-[600px] overflow-y-auto">
-                {planogramLocations
-                  ?.filter(loc => !loc.positionX && !loc.positionY) // Emplacements non positionnés
-                  .map(location => {
-                    const planogram = allPlanograms?.find(p => p.locationId === location.id);
-                    const zone = existingZones?.find(z => z.id === location.zoneId);
-                    
-                    return (
-                      <div
-                        key={location.id}
-                        draggable
-                        onDragStart={(e) => {
-                          e.dataTransfer.setData('locationId', location.id.toString());
-                          e.dataTransfer.effectAllowed = 'move';
-                        }}
-                        className="p-3 bg-white border-2 border-slate-200 rounded-lg cursor-move hover:border-blue-400 hover:shadow-md transition-all"
-                      >
-                        <div className="flex items-start gap-2">
-                          <Move className="w-4 h-4 text-slate-400 mt-1 flex-shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium text-sm text-slate-900 truncate">
+                {allPlanograms?.map(planogram => {
+                  const location = planogramLocations?.find(loc => loc.id === planogram.locationId);
+                  const zone = location?.zoneId ? existingZones?.find(z => z.id === location.zoneId) : null;
+                  
+                  return (
+                    <div
+                      key={planogram.id}
+                      onClick={() => {
+                        if (location) {
+                          window.location.href = `/planograms/location/${location.id}`;
+                        }
+                      }}
+                      className="p-3 bg-white border-2 border-slate-200 rounded-lg cursor-pointer hover:border-blue-400 hover:shadow-md transition-all"
+                    >
+                      <div className="flex items-start gap-2">
+                        <LayoutGrid className="w-4 h-4 text-slate-400 mt-1 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm text-slate-900 truncate">
+                            {planogram.name}
+                          </div>
+                          {location && (
+                            <div className="text-xs text-slate-600 mt-1 truncate">
                               {location.name}
                             </div>
-                            {planogram && (
-                              <div className="text-xs text-slate-600 mt-1 truncate">
-                                {planogram.name}
-                              </div>
-                            )}
-                            <div className="flex gap-2 mt-2 flex-wrap">
-                              <Badge variant="outline" className="text-xs">
-                                {location.shelfWidth}mm
+                          )}
+                          <div className="flex gap-2 mt-2 flex-wrap">
+                            <Badge 
+                              variant={planogram.status === 'active' ? 'default' : 'secondary'}
+                              className="text-xs"
+                            >
+                              {planogram.status === 'active' ? 'Actif' : planogram.status === 'draft' ? 'Brouillon' : 'Archivé'}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              v{planogram.version}
+                            </Badge>
+                            {zone && (
+                              <Badge variant="secondary" className="text-xs">
+                                {zone.code}
                               </Badge>
-                              {zone && (
-                                <Badge variant="secondary" className="text-xs">
-                                  {zone.code}
-                                </Badge>
-                              )}
-                              {planogram && (
-                                <Badge 
-                                  variant={planogram.status === 'active' ? 'default' : 'secondary'}
-                                  className="text-xs"
-                                >
-                                  {planogram.status === 'active' ? 'Actif' : 'Brouillon'}
-                                </Badge>
-                              )}
-                            </div>
+                            )}
                           </div>
                         </div>
                       </div>
-                    );
-                  })}
+                    </div>
+                  );
+                })}
                 
-                {planogramLocations?.filter(loc => !loc.positionX && !loc.positionY).length === 0 && (
+                {(!allPlanograms || allPlanograms.length === 0) && (
                   <div className="text-center text-slate-500 py-8">
                     <LayoutGrid className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                    <p className="text-sm">Tous les emplacements sont positionnés</p>
+                    <p className="text-sm">Aucun planogramme</p>
+                    <p className="text-xs mt-1">Créez votre premier planogramme</p>
                   </div>
                 )}
               </div>
@@ -835,7 +878,7 @@ export default function ZoneEditor() {
           </Card>
 
           {/* Canvas */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-3">
             <Card>
               <CardHeader>
                 <CardTitle>Plan du magasin</CardTitle>
@@ -882,474 +925,192 @@ export default function ZoneEditor() {
           </div>
 
           {/* Propriétés de la zone sélectionnée */}
-          <Card className="lg:col-span-1">
+          <Card className="lg:col-span-2">
             <CardHeader>
-              <CardTitle>Propriétés</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <LayoutGrid className="w-5 h-5" />
+                Emplacements
+              </CardTitle>
               <CardDescription>
-                {selectedZone ? 'Modifier la zone sélectionnée' : 'Aucune zone sélectionnée'}
+                Glissez-déposez les emplacements dans les zones
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {selectedZone ? (
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="zone-code">Code</Label>
-                    <Input
-                      id="zone-code"
-                      value={selectedZone.code}
-                      onChange={(e) => updateSelectedZone({ code: e.target.value })}
-                      className="mt-1"
-                    />
-                  </div>
+              <div className="space-y-3 max-h-[700px] overflow-y-auto">
+                {planogramLocations?.map(location => {
+                  const planogram = allPlanograms?.find(p => p.locationId === location.id);
+                  const zone = location.zoneId ? existingZones?.find(z => z.id === location.zoneId) : null;
+                  const isPositioned = location.positionX !== null && location.positionY !== null;
                   
-                  <div>
-                    <Label htmlFor="zone-name">Nom</Label>
-                    <Input
-                      id="zone-name"
-                      value={selectedZone.name}
-                      onChange={(e) => updateSelectedZone({ name: e.target.value })}
-                      className="mt-1"
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <Label htmlFor="zone-x">Position X</Label>
-                      <Input
-                        id="zone-x"
-                        type="number"
-                        value={Math.round(selectedZone.x)}
-                        onChange={(e) => updateSelectedZone({ x: parseInt(e.target.value) || 0 })}
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="zone-y">Position Y</Label>
-                      <Input
-                        id="zone-y"
-                        type="number"
-                        value={Math.round(selectedZone.y)}
-                        onChange={(e) => updateSelectedZone({ y: parseInt(e.target.value) || 0 })}
-                        className="mt-1"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <Label htmlFor="zone-width">Largeur</Label>
-                      <Input
-                        id="zone-width"
-                        type="number"
-                        value={Math.round(selectedZone.width)}
-                        onChange={(e) => updateSelectedZone({ width: parseInt(e.target.value) || 50 })}
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="zone-height">Hauteur</Label>
-                      <Input
-                        id="zone-height"
-                        type="number"
-                        value={Math.round(selectedZone.height)}
-                        onChange={(e) => updateSelectedZone({ height: parseInt(e.target.value) || 50 })}
-                        className="mt-1"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <Label>Surface estimée</Label>
-                    <div className="mt-1 text-lg font-semibold text-slate-900">
-                      {Math.round((selectedZone.width * selectedZone.height) / 100)} m²
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      id="zone-sponsored"
-                      checked={selectedZone.isSponsored}
-                      onChange={(e) => updateSelectedZone({ 
-                        isSponsored: e.target.checked,
-                        color: e.target.checked ? '#10b981' : '#3b82f6'
-                      })}
-                      className="w-4 h-4"
-                    />
-                    <Label htmlFor="zone-sponsored">Zone sponsorisée</Label>
-                  </div>
-                  
-                  {/* Planogrammes affectés à cette zone */}
-                  <div className="pt-4 border-t">
-                    <div className="flex items-center justify-between mb-3">
-                      <Label className="flex items-center gap-2">
-                        <LayoutGrid className="w-4 h-4" />
-                        Planogrammes
-                      </Label>
-                      <Badge variant="secondary">
-                        {planogramLocations?.filter(loc => {
-                          // Trouver la zone correspondante dans existingZones
-                          const dbZone = existingZones?.find(z => z.code === selectedZone.code);
-                          return dbZone && loc.zoneId === dbZone.id;
-                        }).length || 0}
-                      </Badge>
-                    </div>
-                    
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {planogramLocations
-                        ?.filter(loc => {
-                          const dbZone = existingZones?.find(z => z.code === selectedZone.code);
-                          return dbZone && loc.zoneId === dbZone.id;
-                        })
-                        .map(location => {
-                          const planogram = allPlanograms?.find(p => p.locationId === location.id);
-                          return (
-                            <div key={location.id} className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                              <div className="flex items-start justify-between mb-2">
-                                <div className="flex-1">
-                                  <div className="font-medium text-sm text-slate-900">{location.name}</div>
-                                  {planogram && (
-                                    <div className="text-xs text-slate-600 mt-1">
-                                      {planogram.name} (v{planogram.version})
-                                    </div>
-                                  )}
-                                </div>
-                                {planogram && (
-                                  <Badge variant={planogram.status === 'active' ? 'default' : 'secondary'} className="text-xs">
-                                    {planogram.status === 'active' ? 'Actif' : planogram.status === 'draft' ? 'Brouillon' : 'Archivé'}
-                                  </Badge>
-                                )}
-                              </div>
-                              
-                              <div className="flex gap-2 mt-2">
-                                {planogram ? (
-                                  <>
-                                    <Link href={`/planograms/location/${location.id}`}>
-                                      <Button variant="outline" size="sm" className="flex-1">
-                                        <Eye className="w-3 h-3 mr-1" />
-                                        Éditeur 2D
-                                      </Button>
-                                    </Link>
-                                    <Link href={`/planograms/${planogram.id}/photos`}>
-                                      <Button variant="outline" size="sm" className="flex-1">
-                                        <Camera className="w-3 h-3 mr-1" />
-                                        Photos
-                                      </Button>
-                                    </Link>
-                                  </>
-                                ) : (
-                                  <Button 
-                                    variant="default" 
-                                    size="sm" 
-                                    className="w-full"
-                                    onClick={() => {
-                                      setSelectedLocationForPlanogram(location);
-                                      setShowCreatePlanogramDialog(true);
-                                    }}
-                                  >
-                                    <Plus className="w-3 h-3 mr-1" />
-                                    Créer planogramme
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      
-                      {planogramLocations?.filter(loc => {
-                        const dbZone = existingZones?.find(z => z.code === selectedZone.code);
-                        return dbZone && loc.zoneId === dbZone.id;
-                      }).length === 0 && (
-                        <div className="text-center text-sm text-slate-500 py-4">
-                          Aucun planogramme affecté à cette zone
-                        </div>
-                      )}
-                    </div>
-                    
-                    <Dialog open={showAssignDialog} onOpenChange={setShowAssignDialog}>
-                      <DialogTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full mt-3"
-                        >
-                          <Plus className="w-4 h-4 mr-2" />
-                          Affecter des planogrammes
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                        <DialogHeader>
-                          <DialogTitle>Affecter des planogrammes à la zone</DialogTitle>
-                          <DialogDescription>
-                            Sélectionnez les planogrammes à affecter à la zone <strong>{selectedZone.code} - {selectedZone.name}</strong>
-                          </DialogDescription>
-                        </DialogHeader>
-                        
-                        <div className="space-y-4 mt-4">
-                          {planogramLocations
-                            ?.filter(loc => {
-                              // Afficher les emplacements non affectés ou déjà affectés à cette zone
-                              const dbZone = existingZones?.find(z => z.code === selectedZone.code);
-                              return !loc.zoneId || (dbZone && loc.zoneId === dbZone.id);
-                            })
-                            .map(location => {
-                              const planogram = allPlanograms?.find(p => p.locationId === location.id);
-                              const dbZone = existingZones?.find(z => z.code === selectedZone.code);
-                              const isCurrentlyAssigned = dbZone && location.zoneId === dbZone.id;
-                              const isSelected = selectedLocations.includes(location.id);
-                              
-                              return (
-                                <div
-                                  key={location.id}
-                                  className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                                    isSelected ? 'border-blue-500 bg-blue-50' : 'border-slate-200 hover:border-slate-300'
-                                  }`}
-                                  onClick={() => {
-                                    if (isSelected) {
-                                      setSelectedLocations(selectedLocations.filter(id => id !== location.id));
-                                    } else {
-                                      setSelectedLocations([...selectedLocations, location.id]);
-                                    }
-                                  }}
-                                >
-                                  <div className="flex items-start gap-3">
-                                    <Checkbox
-                                      checked={isSelected}
-                                      onCheckedChange={(checked) => {
-                                        if (checked) {
-                                          setSelectedLocations([...selectedLocations, location.id]);
-                                        } else {
-                                          setSelectedLocations(selectedLocations.filter(id => id !== location.id));
-                                        }
-                                      }}
-                                    />
-                                    <div className="flex-1">
-                                      <div className="flex items-center justify-between">
-                                        <div>
-                                          <div className="font-medium text-slate-900">{location.name}</div>
-                                          {planogram && (
-                                            <div className="text-sm text-slate-600 mt-1">
-                                              {planogram.name} (v{planogram.version})
-                                            </div>
-                                          )}
-                                        </div>
-                                        <div className="flex gap-2">
-                                          {isCurrentlyAssigned && (
-                                            <Badge variant="secondary">Déjà affecté</Badge>
-                                          )}
-                                          {planogram && (
-                                            <Badge variant={planogram.status === 'active' ? 'default' : 'secondary'}>
-                                              {planogram.status === 'active' ? 'Actif' : planogram.status === 'draft' ? 'Brouillon' : 'Archivé'}
-                                            </Badge>
-                                          )}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          
-                          {planogramLocations?.filter(loc => {
-                            const dbZone = existingZones?.find(z => z.code === selectedZone.code);
-                            return !loc.zoneId || (dbZone && loc.zoneId === dbZone.id);
-                          }).length === 0 && (
-                            <div className="text-center text-slate-500 py-8">
-                              Tous les planogrammes sont déjà affectés à d'autres zones
+                  return (
+                    <div
+                      key={location.id}
+                      draggable={!isPositioned}
+                      onDragStart={(e) => {
+                        if (!isPositioned) {
+                          e.dataTransfer.setData('locationId', location.id.toString());
+                          e.dataTransfer.effectAllowed = 'move';
+                        }
+                      }}
+                      onClick={() => {
+                        if (planogram) {
+                          window.location.href = `/planograms/location/${location.id}`;
+                        } else {
+                          setSelectedLocationForPlanogram(location);
+                          setShowCreatePlanogramDialog(true);
+                        }
+                      }}
+                      className={`p-3 bg-white border-2 rounded-lg transition-all ${
+                        !isPositioned 
+                          ? 'border-orange-300 cursor-move hover:border-orange-400 hover:shadow-md' 
+                          : 'border-slate-200 cursor-pointer hover:border-blue-400 hover:shadow-md'
+                      }`}
+                    >
+                      <div className="flex items-start gap-2">
+                        {!isPositioned && <Move className="w-4 h-4 text-orange-500 mt-1 flex-shrink-0" />}
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm text-slate-900 truncate">
+                            {location.name}
+                          </div>
+                          {planogram && (
+                            <div className="text-xs text-slate-600 mt-1 truncate">
+                              {planogram.name}
                             </div>
                           )}
+                          
+                          {/* Détails des étagères */}
+                          <div className="mt-2 p-2 bg-slate-50 rounded border border-slate-200">
+                            <div className="text-xs font-medium text-slate-700 mb-1">Étagères</div>
+                            <div className="grid grid-cols-2 gap-1 text-xs text-slate-600">
+                              <div>Nombre: <span className="font-medium">{location.shelfCount}</span></div>
+                              <div>Largeur: <span className="font-medium">{location.shelfWidth}mm</span></div>
+                              <div>Hauteur: <span className="font-medium">{location.shelfHeight}mm</span></div>
+                              <div>Profondeur: <span className="font-medium">{location.shelfDepth}mm</span></div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex gap-2 mt-2 flex-wrap">
+                            {!isPositioned && (
+                              <Badge variant="outline" className="text-xs bg-orange-50 text-orange-700 border-orange-300">
+                                Non positionné
+                              </Badge>
+                            )}
+                            {zone && (
+                              <Badge variant="secondary" className="text-xs">
+                                {zone.code}
+                              </Badge>
+                            )}
+                            {planogram ? (
+                              <Badge 
+                                variant={planogram.status === 'active' ? 'default' : 'secondary'}
+                                className="text-xs"
+                              >
+                                {planogram.status === 'active' ? 'Actif' : planogram.status === 'draft' ? 'Brouillon' : 'Archivé'}
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-xs text-slate-500">
+                                Pas de planogramme
+                              </Badge>
+                            )}
+                          </div>
                         </div>
-                        
-                        <div className="flex gap-2 mt-6">
-                          <Button
-                            variant="outline"
-                            onClick={() => {
-                              setShowAssignDialog(false);
-                              setSelectedLocations([]);
-                            }}
-                            className="flex-1"
-                          >
-                            Annuler
-                          </Button>
-                          <Button
-                            onClick={() => {
-                              const dbZone = existingZones?.find(z => z.code === selectedZone.code);
-                              if (!dbZone) {
-                                toast.error("Zone non trouvée dans la base de données");
-                                return;
-                              }
-                              
-                              // Affecter tous les emplacements sélectionnés
-                              selectedLocations.forEach(locationId => {
-                                updateZoneMutation.mutate({
-                                  locationId,
-                                  zoneId: dbZone.id
-                                });
-                              });
-                            }}
-                            disabled={selectedLocations.length === 0 || updateZoneMutation.isPending}
-                            className="flex-1"
-                          >
-                            Affecter {selectedLocations.length > 0 ? `(${selectedLocations.length})` : ''}
-                          </Button>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
+                      </div>
+                    </div>
+                  );
+                })}
+                
+                {(!planogramLocations || planogramLocations.length === 0) && (
+                  <div className="text-center text-slate-500 py-8">
+                    <LayoutGrid className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                    <p className="text-sm">Aucun emplacement</p>
+                  </div>
+                )}
+              </div>
+              
+              {/* Modale de création de planogramme */}
+              <Dialog open={showCreatePlanogramDialog} onOpenChange={setShowCreatePlanogramDialog}>
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Créer un nouveau planogramme</DialogTitle>
+                    <DialogDescription>
+                      Créer un planogramme pour l'emplacement : {selectedLocationForPlanogram?.name}
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <div className="space-y-4 py-4">
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Nom du planogramme *</label>
+                      <Input
+                        placeholder="Ex: Planogramme Produits Laitiers"
+                        value={newPlanogramName}
+                        onChange={(e) => setNewPlanogramName(e.target.value)}
+                      />
+                    </div>
                     
-                    {/* Modale de création de planogramme */}
-                    <Dialog open={showCreatePlanogramDialog} onOpenChange={setShowCreatePlanogramDialog}>
-                      <DialogContent className="max-w-md">
-                        <DialogHeader>
-                          <DialogTitle>Créer un nouveau planogramme</DialogTitle>
-                          <DialogDescription>
-                            Créer un planogramme pour l'emplacement : {selectedLocationForPlanogram?.name}
-                          </DialogDescription>
-                        </DialogHeader>
-                        
-                        <div className="space-y-4 py-4">
-                          <div>
-                            <label className="text-sm font-medium mb-2 block">Nom du planogramme *</label>
-                            <Input
-                              placeholder="Ex: Planogramme Produits Laitiers"
-                              value={newPlanogramName}
-                              onChange={(e) => setNewPlanogramName(e.target.value)}
-                            />
-                          </div>
-                          
-                          <div>
-                            <label className="text-sm font-medium mb-2 block">Description (optionnelle)</label>
-                            <Input
-                              placeholder="Description du planogramme"
-                              value={newPlanogramDescription}
-                              onChange={(e) => setNewPlanogramDescription(e.target.value)}
-                            />
-                          </div>
-                          
-                          <div className="bg-slate-50 p-3 rounded-lg space-y-2">
-                            <div className="text-sm">
-                              <span className="font-medium">Magasin :</span> {store?.name}
-                            </div>
-                            <div className="text-sm">
-                              <span className="font-medium">Emplacement :</span> {selectedLocationForPlanogram?.name}
-                            </div>
-                            <div className="text-sm">
-                              <span className="font-medium">Étagères :</span> {selectedLocationForPlanogram?.shelfCount}
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            onClick={() => {
-                              setShowCreatePlanogramDialog(false);
-                              setNewPlanogramName('');
-                              setNewPlanogramDescription('');
-                            }}
-                            className="flex-1"
-                          >
-                            Annuler
-                          </Button>
-                          <Button
-                            onClick={async () => {
-                              if (!newPlanogramName.trim()) {
-                                toast.error("Le nom du planogramme est requis");
-                                return;
-                              }
-                              
-                              try {
-                                // Note: La procédure create n'existe pas encore, redirection directe vers l'éditeur
-                                toast.success("Redirection vers l'éditeur de planogramme");
-                                setShowCreatePlanogramDialog(false);
-                                setNewPlanogramName('');
-                                setNewPlanogramDescription('');
-                                
-                                // Rediriger vers l'éditeur 2D qui gère la création
-                                window.location.href = `/planograms/location/${selectedLocationForPlanogram!.id}`;
-                              } catch (error) {
-                                toast.error("Erreur lors de la création du planogramme");
-                              }
-                            }}
-                            disabled={!newPlanogramName.trim()}
-                            className="flex-1"
-                          >
-                            <Plus className="w-4 h-4 mr-2" />
-                            Créer et ouvrir
-                          </Button>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Description (optionnelle)</label>
+                      <Input
+                        placeholder="Description du planogramme"
+                        value={newPlanogramDescription}
+                        onChange={(e) => setNewPlanogramDescription(e.target.value)}
+                      />
+                    </div>
+                    
+                    <div className="bg-slate-50 p-3 rounded-lg space-y-2">
+                      <div className="text-sm">
+                        <span className="font-medium">Magasin :</span> {store?.name}
+                      </div>
+                      <div className="text-sm">
+                        <span className="font-medium">Emplacement :</span> {selectedLocationForPlanogram?.name}
+                      </div>
+                      <div className="text-sm">
+                        <span className="font-medium">Étagères :</span> {selectedLocationForPlanogram?.shelfCount}
+                      </div>
+                    </div>
                   </div>
                   
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => {
-                      setZones(zones.filter(z => z.id !== selectedZone.id));
-                      setSelectedZone(null);
-                      toast.success("Zone supprimée");
-                    }}
-                    className="w-full"
-                  >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Supprimer cette zone
-                  </Button>
-                </div>
-              ) : (
-                <div className="text-center text-slate-500 py-8">
-                  <Grid3x3 className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                  <p>Sélectionnez une zone pour voir ses propriétés</p>
-                </div>
-              )}
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setShowCreatePlanogramDialog(false);
+                        setNewPlanogramName('');
+                        setNewPlanogramDescription('');
+                      }}
+                      className="flex-1"
+                    >
+                      Annuler
+                    </Button>
+                    <Button
+                      onClick={async () => {
+                        if (!newPlanogramName.trim()) {
+                          toast.error("Le nom du planogramme est requis");
+                          return;
+                        }
+                        
+                        try {
+                          toast.success("Redirection vers l'éditeur de planogramme");
+                          setShowCreatePlanogramDialog(false);
+                          setNewPlanogramName('');
+                          setNewPlanogramDescription('');
+                          
+                          window.location.href = `/planograms/location/${selectedLocationForPlanogram!.id}`;
+                        } catch (error) {
+                          toast.error("Erreur lors de la création du planogramme");
+                        }
+                      }}
+                      disabled={!newPlanogramName.trim()}
+                      className="flex-1"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Créer et ouvrir
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </CardContent>
           </Card>
         </div>
-
-        {/* Liste des zones */}
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>Zones créées ({zones.length})</CardTitle>
-            <CardDescription>Liste de toutes les zones du magasin</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {zones.map(zone => (
-                <div
-                  key={zone.id}
-                  onClick={() => setSelectedZone(zone)}
-                  className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                    selectedZone?.id === zone.id
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-slate-200 hover:border-slate-300'
-                  }`}
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <h3 className="font-semibold text-slate-900">{zone.code}</h3>
-                      <p className="text-sm text-slate-600">{zone.name}</p>
-                    </div>
-                    {zone.isSponsored && (
-                      <Badge variant="default" className="bg-green-600">
-                        Sponsorisée
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="text-sm text-slate-500">
-                    Surface: {Math.round((zone.width * zone.height) / 100)} m²
-                  </div>
-                </div>
-              ))}
-              
-              {zones.length === 0 && (
-                <div className="col-span-full text-center py-12 text-slate-500">
-                  <Grid3x3 className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                  <p>Aucune zone créée</p>
-                  <p className="text-sm mt-1">Utilisez l'outil Rectangle pour dessiner des zones</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
       </main>
     </div>
   );
