@@ -81,6 +81,11 @@ export const appRouter = router({
       .query(async ({ input }) => {
         return await db.getPlanogramsByLocation(input.locationId);
       }),
+    byStore: publicProcedure
+      .input(z.object({ storeId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getPlanogramsByStore(input.storeId);
+      }),
     getById: publicProcedure
       .input(z.object({ id: z.number() }))
       .query(async ({ input }) => {

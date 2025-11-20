@@ -583,3 +583,26 @@ export async function getUserPhotos(userId: number, limit: number = 20) {
     .orderBy(desc(planogramPhotos.timestamp))
     .limit(limit);
 }
+
+
+export async function getPlanogramsByStore(storeId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Récupérer tous les planogrammes via les locations du magasin
+  const result = await db
+    .select({
+      id: planograms.id,
+      name: planograms.name,
+      locationId: planograms.locationId,
+      version: planograms.version,
+      status: planograms.status,
+      createdAt: planograms.createdAt,
+    })
+    .from(planograms)
+    .innerJoin(planogramLocations, eq(planograms.locationId, planogramLocations.id))
+    .where(eq(planogramLocations.storeId, storeId))
+    .orderBy(desc(planograms.createdAt));
+  
+  return result;
+}

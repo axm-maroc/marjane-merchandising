@@ -264,3 +264,11 @@
 - [x] Ajouter un indicateur de statut de connexion dans MobileLayout
 - [x] Créer le hook useServiceWorker pour gérer l'état en ligne/hors-ligne
 - [ ] Tester le mode hors-ligne et la synchronisation
+
+
+## Amélioration du module Suivi des Stocks
+- [x] Ajouter le filtre planogramme entre le filtre magasin et le filtre produit
+- [x] Réorganiser la disposition des filtres (Magasin → Planogramme → Produit)
+- [x] Ajouter la procédure tRPC planograms.byStore
+- [x] Ajouter la fonction getPlanogramsByStore dans db.ts
+- [x] Tester le filtrage avec les trois filtres combinés

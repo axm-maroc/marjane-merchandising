@@ -38,17 +38,27 @@ export default function StockTracking() {
   const { data: products } = trpc.products.list.useQuery();
   
   const [selectedStoreId, setSelectedStoreId] = useState<number | null>(null);
+  const [selectedPlanogramId, setSelectedPlanogramId] = useState<number | null>(null);
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
+  
+  // Charger les planogrammes du magasin sélectionné
+  const { data: planograms } = trpc.planograms.byStore.useQuery(
+    { storeId: selectedStoreId || 0 },
+    { enabled: !!selectedStoreId }
+  );
 
-  // Auto-select first store and product
+  // Auto-select first store, planogram and product
   useMemo(() => {
     if (!selectedStoreId && stores && stores.length > 0) {
       setSelectedStoreId(stores[0].id);
     }
+    if (!selectedPlanogramId && planograms && planograms.length > 0) {
+      setSelectedPlanogramId(planograms[0].id);
+    }
     if (!selectedProductId && products && products.length > 0) {
       setSelectedProductId(products[0].id);
     }
-  }, [stores, products, selectedStoreId, selectedProductId]);
+  }, [stores, planograms, products, selectedStoreId, selectedPlanogramId, selectedProductId]);
 
   const { data: stockHistory } = trpc.stock.history.useQuery(
     {
@@ -215,12 +225,15 @@ export default function StockTracking() {
             <CardDescription className="text-slate-600">Choisissez un magasin et un produit</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="text-sm font-medium text-slate-700 mb-2 block">Magasin</label>
                 <Select
                   value={selectedStoreId?.toString() || ""}
-                  onValueChange={(value) => setSelectedStoreId(parseInt(value))}
+                  onValueChange={(value) => {
+                    setSelectedStoreId(parseInt(value));
+                    setSelectedPlanogramId(null); // Reset planogram when store changes
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionnez un magasin" />
@@ -229,6 +242,25 @@ export default function StockTracking() {
                     {stores?.map((store) => (
                       <SelectItem key={store.id} value={store.id.toString()}>
                         {store.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-700 mb-2 block">Planogramme</label>
+                <Select
+                  value={selectedPlanogramId?.toString() || ""}
+                  onValueChange={(value) => setSelectedPlanogramId(parseInt(value))}
+                  disabled={!selectedStoreId}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionnez un planogramme" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {planograms?.map((planogram: any) => (
+                      <SelectItem key={planogram.id} value={planogram.id.toString()}>
+                        {planogram.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
