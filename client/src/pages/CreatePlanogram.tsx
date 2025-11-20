@@ -36,7 +36,6 @@ export default function CreatePlanogram() {
   
   // Step 1: Basic Info
   const [storeId, setStoreId] = useState<number | null>(null);
-  const [zoneId, setZoneId] = useState<number | null>(null);
   const [name, setName] = useState("");
   const [location, setLocationValue] = useState("");
   
@@ -53,10 +52,6 @@ export default function CreatePlanogram() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const { data: stores } = trpc.stores.list.useQuery();
-  const { data: zones } = trpc.zones.byStore.useQuery(
-    { storeId: storeId || 0 },
-    { enabled: !!storeId }
-  );
   const { data: products } = trpc.products.list.useQuery();
   // const createMutation = trpc.planogramLocations.create.useMutation(); // TODO: Implement create mutation
 
@@ -202,30 +197,7 @@ export default function CreatePlanogram() {
                 </div>
 
                 <div>
-                  <Label htmlFor="zone" className="text-slate-700">Zone</Label>
-                  <select
-                    id="zone"
-                    value={zoneId || ""}
-                    onChange={(e) => setZoneId(e.target.value ? parseInt(e.target.value) : null)}
-                    className="w-full mt-2 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                    disabled={!storeId}
-                  >
-                    <option value="">Aucune zone (optionnel)</option>
-                    {zones?.map((zone: any) => (
-                      <option key={zone.id} value={zone.id}>
-                        {zone.name} ({zone.code}){zone.isSponsored ? ' - Sponsorisée' : ''}
-                      </option>
-                    ))}
-                  </select>
-                  {storeId && zones && zones.length === 0 && (
-                    <p className="text-sm text-slate-500 mt-1">
-                      Aucune zone créée pour ce magasin. <Link href={`/stores/${storeId}/zones`} className="text-green-600 hover:underline">Créer une zone</Link>
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="name" className="text-slate-700">Nom du planogramme *</Label>
+                  <Label htmlFor="name" className="text-slate-700">Nom du Planogramme *</Label>
                   <Input
                     id="name"
                     value={name}
