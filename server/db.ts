@@ -17,6 +17,10 @@ import {
   salesForecasts,
   anomalies,
   recommendations,
+  storeZones,
+  InsertStoreZone,
+  zoneSponsors,
+  InsertZoneSponsor,
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -605,4 +609,166 @@ export async function getPlanogramsByStore(storeId: number) {
     .orderBy(desc(planograms.createdAt));
   
   return result;
+}
+
+
+// ============ ZONES ET SPONSORING ============
+
+export async function createStoreZone(data: InsertStoreZone) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(storeZones).values(data);
+  return result[0]?.insertId;
+}
+
+export async function getZonesByStore(storeId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db
+    .select()
+    .from(storeZones)
+    .where(eq(storeZones.storeId, storeId))
+    .orderBy(storeZones.code);
+}
+
+export async function getZoneById(zoneId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db
+    .select()
+    .from(storeZones)
+    .where(eq(storeZones.id, zoneId))
+    .limit(1);
+    
+  return result[0] || null;
+}
+
+export async function updateStoreZone(zoneId: number, data: Partial<InsertStoreZone>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db
+    .update(storeZones)
+    .set({ ...data, updatedAt: new Date() })
+    .where(eq(storeZones.id, zoneId));
+    
+  return { success: true };
+}
+
+export async function deleteStoreZone(zoneId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.delete(storeZones).where(eq(storeZones.id, zoneId));
+  return { success: true };
+}
+
+// Sponsoring
+export async function createZoneSponsor(data: InsertZoneSponsor) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Marquer la zone comme sponsorisée
+  await db
+    .update(storeZones)
+    .set({ isSponsored: true, updatedAt: new Date() })
+    .where(eq(storeZones.id, data.zoneId));
+  
+  const result = await db.insert(zoneSponsors).values(data);
+  return result[0]?.insertId;
+}
+
+export async function getSponsorsByZone(zoneId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db
+    .select()
+    .from(zoneSponsors)
+    .where(eq(zoneSponsors.zoneId, zoneId))
+    .orderBy(desc(zoneSponsors.startDate));
+}
+
+export async function getActiveSponsorByZone(zoneId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const now = new Date();
+  const result = await db
+    .select()
+    .from(zoneSponsors)
+    .where(
+      and(
+        eq(zoneSponsors.zoneId, zoneId),
+        eq(zoneSponsors.status, 'active'),
+        lte(zoneSponsors.startDate, now),
+        gte(zoneSponsors.endDate, now)
+      )
+    )
+    .limit(1);
+    
+  return result[0] || null;
+}
+
+export async function updateZoneSponsor(sponsorId: number, data: Partial<InsertZoneSponsor>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db
+    .update(zoneSponsors)
+    .set({ ...data, updatedAt: new Date() })
+    .where(eq(zoneSponsors.id, sponsorId));
+    
+  return { success: true };
+}
+
+export async function getExpiringSponsorships(daysBeforeExpiry: number = 30) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const futureDate = new Date();
+  futureDate.setDate(futureDate.getDate() + daysBeforeExpiry);
+  
+  return await db
+    .select({
+      sponsor: zoneSponsors,
+      zone: storeZones,
+      store: stores,
+    })
+    .from(zoneSponsors)
+    .innerJoin(storeZones, eq(zoneSponsors.zoneId, storeZones.id))
+    .innerJoin(stores, eq(storeZones.storeId, stores.id))
+    .where(
+      and(
+        eq(zoneSponsors.status, 'active'),
+        lte(zoneSponsors.endDate, futureDate),
+        gte(zoneSponsors.endDate, new Date())
+      )
+    )
+    .orderBy(zoneSponsors.endDate);
+}
+
+export async function getSponsorshipRevenue(storeId?: number, startDate?: Date, endDate?: Date) {
+  const db = await getDb();
+  if (!db) return { totalRevenue: 0, activeContracts: 0, expiredContracts: 0 };
+  
+  let query = db
+    .select({
+      totalRevenue: sql<number>`SUM(${zoneSponsors.contractAmount})`,
+      activeContracts: sql<number>`COUNT(CASE WHEN ${zoneSponsors.status} = 'active' THEN 1 END)`,
+      expiredContracts: sql<number>`COUNT(CASE WHEN ${zoneSponsors.status} = 'expired' THEN 1 END)`,
+    })
+    .from(zoneSponsors);
+  
+  if (storeId) {
+    query = query
+      .innerJoin(storeZones, eq(zoneSponsors.zoneId, storeZones.id))
+      .where(eq(storeZones.storeId, storeId)) as any;
+  }
+  
+  const result = await query;
+  return result[0] || { totalRevenue: 0, activeContracts: 0, expiredContracts: 0 };
 }

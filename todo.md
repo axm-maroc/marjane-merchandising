@@ -272,3 +272,52 @@
 - [x] Ajouter la procédure tRPC planograms.byStore
 - [x] Ajouter la fonction getPlanogramsByStore dans db.ts
 - [x] Tester le filtrage avec les trois filtres combinés
+
+
+## Nouvelles fonctionnalités - Développement avancé
+
+### 1. Système de gestion des zones magasin avec sponsoring fournisseurs
+- [x] Créer la table `storeZones` dans le schéma de base de données
+- [x] Créer la table `zoneSponsors` pour gérer les contrats de sponsoring
+- [x] Ajouter les fonctions CRUD pour les zones dans db.ts
+- [x] Créer les procédures tRPC pour la gestion des zones
+- [x] Développer l'interface de création/édition de zones (StoreZones.tsx)
+- [x] Implémenter la gestion des contrats de sponsoring (fournisseur, période, montant)
+- [x] Ajouter un bouton "Gérer les Zones" dans la page de détail du magasin
+- [x] Ajouter la possibilité d'affecter des planogrammes aux zones (via zoneId dans planogramLocations)
+- [x] Implémenter les procédures tRPC pour les contrats expirant (expiring)
+- [x] Créer la procédure tRPC pour le rapport financier (revenue)
+
+### 2. Amélioration du module Suivi des Stocks - Filtre Zone
+- [x] Ajouter le filtre "Zone" dans l'interface StockTracking
+- [x] Réorganiser les filtres : Magasin → Zone → Planogramme → Produit
+- [x] Utiliser la procédure tRPC zones.byStore (déjà créée en Phase 2)
+- [x] Utiliser la fonction getZonesByStore dans db.ts (déjà créée en Phase 2)
+- [x] Implémenter le filtrage en cascade (zone réinitialise le planogramme)
+- [x] Adapter la grille de filtres pour 4 colonnes (Magasin, Zone, Planogramme, Produit)
+
+### 3. Moteur de Recommandations IA - Phase 1 (Backend)
+- [ ] Créer les tables `recommendations` et `performanceScores`
+- [ ] Implémenter les fonctions d'accès aux données dans db.ts
+- [ ] Développer le moteur d'analyse des performances (performance-analyzer.ts)
+- [ ] Créer le générateur de recommandations (recommendation-engine.ts)
+- [ ] Implémenter 5 types de recommandations (reposition, facing, cross-merchandising, etc.)
+- [ ] Ajouter les procédures tRPC pour les recommandations
+- [ ] Créer le système de calcul de ROI et d'impact estimé
+
+### 4. Moteur de Recommandations IA - Phase 1 (Frontend)
+- [ ] Créer la page Recommendations.tsx avec liste et filtres
+- [ ] Développer le widget RecommendationsWidget.tsx
+- [ ] Implémenter l'interface de génération de recommandations
+- [ ] Ajouter les actions Accepter/Rejeter/Appliquer
+- [ ] Créer le tableau de bord des statistiques de recommandations
+- [ ] Intégrer le widget dans le Dashboard principal
+- [ ] Ajouter la route /recommendations dans App.tsx
+
+### 5. Tests et Documentation
+- [ ] Écrire les tests unitaires pour le moteur d'analyse
+- [ ] Écrire les tests unitaires pour le générateur de recommandations
+- [ ] Tester l'intégration complète du système de zones
+- [ ] Créer la documentation utilisateur pour les zones et le sponsoring
+- [ ] Créer le guide d'utilisation du moteur de recommandations
+- [ ] Valider les performances et optimiser si nécessaire

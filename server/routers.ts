@@ -357,6 +357,112 @@ export const appRouter = router({
         return await db.getUserPhotos(input.userId, input.limit);
       }),
   }),
+
+  // Zones magasin
+  zones: router({
+    byStore: publicProcedure
+      .input(z.object({ storeId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getZonesByStore(input.storeId);
+      }),
+    byId: publicProcedure
+      .input(z.object({ zoneId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getZoneById(input.zoneId);
+      }),
+    create: publicProcedure
+      .input(z.object({
+        storeId: z.number(),
+        name: z.string(),
+        code: z.string(),
+        surface: z.number().optional(),
+        location: z.string().optional(),
+        status: z.enum(['active', 'inactive', 'maintenance']).default('active'),
+      }))
+      .mutation(async ({ input }) => {
+        return await db.createStoreZone(input);
+      }),
+    update: publicProcedure
+      .input(z.object({
+        zoneId: z.number(),
+        name: z.string().optional(),
+        code: z.string().optional(),
+        surface: z.number().optional(),
+        location: z.string().optional(),
+        status: z.enum(['active', 'inactive', 'maintenance']).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { zoneId, ...data } = input;
+        return await db.updateStoreZone(zoneId, data);
+      }),
+    delete: publicProcedure
+      .input(z.object({ zoneId: z.number() }))
+      .mutation(async ({ input }) => {
+        return await db.deleteStoreZone(input.zoneId);
+      }),
+  }),
+
+  // Sponsoring
+  sponsors: router({
+    byZone: publicProcedure
+      .input(z.object({ zoneId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getSponsorsByZone(input.zoneId);
+      }),
+    active: publicProcedure
+      .input(z.object({ zoneId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getActiveSponsorByZone(input.zoneId);
+      }),
+    create: publicProcedure
+      .input(z.object({
+        zoneId: z.number(),
+        supplierName: z.string(),
+        supplierLogo: z.string().optional(),
+        contractAmount: z.number(),
+        startDate: z.date(),
+        endDate: z.date(),
+        contactName: z.string().optional(),
+        contactEmail: z.string().optional(),
+        contactPhone: z.string().optional(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return await db.createZoneSponsor(input);
+      }),
+    update: publicProcedure
+      .input(z.object({
+        sponsorId: z.number(),
+        supplierName: z.string().optional(),
+        supplierLogo: z.string().optional(),
+        contractAmount: z.number().optional(),
+        startDate: z.date().optional(),
+        endDate: z.date().optional(),
+        status: z.enum(['active', 'expired', 'cancelled']).optional(),
+        contactName: z.string().optional(),
+        contactEmail: z.string().optional(),
+        contactPhone: z.string().optional(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { sponsorId, ...data } = input;
+        return await db.updateZoneSponsor(sponsorId, data);
+      }),
+    expiring: publicProcedure
+      .input(z.object({ daysBeforeExpiry: z.number().default(30) }))
+      .query(async ({ input }) => {
+        return await db.getExpiringSponsorships(input.daysBeforeExpiry);
+      }),
+    revenue: publicProcedure
+      .input(z.object({
+        storeId: z.number().optional(),
+        startDate: z.date().optional(),
+        endDate: z.date().optional(),
+      }))
+      .query(async ({ input }) => {
+        return await db.getSponsorshipRevenue(input.storeId, input.startDate, input.endDate);
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

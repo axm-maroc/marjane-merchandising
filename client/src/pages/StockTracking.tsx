@@ -38,8 +38,15 @@ export default function StockTracking() {
   const { data: products } = trpc.products.list.useQuery();
   
   const [selectedStoreId, setSelectedStoreId] = useState<number | null>(null);
+  const [selectedZoneId, setSelectedZoneId] = useState<number | null>(null);
   const [selectedPlanogramId, setSelectedPlanogramId] = useState<number | null>(null);
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
+  
+  // Charger les zones du magasin sélectionné
+  const { data: zones } = trpc.zones.byStore.useQuery(
+    { storeId: selectedStoreId || 0 },
+    { enabled: !!selectedStoreId }
+  );
   
   // Charger les planogrammes du magasin sélectionné
   const { data: planograms } = trpc.planograms.byStore.useQuery(
@@ -47,10 +54,13 @@ export default function StockTracking() {
     { enabled: !!selectedStoreId }
   );
 
-  // Auto-select first store, planogram and product
+  // Auto-select first store, zone, planogram and product
   useMemo(() => {
     if (!selectedStoreId && stores && stores.length > 0) {
       setSelectedStoreId(stores[0].id);
+    }
+    if (!selectedZoneId && zones && zones.length > 0) {
+      setSelectedZoneId(zones[0].id);
     }
     if (!selectedPlanogramId && planograms && planograms.length > 0) {
       setSelectedPlanogramId(planograms[0].id);
@@ -58,7 +68,7 @@ export default function StockTracking() {
     if (!selectedProductId && products && products.length > 0) {
       setSelectedProductId(products[0].id);
     }
-  }, [stores, planograms, products, selectedStoreId, selectedPlanogramId, selectedProductId]);
+  }, [stores, zones, planograms, products, selectedStoreId, selectedZoneId, selectedPlanogramId, selectedProductId]);
 
   const { data: stockHistory } = trpc.stock.history.useQuery(
     {
@@ -222,16 +232,17 @@ export default function StockTracking() {
         <Card className="border-slate-200 mb-6">
           <CardHeader>
             <CardTitle className="text-slate-900">Sélection</CardTitle>
-            <CardDescription className="text-slate-600">Choisissez un magasin et un produit</CardDescription>
+            <CardDescription className="text-slate-600">Choisissez un magasin, une zone et un produit</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
                 <label className="text-sm font-medium text-slate-700 mb-2 block">Magasin</label>
                 <Select
                   value={selectedStoreId?.toString() || ""}
                   onValueChange={(value) => {
                     setSelectedStoreId(parseInt(value));
+                    setSelectedZoneId(null); // Reset zone when store changes
                     setSelectedPlanogramId(null); // Reset planogram when store changes
                   }}
                 >
@@ -242,6 +253,29 @@ export default function StockTracking() {
                     {stores?.map((store) => (
                       <SelectItem key={store.id} value={store.id.toString()}>
                         {store.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-700 mb-2 block">Zone</label>
+                <Select
+                  value={selectedZoneId?.toString() || ""}
+                  onValueChange={(value) => {
+                    setSelectedZoneId(parseInt(value));
+                    setSelectedPlanogramId(null); // Reset planogram when zone changes
+                  }}
+                  disabled={!selectedStoreId}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Toutes les zones" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="0">Toutes les zones</SelectItem>
+                    {zones?.map((zone: any) => (
+                      <SelectItem key={zone.id} value={zone.id.toString()}>
+                        {zone.name} ({zone.code})
                       </SelectItem>
                     ))}
                   </SelectContent>

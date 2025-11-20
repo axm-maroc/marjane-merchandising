@@ -59,6 +59,12 @@ export default function StoreDetail() {
                 {store.address}, {store.city}
               </p>
             </div>
+            <Link href={`/stores/${storeId}/zones`}>
+              <Button variant="outline">
+                <LayoutGrid className="w-4 h-4 mr-2" />
+                Gérer les Zones
+              </Button>
+            </Link>
           </div>
         </div>
       </header>

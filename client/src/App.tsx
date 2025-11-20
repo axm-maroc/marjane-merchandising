@@ -16,6 +16,7 @@ import Recommendations from "./pages/Recommendations";
 import CreatePlanogram from "./pages/CreatePlanogram";
 import PlanogramHistory from "./pages/PlanogramHistory";
 import Dashboard from "./pages/Dashboard";
+import StoreZones from "./pages/StoreZones";
 import MobileLayout from "./pages/mobile/MobileLayout";
 import MobileHome from "./pages/mobile/Home";
 import MobileTasks from "./pages/mobile/Tasks";
@@ -30,6 +31,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/stores" component={Stores} />
+      <Route path="/stores/:id/zones" component={StoreZones} />
       <Route path="/stores/:id" component={StoreDetail} />
       <Route path={"/planograms"} component={Planograms} />
       <Route path={"/planograms/location/:id"} component={PlanogramView} />

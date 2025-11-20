@@ -99,8 +99,9 @@ export type InsertProduct = typeof products.$inferInsert;
 export const planogramLocations = mysqlTable("planogramLocations", {
   id: int("id").autoincrement().primaryKey(),
   storeId: int("storeId").notNull(),
+  zoneId: int("zoneId"), // Référence à la zone du magasin (optionnel)
   name: varchar("name", { length: 255 }).notNull(),
-  zone: varchar("zone", { length: 100 }), // Zone du magasin (entrée, allée 1, etc.)
+  zone: varchar("zone", { length: 100 }), // Zone du magasin (entrée, allée 1, etc.) - legacy field
   shelfCount: int("shelfCount").default(4).notNull(), // Nombre d'étagères
   shelfWidth: int("shelfWidth").default(2000).notNull(), // Largeur en mm
   shelfHeight: int("shelfHeight").default(300).notNull(), // Hauteur par étagère en mm
@@ -261,3 +262,44 @@ export const recommendations = mysqlTable("recommendations", {
 export type Recommendation = typeof recommendations.$inferSelect;
 export type InsertRecommendation = typeof recommendations.$inferInsert;
 
+/**
+ * Zones dans les magasins
+ */
+export const storeZones = mysqlTable("storeZones", {
+  id: int("id").autoincrement().primaryKey(),
+  storeId: int("storeId").notNull(),
+  name: varchar("name", { length: 255 }).notNull(), // Ex: "Zone Entrée", "Rayon Central", "Zone Promotions"
+  code: varchar("code", { length: 50 }).notNull(), // Ex: "Z01", "Z02"
+  surface: int("surface"), // Surface en m²
+  location: text("location"), // Description de l'emplacement
+  isSponsored: boolean("isSponsored").default(false).notNull(),
+  status: mysqlEnum("status", ["active", "inactive", "maintenance"]).default("active").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type StoreZone = typeof storeZones.$inferSelect;
+export type InsertStoreZone = typeof storeZones.$inferInsert;
+
+/**
+ * Contrats de sponsoring des zones par les fournisseurs
+ */
+export const zoneSponsors = mysqlTable("zoneSponsors", {
+  id: int("id").autoincrement().primaryKey(),
+  zoneId: int("zoneId").notNull(),
+  supplierName: varchar("supplierName", { length: 255 }).notNull(), // Ex: "Procter & Gamble", "Unilever"
+  supplierLogo: text("supplierLogo"), // URL du logo du fournisseur
+  contractAmount: int("contractAmount").notNull(), // Montant en centimes (DH)
+  startDate: timestamp("startDate").notNull(),
+  endDate: timestamp("endDate").notNull(),
+  status: mysqlEnum("status", ["active", "expired", "cancelled"]).default("active").notNull(),
+  contactName: varchar("contactName", { length: 255 }),
+  contactEmail: varchar("contactEmail", { length: 320 }),
+  contactPhone: varchar("contactPhone", { length: 20 }),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ZoneSponsor = typeof zoneSponsors.$inferSelect;
+export type InsertZoneSponsor = typeof zoneSponsors.$inferInsert;
