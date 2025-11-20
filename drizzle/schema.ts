@@ -303,3 +303,66 @@ export const zoneSponsors = mysqlTable("zoneSponsors", {
 
 export type ZoneSponsor = typeof zoneSponsors.$inferSelect;
 export type InsertZoneSponsor = typeof zoneSponsors.$inferInsert;
+
+
+/**
+ * Recommandations IA pour l'optimisation merchandising
+ */
+export const aiRecommendations = mysqlTable("aiRecommendations", {
+  id: int("id").autoincrement().primaryKey(),
+  storeId: int("storeId").notNull(),
+  zoneId: int("zoneId"),
+  planogramId: int("planogramId"),
+  productId: int("productId"),
+  type: mysqlEnum("type", [
+    "reposition", // Repositionner un produit
+    "facing", // Ajuster le nombre de facings
+    "cross_merchandising", // Suggestion de cross-merchandising
+    "dereference", // Déréférencer un produit
+    "new_product", // Ajouter un nouveau produit
+  ]).notNull(),
+  priority: mysqlEnum("priority", ["low", "medium", "high", "critical"]).default("medium").notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  currentValue: text("currentValue"), // Valeur actuelle (JSON)
+  suggestedValue: text("suggestedValue"), // Valeur suggérée (JSON)
+  estimatedImpact: int("estimatedImpact"), // Impact estimé en centimes (DH)
+  estimatedImpactPercent: int("estimatedImpactPercent"), // Impact estimé en pourcentage
+  confidence: int("confidence").notNull(), // Score de confiance 0-100
+  status: mysqlEnum("status", ["pending", "applied", "dismissed", "expired"]).default("pending").notNull(),
+  appliedAt: timestamp("appliedAt"),
+  appliedBy: int("appliedBy"), // User ID
+  dismissedAt: timestamp("dismissedAt"),
+  dismissedBy: int("dismissedBy"), // User ID
+  expiresAt: timestamp("expiresAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type AIRecommendation = typeof aiRecommendations.$inferSelect;
+export type InsertAIRecommendation = typeof aiRecommendations.$inferInsert;
+
+/**
+ * Scores de performance des produits/planogrammes
+ */
+export const performanceScores = mysqlTable("performanceScores", {
+  id: int("id").autoincrement().primaryKey(),
+  storeId: int("storeId").notNull(),
+  planogramId: int("planogramId"),
+  productId: int("productId"),
+  period: varchar("period", { length: 20 }).notNull(), // Ex: "2024-W12", "2024-03"
+  salesScore: int("salesScore").notNull(), // Score de ventes 0-100
+  rotationScore: int("rotationScore").notNull(), // Score de rotation 0-100
+  marginScore: int("marginScore").notNull(), // Score de marge 0-100
+  complianceScore: int("complianceScore").notNull(), // Score de conformité 0-100
+  overallScore: int("overallScore").notNull(), // Score global 0-100
+  salesAmount: int("salesAmount"), // CA en centimes
+  stockLevel: int("stockLevel"), // Niveau de stock
+  rotationDays: int("rotationDays"), // Jours de rotation
+  marginPercent: int("marginPercent"), // Marge en pourcentage * 100
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type PerformanceScore = typeof performanceScores.$inferSelect;
+export type InsertPerformanceScore = typeof performanceScores.$inferInsert;

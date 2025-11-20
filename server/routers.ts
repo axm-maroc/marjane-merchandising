@@ -463,6 +463,43 @@ export const appRouter = router({
         return await db.getSponsorshipRevenue(input.storeId, input.startDate, input.endDate);
       }),
   }),
+
+  // Recommandations IA
+  aiRecommendations: router({
+    generate: publicProcedure
+      .input(z.object({ storeId: z.number() }))
+      .mutation(async ({ input }) => {
+        const { generateRecommendations, saveRecommendations } = await import('./recommendation-engine');
+        const recommendations = await generateRecommendations(input.storeId);
+        await saveRecommendations(recommendations);
+        return { count: recommendations.length, recommendations };
+      }),
+    byStore: publicProcedure
+      .input(z.object({
+        storeId: z.number(),
+        status: z.enum(['pending', 'applied', 'dismissed', 'expired']).optional(),
+      }))
+      .query(async ({ input }) => {
+        const { getRecommendationsByStore } = await import('./recommendation-engine');
+        return await getRecommendationsByStore(input.storeId, input.status);
+      }),
+    markAsApplied: publicProcedure
+      .input(z.object({ recommendationId: z.number() }))
+      .mutation(async ({ input }) => {
+        const { markRecommendationAsApplied } = await import('./recommendation-engine');
+        // Utiliser un userId par défaut pour le moment
+        await markRecommendationAsApplied(input.recommendationId, 1);
+        return { success: true };
+      }),
+    dismiss: publicProcedure
+      .input(z.object({ recommendationId: z.number() }))
+      .mutation(async ({ input }) => {
+        const { dismissRecommendation } = await import('./recommendation-engine');
+        // Utiliser un userId par défaut pour le moment
+        await dismissRecommendation(input.recommendationId, 1);
+        return { success: true };
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

@@ -321,3 +321,43 @@
 - [ ] Créer la documentation utilisateur pour les zones et le sponsoring
 - [ ] Créer le guide d'utilisation du moteur de recommandations
 - [ ] Valider les performances et optimiser si nécessaire
+
+
+## Développement avancé - Phase 2
+
+### 1. Moteur de Recommandations IA
+- [x] Créer les tables `aiRecommendations` et `performanceScores` dans le schéma
+- [x] Implémenter le moteur d'analyse des performances (calcul de scores)
+- [x] Créer le générateur de recommandations (5 types : reposition, facing, cross-merchandising, déréférencement, nouveaux produits)
+- [x] Ajouter les procédures tRPC pour les recommandations (generate, byStore, markAsApplied, dismiss)
+- [x] Créer le fichier recommendation-engine.ts avec toute la logique
+- [x] Développer la page AIRecommendations.tsx avec liste filtrée
+- [x] Ajouter les statistiques (en attente, appliquées, impact potentiel)
+- [x] Implémenter les actions (marquer comme appliquée, rejeter)
+- [x] Ajouter les filtres par statut et magasin
+- [ ] Créer le widget de recommandations pour le dashboard
+- [x] Implémenter le système de scoring et priorisation (salesScore, rotationScore, marginScore, complianceScore)
+- [x] Ajouter la simulation d'impact avant mise en œuvre (estimatedImpact, estimatedImpactPercent, confidence)
+- [ ] Créer les tests unitaires pour le moteur de recommandations
+
+### 2. Visualisation 3D du plan magasin
+- [ ] Créer la page StoreMap.tsx pour la visualisation du plan
+- [ ] Implémenter le rendu 2D/3D des zones avec Three.js ou Canvas
+- [ ] Ajouter le code couleur pour les zones (sponsorisées vs libres)
+- [ ] Rendre les zones cliquables pour afficher les détails
+- [ ] Afficher les planogrammes associés à chaque zone
+- [ ] Ajouter une légende interactive
+- [ ] Implémenter le zoom et la navigation dans le plan
+- [ ] Ajouter un mode édition pour repositionner les zones visuellement
+- [ ] Créer un export PDF/PNG du plan magasin
+
+### 3. Tableau de bord des contrats de sponsoring
+- [ ] Créer la page SponsorDashboard.tsx
+- [ ] Afficher la liste complète des contrats actifs avec filtres
+- [ ] Calculer et afficher les revenus totaux par fournisseur
+- [ ] Implémenter le système d'alertes pour contrats expirant (< 30 jours)
+- [ ] Créer des graphiques d'évolution des revenus de sponsoring (Chart.js)
+- [ ] Ajouter un tableau de comparaison des fournisseurs (CA, nombre de zones, durée moyenne)
+- [ ] Implémenter l'export Excel/PDF des rapports financiers
+- [ ] Ajouter des KPIs : taux d'occupation des zones, revenu moyen par m², taux de renouvellement
+- [ ] Créer une timeline visuelle des contrats (Gantt chart)
