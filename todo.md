@@ -801,3 +801,11 @@
 - [x] Tester la fonctionnalité avec une photo d'exemple (test API réussi)
 - [x] Vérifier que l'analyse IA fonctionne correctement (4 anomalies détectées, score 75/100)
 - [x] Créer un test unitaire pour la détection d'anomalies (test passé avec succès)
+
+
+### Nettoyage de la base de données
+- [x] Identifier les magasins de test (12 magasins "Test Store Filters")
+- [x] Créer un script de nettoyage (scripts/clean-test-stores.mjs)
+- [x] Exécuter le nettoyage avec succès
+- [x] Vérifier que seuls les 12 magasins Marjane authentiques restent
+- [x] Confirmer la suppression de toutes les données associées (zones, emplacements, planogrammes, etc.)
