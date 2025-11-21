@@ -24,7 +24,7 @@ import MobileTasks from "./pages/mobile/Tasks";
 import MobileCamera from "./pages/mobile/Camera";
 import MobileAnomalies from "./pages/mobile/Anomalies";
 import MobileProfile from "./pages/mobile/Profile";
-import ImpactSimulator from "./pages/ImpactSimulator";
+import StrategicKPIs from "./pages/StrategicKPIs";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -45,7 +45,7 @@ function Router() {
       <Route path="/forecasts" component={AIRecommendations} />
       <Route path="/anomalies" component={AnomalyDetection} />
       <Route path="/recommendations" component={Recommendations} />
-      <Route path="/impact-simulator" component={ImpactSimulator} />
+      <Route path="/kpis" component={StrategicKPIs} />
       
       {/* Routes mobiles */}
       <Route path="/mobile">

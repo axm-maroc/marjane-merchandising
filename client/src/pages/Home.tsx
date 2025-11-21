@@ -1,7 +1,7 @@
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Store, Package, LayoutGrid, TrendingUp, AlertTriangle, Share2, BarChart3, Smartphone, Zap } from "lucide-react";
+import { Store, Package, LayoutGrid, TrendingUp, AlertTriangle, Share2, BarChart3, Smartphone, Target } from "lucide-react";
 import { Link } from "wouter";
 import { APP_TITLE } from "@/const";
 
@@ -17,6 +17,14 @@ export default function Home() {
       href: "/dashboard",
       color: "text-purple-600",
       bgColor: "bg-purple-50",
+    },
+    {
+      icon: Target,
+      title: "KPIs Stratégiques",
+      description: "Indicateurs clés : CA/m², rotation, rupture, NPS, temps d'actualisation",
+      href: "/kpis",
+      color: "text-indigo-600",
+      bgColor: "bg-indigo-50",
     },
     {
       icon: Store,
@@ -73,14 +81,6 @@ export default function Home() {
       href: "/mobile",
       color: "text-emerald-600",
       bgColor: "bg-emerald-50",
-    },
-    {
-      icon: Zap,
-      title: "Simulateur d'Impact",
-      description: "Visualisez l'impact des changements de planogrammes sur les KPIs",
-      href: "/impact-simulator",
-      color: "text-yellow-600",
-      bgColor: "bg-yellow-50",
     },
   ];
 

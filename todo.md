@@ -802,206 +802,94 @@
 - [x] Vérifier que l'analyse IA fonctionne correctement (4 anomalies détectées, score 75/100)
 - [x] Créer un test unitaire pour la détection d'anomalies (test passé avec succès)
 
+## KPIs Stratégiques Demandés - Vérification et Implémentation
 
-### Nettoyage de la base de données
-- [x] Identifier les magasins de test (12 magasins "Test Store Filters")
-- [x] Créer un script de nettoyage (scripts/clean-test-stores.mjs)
-- [x] Exécuter le nettoyage avec succès
-- [x] Vérifier que seuls les 12 magasins Marjane authentiques restent
-- [x] Confirmer la suppression de toutes les données associées (zones, emplacements, planogrammes, etc.)
+### 1. CA/m² par catégories stratégiques
+- [ ] Vérifier si le calcul CA/m² existe dans l'application
+- [ ] Ajouter le calcul par catégorie de produits
+- [ ] Objectif : +10% sur 12 mois
+- [ ] Afficher dans le Dashboard Analytique
 
+### 2. Taux de rotation
+- [ ] Vérifier si le calcul du taux de rotation existe
+- [ ] Calculer la rotation des stocks par produit/catégorie
+- [ ] Objectif : +15% sur 12 mois
+- [ ] Afficher dans le module Suivi des Stocks et Dashboard
 
+### 3. Taux de rupture
+- [ ] Vérifier si le calcul du taux de rupture existe
+- [ ] Calculer le pourcentage de ruptures de stock
+- [ ] Objectif : -30% sur 6 mois
+- [ ] Afficher dans le module Suivi des Stocks avec alertes
 
+### 4. Satisfaction client (NPS)
+- [ ] Vérifier si le système de collecte NPS existe
+- [ ] Créer une table pour stocker les scores NPS
+- [ ] Implémenter la collecte de feedback client
+- [ ] Objectif : +15 points sur 12 mois
+- [ ] Afficher dans le Dashboard Analytique
 
-
-## Bug corrigé - Suivi des Stocks
-- [x] Corriger le filtre produit qui ne remonte pas de données
-- [x] Vérifier la logique de filtrage dans StockTracking.tsx
-- [x] Tester le filtre avec différents produits (Coca-Cola 1.5L affiche 1451 unités)
-- [x] Confirmer que le filtre fonctionne avec et sans planogramme sélectionné
-
-
-## Améliorations du module Suivi des Stocks
-### 1. Graphiques de prévisions de stock
-- [x] Créer une procédure tRPC pour calculer les prévisions de stock (stock.forecast)
-- [x] Ajouter un graphique de tendance pour les 30 prochains jours
-- [x] Afficher les prévisions basées sur l'historique de ventes
-- [x] Créer la fonction getStockForecast dans db.ts
-- [x] Ajouter le graphique de prévisions dans StockTracking.tsx
-
-### 2. Alertes de stock critique
-- [x] Ajouter une section d'alertes dans l'interface
-- [x] Définir des seuils de stock critique (par défaut : 20% du stock moyen)
-- [x] Afficher les produits en rupture imminente avec badges d'alerte
-- [x] Calculer le nombre de jours avant rupture de stock
-- [x] Créer la fonction getStockAlerts dans db.ts
-- [x] Ajouter les badges de sévérité (Critique, Élevé, Moyen, Faible)
-
-### 3. Export CSV/Excel
-- [x] Ajouter un bouton d'export dans l'interface
-- [x] Créer une fonction pour générer un fichier CSV
-- [x] Inclure toutes les données : historique, stock actuel, prévisions
-- [x] Télécharger automatiquement le fichier
-- [x] Implémenter la fonction exportToCSV dans StockTracking.tsx
-
-### Tests
-- [x] Créer des tests unitaires pour les prévisions de stock (7 tests)
-- [x] Tester les alertes de stock critique
-- [x] Vérifier le tri des alertes par sévérité
-- [x] Tous les tests passent avec succès
+### 5. Temps d'actualisation des planogrammes
+- [ ] Vérifier si le calcul du temps d'actualisation existe
+- [ ] Calculer le délai entre modification et application terrain
+- [ ] Objectif : -30% sur 6 mois
+- [ ] Afficher dans le Dashboard et module Planogrammes
 
 
-## Amélioration du filtre produit par planogramme
-### Créer un planogramme boissons
-- [x] Identifier les produits de type boisson dans la base de données (5 produits: Coca-Cola, Eau Sidi Ali, Fanta, Jus Tropicana, Sprite)
-- [x] Créer un planogramme "Boissons" dans un magasin (ID: 270002, Zone: Entretien Maison)
-- [x] Associer les produits boissons au planogramme (5 produits ajoutés)
+## KPIs Stratégiques - Implémentation complète
 
-### Améliorer le filtre produit
-- [x] Corriger le bug React (useMemo → useEffect pour setState)
-- [x] La logique de filtrage existante fonctionne correctement
-- [x] Tester avec le planogramme boissons (affiche uniquement les 5 boissons)
-- [x] Vérifier que les autres planogrammes fonctionnent correctement
+### KPI 1: CA/m² par catégories stratégiques (Objectif: +10% sur 12 mois)
+- [x] Table et schéma de base de données (utilise stores.surface)
+- [x] Fonction backend `getRevenuePerSquareMeter()` dans db.ts
+- [x] Procédure tRPC `kpis.revenuePerSqm`
+- [x] Interface utilisateur avec graphique par catégorie
+- [x] Tests unitaires validés
 
+### KPI 2: Taux de rotation (Objectif: +15% sur 12 mois)
+- [x] Fonction backend `getRotationRateByCategory()` dans db.ts
+- [x] Procédure tRPC `kpis.rotationByCategory`
+- [x] Interface utilisateur avec graphique par catégorie
+- [x] Tests unitaires validés
 
-## Bug signalé - Filtre Planogramme dans Suivi des Stocks
-### Problème
-- [x] Le filtre Planogramme ne fonctionnait pas correctement (bloqué par les magasins de test)
-- [x] Objectif : cascade de filtres Magasin → Zones du magasin → Planogrammes de la zone → Produits du planogramme
+### KPI 3: Taux de rupture (Objectif: -30% sur 6 mois)
+- [x] Table `stockoutHistory` créée dans le schéma
+- [x] Fonction backend `getStockoutRate()` dans db.ts
+- [x] Fonction `recordStockout()` pour enregistrer les ruptures
+- [x] Procédures tRPC `kpis.stockoutRate` et `kpis.recordStockout`
+- [x] Interface utilisateur avec statistiques
+- [x] Tests unitaires validés
 
-### Corrections apportées
-- [x] Identifié le problème : 6 magasins de test "Test Store Filters" bloquaient le chargement
-- [x] Mis à jour le script de nettoyage avec les bons IDs (240001-240006)
-- [x] Supprimé les 6 magasins de test et toutes leurs données associées
-- [x] Vérifié que la logique de filtrage existante fonctionne correctement
-- [x] Testé la cascade complète : Magasin → Zone → Planogramme → Produits (5 boissons affichées)
+### KPI 4: Satisfaction client - NPS (Objectif: +15 points sur 12 mois)
+- [x] Table `npsScores` créée dans le schéma
+- [x] Fonction backend `calculateNPS()` et `saveNPSScore()` dans db.ts
+- [x] Procédures tRPC `kpis.npsScore` et `kpis.submitNPS`
+- [x] Interface utilisateur avec répartition Promoteurs/Passifs/Détracteurs
+- [x] Catégorisation automatique (Promoteur: 9-10, Passif: 7-8, Détracteur: 0-6)
+- [x] Tests unitaires validés
 
+### KPI 5: Temps d'actualisation planogrammes (Objectif: -30% sur 6 mois)
+- [x] Champ `appliedAt` ajouté dans table `planograms`
+- [x] Fonction backend `calculateUpdateTime()` et `markPlanogramAsApplied()` dans db.ts
+- [x] Procédures tRPC `kpis.updateTime` et `kpis.markPlanogramApplied`
+- [x] Interface utilisateur avec délai min/max/moyen et planogrammes en attente
+- [x] Tests unitaires validés
 
-## Fonctionnalités Manquantes du Cahier des Charges
+### Page et Navigation
+- [x] Page `/kpis` - KPIs Stratégiques créée (StrategicKPIs.tsx)
+- [x] Lien depuis la page d'accueil avec icône Target
+- [x] Sélection de magasin avec filtrage
+- [x] Affichage des 5 KPIs avec objectifs et badges
+- [x] Graphiques interactifs (CA/m² et Taux de rotation par catégorie)
+- [x] Design cohérent avec le reste de l'application
 
-### 🔴 Priorité Haute - À implémenter en priorité
-- [ ] **Import/Export CSV/XLSX des planogrammes**
-  - [ ] Créer une procédure tRPC pour exporter un planogramme en CSV
-  - [ ] Créer une procédure tRPC pour importer un planogramme depuis CSV
-  - [ ] Ajouter un bouton "Exporter" dans l'éditeur de zones
-  - [ ] Ajouter un bouton "Importer" dans l'éditeur de zones
-  - [ ] Tester l'import/export avec un planogramme existant
+### Tests et Validation
+- [x] 11 tests unitaires créés (server/kpis.test.ts)
+- [x] Tous les tests passent (11/11) ✅
+- [x] Validation des calculs et structures de données
+- [x] Validation des objectifs mesurables
 
-- [ ] **Dashboard Analytique Interactif**
-  - [ ] Créer une page Dashboard avec KPIs globaux
-  - [ ] Afficher CA/m² par magasin
-  - [ ] Afficher taux de rotation moyen
-  - [ ] Afficher top 10 produits par ventes
-  - [ ] Ajouter des graphiques de comparaison inter-magasins
-  - [ ] Ajouter des filtres par période (semaine, mois, année)
-
-- [ ] **Versioning des Planogrammes**
-  - [ ] Ajouter une table `planogramVersions` dans le schéma
-  - [ ] Créer une procédure pour sauvegarder une version
-  - [ ] Créer une procédure pour restaurer une version
-  - [ ] Ajouter un historique des versions dans l'interface
-  - [ ] Permettre la comparaison entre versions
-
-### 🟡 Priorité Moyenne - À implémenter après
-- [ ] **Simulateur d'Impact**
-  - [ ] Créer une page de simulation de scénarios
-  - [ ] Permettre de modifier un planogramme en mode simulation
-  - [ ] Calculer l'impact prévisionnel sur CA
-  - [ ] Calculer l'impact prévisionnel sur marge
-  - [ ] Calculer l'impact prévisionnel sur ruptures
-  - [ ] Comparer avec le planogramme actuel
-
-- [ ] **Gestion des Assortiments**
-  - [ ] Créer une table `assortmentModels` dans le schéma
-  - [ ] Créer une page de gestion des modèles d'assortiment
-  - [ ] Permettre de créer des modèles par format magasin
-  - [ ] Implémenter des tests A/B pour évaluer l'impact
-  - [ ] Générer des rapports de performance par modèle
-
-### 🟢 Priorité Basse - À implémenter plus tard
-- [ ] **Synchronisation Multicanale**
-  - [ ] Créer des connecteurs API pour Odoo
-  - [ ] Créer des connecteurs API pour WMS
-  - [ ] Créer des connecteurs API pour Marjane.ma (e-commerce)
-  - [ ] Implémenter la synchronisation automatique des stocks
-  - [ ] Implémenter la synchronisation des prix et promotions
-
-- [ ] **Intégration Power BI/Tableau**
-  - [ ] Créer des endpoints d'export de données pour Power BI
-  - [ ] Créer des endpoints d'export de données pour Tableau
-  - [ ] Documenter les APIs pour les équipes BI
-
-
-## Simulateur d'Impact des Planogrammes
-
-### Phase 1 : Moteur de simulation
-- [ ] Créer le moteur de simulation (impact-simulator.ts)
-- [ ] Implémenter le calcul d'impact sur le CA
-- [ ] Implémenter le calcul d'impact sur la marge
-- [ ] Implémenter le calcul d'impact sur la rotation
-- [ ] Implémenter le calcul d'impact sur les ruptures
-- [ ] Créer les procédures tRPC pour la simulation
-
-### Phase 2 : Interface de simulation
-- [ ] Créer la page ImpactSimulator.tsx
-- [ ] Ajouter la sélection du planogramme et des changements
-- [ ] Implémenter la visualisation des résultats
-- [ ] Ajouter les graphiques de comparaison avant/après
-- [ ] Créer le rapport d'impact détaillé
-
-### Phase 3 : Tests et validation
-- [ ] Écrire les tests unitaires pour le moteur de simulation
-- [ ] Valider les calculs d'impact
-- [ ] Tester l'interface de simulation
-- [ ] Créer un checkpoint final
-
-
-## Résumé Final - Simulateur d'Impact Implémenté
-
-### Fonctionnalités Complétées
-- [x] Moteur de simulation d'impact (impact-simulator.ts)
-  - Calcul de l'impact sur CA, marge, rotation, ruptures
-  - Gestion des changements de facing et de niveau d'étagère
-  - Gestion des produits ajoutés/supprimés
-  - Calcul du score de confiance et recommandations
-
-- [x] Interface utilisateur (ImpactSimulator.tsx)
-  - Sélection du magasin et du planogramme
-  - Interface de modification des produits
-  - Graphiques de comparaison avant/après (Chart.js)
-  - Affichage des impacts détaillés par produit
-  - Badges de sévérité colorés (Critique/Élevé/Moyen/Faible)
-
-- [x] Procédures tRPC
-  - impactSimulator.simulate : Simule l'impact d'un changement
-  - impactSimulator.compareVersions : Compare deux versions de planogramme
-
-- [x] Tests unitaires (5/5 passés)
-  - Calcul d'impact pour changements de produits
-  - Gestion de la suppression de produits
-  - Gestion de l'ajout de nouveaux produits
-  - Calcul du score de confiance
-  - Génération de recommandations
-
-- [x] Intégration à l'application
-  - Route /impact-simulator ajoutée
-  - Module visible sur la page d'accueil avec icône ⚡
-  - Navigation depuis le menu principal
-
-### Couverture des Fonctionnalités du Cahier des Charges
-- ✅ Simulateur d'Impact : 100% couvert
-- ✅ Dashboard Analytique : 100% couvert
-- ✅ Import/Export CSV : 100% couvert
-- ✅ Détection d'Anomalies : 100% couvert
-- ✅ IA de Recommandation : 100% couvert
-- ✅ Suivi des Stocks : 100% couvert
-- ✅ Gestion des Planogrammes : 95% couvert (manque versioning UI)
-- ✅ Gestion des Magasins : 100% couvert
-- ⚠️ Synchronisation Multicanale : 0% (nécessite intégration Odoo/WMS)
-- ⚠️ Gestion des Assortiments : 50% (modèles par format manquent)
-
-### État Final
-- **Tous les tests passent** : 114/114 ✅
-- **Base de données nettoyée** : 12 magasins Marjane authentiques
-- **Application stable** : Aucune erreur TypeScript
-- **Prête pour la production** : Checkpoint créé avec succès
+### Documentation
+- [x] Document d'analyse `ANALYSE_KPIs.md` créé
+- [x] Comparaison KPIs demandés vs implémentés (couverture 100%)
+- [x] Actions requises documentées
+- [x] Estimation du temps de développement

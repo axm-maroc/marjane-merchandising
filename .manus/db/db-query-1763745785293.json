@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS npsScores (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  storeId INT NOT NULL,\n  score INT NOT NULL,\n  category ENUM('promoter', 'passive', 'detractor') NOT NULL,\n  comment TEXT,\n  customerEmail VARCHAR(320),\n  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2ysLRxkn5svVbvo.899a3d8366ac --database LebYPrKjTRfaTHWQfHeBAy --execute CREATE TABLE IF NOT EXISTS npsScores (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  storeId INT NOT NULL,\n  score INT NOT NULL,\n  category ENUM('promoter', 'passive', 'detractor') NOT NULL,\n  comment TEXT,\n  customerEmail VARCHAR(320),\n  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 210
+}

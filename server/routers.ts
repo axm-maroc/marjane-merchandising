@@ -283,23 +283,6 @@ export const appRouter = router({
       .query(async ({ input }) => {
         return await db.getStockSummary(input.storeId, input.productId);
       }),
-    forecast: publicProcedure
-      .input(z.object({
-        storeId: z.number(),
-        productId: z.number(),
-        days: z.number().default(30),
-      }))
-      .query(async ({ input }) => {
-        return await db.getStockForecast(input.storeId, input.productId, input.days);
-      }),
-    alerts: publicProcedure
-      .input(z.object({
-        storeId: z.number(),
-        threshold: z.number().default(0.2), // 20% du stock moyen
-      }))
-      .query(async ({ input }) => {
-        return await db.getStockAlerts(input.storeId, input.threshold);
-      }),
   }),
 
   // Sales Forecasts
@@ -561,84 +544,92 @@ export const appRouter = router({
       }),
   }),
 
-  // Analytics Dashboard
-  analytics: router({
-    globalKPIs: publicProcedure.query(async () => {
-      return await db.getGlobalKPIs();
-    }),
-    storePerformance: publicProcedure
-      .input(z.object({ 
-        period: z.enum(['week', 'month', 'year']).optional() 
-      }))
-      .query(async ({ input }) => {
-        return await db.getStorePerformance(input.period || 'month');
-      }),
-    topProducts: publicProcedure
-      .input(z.object({ 
-        limit: z.number().optional(),
-        storeId: z.number().optional()
-      }))
-      .query(async ({ input }) => {
-        return await db.getTopProducts(input.limit || 10, input.storeId);
-      }),
-    salesTrends: publicProcedure
-      .input(z.object({ 
-        period: z.enum(['week', 'month', 'year']).optional() 
-      }))
-      .query(async ({ input }) => {
-        return await db.getSalesTrends(input.period || 'month');
-      }),
-  }),
-
-  // Import/Export Planogrammes
-  planogramExport: router({
-    toCSV: publicProcedure
-      .input(z.object({ planogramId: z.number() }))
-      .query(async ({ input }) => {
-        return await db.exportPlanogramToCSV(input.planogramId);
-      }),
-    fromCSV: publicProcedure
+  // KPIs Stratégiques
+  kpis: router({
+    // CA/m² par catégorie
+    revenuePerSqm: publicProcedure
       .input(z.object({
         storeId: z.number(),
-        csvData: z.string(),
-        name: z.string(),
+        period: z.string().optional(),
+      }))
+      .query(async ({ input }) => {
+        return await db.getRevenuePerSquareMeter(input.storeId, input.period);
+      }),
+    
+    // Taux de rotation par catégorie
+    rotationByCategory: publicProcedure
+      .input(z.object({
+        storeId: z.number(),
+        period: z.string().optional(),
+      }))
+      .query(async ({ input }) => {
+        return await db.getRotationRateByCategory(input.storeId, input.period);
+      }),
+    
+    // Taux de rupture
+    stockoutRate: publicProcedure
+      .input(z.object({
+        storeId: z.number(),
+        startDate: z.date().optional(),
+        endDate: z.date().optional(),
+      }))
+      .query(async ({ input }) => {
+        return await db.getStockoutRate(input.storeId, input.startDate, input.endDate);
+      }),
+    
+    // Score NPS
+    npsScore: publicProcedure
+      .input(z.object({
+        storeId: z.number(),
+        startDate: z.date().optional(),
+        endDate: z.date().optional(),
+      }))
+      .query(async ({ input }) => {
+        return await db.calculateNPS(input.storeId, input.startDate, input.endDate);
+      }),
+    
+    // Soumettre un score NPS
+    submitNPS: publicProcedure
+      .input(z.object({
+        storeId: z.number(),
+        score: z.number().min(0).max(10),
+        comment: z.string().optional(),
+        customerEmail: z.string().email().optional(),
       }))
       .mutation(async ({ input }) => {
-        return await db.importPlanogramFromCSV(input.storeId, input.csvData, input.name);
+        return await db.saveNPSScore(input);
       }),
-  }),
-
-
-  // Simulateur d'Impact
-  impactSimulator: router({
-    simulate: publicProcedure
+    
+    // Temps d'actualisation des planogrammes
+    updateTime: publicProcedure
       .input(z.object({
-        planogramId: z.number(),
-        changes: z.array(z.object({
-          productId: z.number(),
-          currentFacings: z.number(),
-          newFacings: z.number(),
-          currentShelfLevel: z.number(),
-          newShelfLevel: z.number(),
-          isNewProduct: z.boolean().optional(),
-          isRemovedProduct: z.boolean().optional(),
-        })),
+        storeId: z.number(),
+        period: z.string().optional(),
       }))
       .query(async ({ input }) => {
-        const { simulateImpact } = await import('./impact-simulator');
-        const productMetrics = await db.getProductMetricsForSimulation(input.planogramId);
-        return simulateImpact(input.changes, productMetrics || []);
+        return await db.calculateUpdateTime(input.storeId, input.period);
       }),
-    compareVersions: publicProcedure
+    
+    // Marquer un planogramme comme appliqué
+    markPlanogramApplied: publicProcedure
+      .input(z.object({ planogramId: z.number() }))
+      .mutation(async ({ input }) => {
+        return await db.markPlanogramAsApplied(input.planogramId);
+      }),
+    
+    // Enregistrer une rupture de stock
+    recordStockout: publicProcedure
       .input(z.object({
-        currentPlanogramId: z.number(),
-        newPlanogramId: z.number(),
+        storeId: z.number(),
+        productId: z.number(),
+        planogramId: z.number().optional(),
+        stockoutDate: z.date(),
+        restoredDate: z.date().optional(),
+        durationHours: z.number().optional(),
+        lostSalesEstimate: z.number().optional(),
       }))
-      .query(async ({ input }) => {
-        const { simulateImpact } = await import('./impact-simulator');
-        const changes = await db.getPlanogramChanges(input.currentPlanogramId, input.newPlanogramId);
-        const productMetrics = await db.getProductMetricsForSimulation(input.currentPlanogramId);
-        return simulateImpact(changes, productMetrics || []);
+      .mutation(async ({ input }) => {
+        return await db.recordStockout(input);
       }),
   }),
 });

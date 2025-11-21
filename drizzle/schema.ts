@@ -127,6 +127,7 @@ export const planograms = mysqlTable("planograms", {
   salesTarget: int("salesTarget"), // Objectif de vente en centimes
   startDate: timestamp("startDate"),
   endDate: timestamp("endDate"),
+  appliedAt: timestamp("appliedAt"), // Date d'application terrain du planogramme
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -368,3 +369,38 @@ export const performanceScores = mysqlTable("performanceScores", {
 
 export type PerformanceScore = typeof performanceScores.$inferSelect;
 export type InsertPerformanceScore = typeof performanceScores.$inferInsert;
+
+
+/**
+ * Scores NPS (Net Promoter Score) - Satisfaction client
+ */
+export const npsScores = mysqlTable("npsScores", {
+  id: int("id").autoincrement().primaryKey(),
+  storeId: int("storeId").notNull(),
+  score: int("score").notNull(), // 0-10
+  category: mysqlEnum("category", ["promoter", "passive", "detractor"]).notNull(),
+  comment: text("comment"),
+  customerEmail: varchar("customerEmail", { length: 320 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type NPSScore = typeof npsScores.$inferSelect;
+export type InsertNPSScore = typeof npsScores.$inferInsert;
+
+/**
+ * Historique des ruptures de stock
+ */
+export const stockoutHistory = mysqlTable("stockoutHistory", {
+  id: int("id").autoincrement().primaryKey(),
+  storeId: int("storeId").notNull(),
+  productId: int("productId").notNull(),
+  planogramId: int("planogramId"),
+  stockoutDate: timestamp("stockoutDate").notNull(),
+  restoredDate: timestamp("restoredDate"),
+  durationHours: int("durationHours"), // Durée de la rupture en heures
+  lostSalesEstimate: int("lostSalesEstimate"), // Estimation des ventes perdues en centimes
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type StockoutHistory = typeof stockoutHistory.$inferSelect;
+export type InsertStockoutHistory = typeof stockoutHistory.$inferInsert;
