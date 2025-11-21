@@ -133,8 +133,8 @@ export default function AIRecommendations() {
       <header className="bg-white border-b border-slate-200 shadow-sm">
         <div className="container py-6">
           <div className="flex items-center gap-4">
-            <Link href="/">
-              <Button variant="ghost" size="icon">
+            <Link href="/dashboard">
+              <Button variant="ghost" size="icon" title="Retour au Dashboard">
                 <ArrowLeft className="w-5 h-5" />
               </Button>
             </Link>

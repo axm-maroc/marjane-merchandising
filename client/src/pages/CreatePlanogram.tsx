@@ -62,10 +62,12 @@ export default function CreatePlanogram() {
   const createMutation = trpc.planogramLocations.create.useMutation({
     onSuccess: (result: any) => {
       toast.success("Planogramme créé avec succès !");
-      setLocation(`/planogram/${result.locationId}`);
+      const planogramId = result.planogramId || result.id;
+      setLocation(`/planograms/${planogramId}`);
     },
     onError: (error: any) => {
       toast.error(`Erreur: ${error.message}`);
+      console.error("Erreur création planogramme:", error);
     },
   });
 

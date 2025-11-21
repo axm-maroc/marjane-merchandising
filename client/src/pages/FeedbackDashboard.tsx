@@ -1,4 +1,3 @@
-import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -10,11 +9,14 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
-import { AlertCircle, CheckCircle, Clock, Filter, MessageSquare } from "lucide-react";
+import { useAuth } from "@/_core/hooks/useAuth"; // Removed duplicate import
+import { AlertCircle, CheckCircle, Clock, Filter, MessageSquare, ArrowLeft } from "lucide-react";
+import { useLocation } from "wouter";
 import { useState } from "react";
 import { toast } from "sonner";
 
 export default function FeedbackDashboard() {
+  const [, navigate] = useLocation();
   const { isAuthenticated, loading: authLoading } = useAuth();
   const [selectedStore, setSelectedStore] = useState<number | undefined>();
   const [selectedStatus, setSelectedStatus] = useState<"pending" | "in_progress" | "resolved" | undefined>();
@@ -88,8 +90,15 @@ export default function FeedbackDashboard() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4">
-        {/* En-tête */}
+        {/* En-tête avec bouton retour */}
         <div className="mb-8">
+          <button
+            onClick={() => navigate("/kpis")}
+            className="flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-4"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Retour aux KPIs
+          </button>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Tableau de Bord des Feedbacks Négatifs</h1>
           <p className="text-gray-600">Gérez et suivez les feedbacks clients nécessitant une attention particulière</p>
         </div>

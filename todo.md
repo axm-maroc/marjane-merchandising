@@ -1211,3 +1211,24 @@
 - [x] Couverture 100% des fonctionnalités avancées IA demandées
 - [x] Validation des calculs d'impact (CA, marge, ruptures)
 - [x] Validation des prévisions de +10% CA
+
+
+## 🐛 Corrections d'Erreurs Utilisateur
+
+### Erreur 1 : Filtre magasin FeedbackDashboard
+- [ ] Corriger l'erreur "Une erreur inattendue s'est produite" dans le filtre magasin
+- [ ] Vérifier la procédure tRPC feedback.getNegative
+- [ ] Tester avec différents magasins
+
+### Erreur 2 : Navigation Arrière Manquante
+- [ ] Ajouter bouton retour dans FeedbackDashboard vers KPIs
+- [ ] Ajouter bouton retour dans StockTracking vers Dashboard
+- [ ] Ajouter bouton retour dans AIRecommendations vers Dashboard
+- [ ] Ajouter bouton retour dans Dashboard Analytique
+- [ ] Vérifier tous les retours arrière existants
+
+### Erreur 3 : Création Planogramme - Emplacement Introuvable
+- [ ] Corriger l'erreur "Emplacement introuvable" lors de la création
+- [ ] Vérifier la procédure tRPC planogramLocations.create
+- [ ] Vérifier la redirection après création
+- [ ] Tester la création complète

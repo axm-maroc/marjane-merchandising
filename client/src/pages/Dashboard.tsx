@@ -2,8 +2,7 @@ import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";import { 
   TrendingUp, 
   TrendingDown, 
   AlertTriangle, 
@@ -12,8 +11,10 @@ import {
   DollarSign,
   BarChart3,
   Download,
-  Calendar
+  Calendar,
+  ArrowLeft
 } from "lucide-react";
+import { useLocation } from "wouter";
 import { Link } from "wouter";
 import { useState, useMemo } from "react";
 import { Line, Bar, Doughnut } from "react-chartjs-2";
@@ -48,6 +49,7 @@ ChartJS.register(
 type TimePeriod = "day" | "week" | "month" | "year";
 
 export default function Dashboard() {
+  const [, navigate] = useLocation();
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("month");
   const [selectedStore, setSelectedStore] = useState<string>("all");
 
@@ -189,12 +191,21 @@ export default function Dashboard() {
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
         <div className="container py-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                <BarChart3 className="w-8 h-8 text-emerald-600" />
-                Dashboard Analytique
-              </h1>
-              <p className="text-slate-600 mt-1">Vue d'ensemble de la performance merchandising</p>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => navigate("/")}
+                className="text-slate-600 hover:text-slate-900"
+                title="Retour à l'accueil"
+              >
+                <ArrowLeft className="w-6 h-6" />
+              </button>
+              <div>
+                <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
+                  <BarChart3 className="w-8 h-8 text-emerald-600" />
+                  Dashboard Analytique
+                </h1>
+                <p className="text-slate-600 mt-1">Vue d'ensemble de la performance merchandising</p>
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <Select value={timePeriod} onValueChange={(value) => setTimePeriod(value as TimePeriod)}>
