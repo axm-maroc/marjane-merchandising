@@ -927,3 +927,4 @@
 - [x] Tester le flux complet d'intégration
 - [x] Tous les tests passent (14/14) ✅
 - [x] Créer un checkpoint
+- [x] Corriger l'erreur React "Rendered more hooks" dans FeedbackAdmin.tsx

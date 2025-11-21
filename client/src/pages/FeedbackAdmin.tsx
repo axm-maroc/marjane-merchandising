@@ -15,12 +15,6 @@ export default function FeedbackAdmin() {
   // Charger les magasins
   const { data: stores } = trpc.stores.list.useQuery();
 
-  // Charger les statistiques NPS par magasin
-  const storeStats = stores?.map(store => {
-    const { data: npsData } = trpc.kpis.npsScore.useQuery({ storeId: store.id });
-    return { store, npsData };
-  });
-
   const getFeedbackUrl = (storeId: number) => {
     return `${window.location.origin}/feedback/${storeId}`;
   };
@@ -62,21 +56,15 @@ export default function FeedbackAdmin() {
       {/* Main Content */}
       <main className="container py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {stores?.map((store) => {
-            const stats = storeStats?.find(s => s.store.id === store.id)?.npsData;
-            
-            return (
-              <QRCodeCard
-                key={store.id}
-                store={store}
-                stats={stats}
-                feedbackUrl={getFeedbackUrl(store.id)}
-                onCopy={() => copyToClipboard(store.id)}
-                isCopied={copiedStoreId === store.id}
-              />
-            );
-          })}
-        </div>
+          {stores?.map((store) => (
+            <QRCodeCard
+              key={store.id}
+              store={store}
+              feedbackUrl={getFeedbackUrl(store.id)}
+              onCopy={() => copyToClipboard(store.id)}
+              isCopied={copiedStoreId === store.id}
+            />
+          ))}        </div>
 
         {/* Instructions */}
         <Card className="mt-8 border-indigo-200 bg-indigo-50">
@@ -128,13 +116,14 @@ export default function FeedbackAdmin() {
 
 interface QRCodeCardProps {
   store: any;
-  stats: any;
   feedbackUrl: string;
   onCopy: () => void;
   isCopied: boolean;
 }
 
-function QRCodeCard({ store, stats, feedbackUrl, onCopy, isCopied }: QRCodeCardProps) {
+function QRCodeCard({ store, feedbackUrl, onCopy, isCopied }: QRCodeCardProps) {
+  // Charger les statistiques NPS pour ce magasin
+  const { data: stats } = trpc.kpis.npsScore.useQuery({ storeId: store.id });
   const qrCodeRef = useRef<HTMLDivElement>(null);
   const qrCodeInstance = useRef<QRCodeStyling | null>(null);
 
