@@ -413,7 +413,7 @@ export default function ZoneEditor() {
           window.location.href = `/planograms/location/${clickedLocation.id}`;
         } else {
           // Ouvrir la modale de création
-          setSelectedLocationForPlanogram(clickedLocation);
+          setSelectedLocationForPlanogram(clickedLocation.id);
           setShowCreatePlanogramDialog(true);
         }
         return;
@@ -1123,7 +1123,7 @@ export default function ZoneEditor() {
                   <DialogHeader>
                     <DialogTitle>Créer un nouveau planogramme</DialogTitle>
                     <DialogDescription>
-                      Créer un planogramme pour l'emplacement : {selectedLocationForPlanogram?.name}
+                      Créer un planogramme pour l'emplacement : {planogramLocations?.find(loc => loc.id === selectedLocationForPlanogram)?.name}
                     </DialogDescription>
                   </DialogHeader>
                   
