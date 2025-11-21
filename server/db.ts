@@ -27,6 +27,7 @@ import {
   InsertStockoutHistory,
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
+import { notifyOwner } from './_core/notification';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -917,7 +918,43 @@ export async function getStockoutRate(storeId: number, startDate?: Date, endDate
 }
 
 /**
- * Enregistre un score NPS
+ * Envoie une notification au propriétaire lorsqu'un feedback négatif est reçu
+ */
+async function notifyNegativeFeedback(storeId: number, score: number, comment?: string | null) {
+  try {
+    // Récupérer les informations du magasin
+    const db = await getDb();
+    if (!db) return;
+    
+    const storeResult = await db.select().from(stores).where(eq(stores.id, storeId)).limit(1);
+    if (storeResult.length === 0) return;
+    
+    const store = storeResult[0];
+    
+    // Construire le message de notification
+    const title = `⚠️ Feedback négatif reçu - ${store.name}`;
+    const content = `Un client a donné un avis négatif pour le magasin ${store.name} (à ${store.city}).
+
+**Score NPS:** ${score}/10 (Détracteur)
+${comment ? `\n**Commentaire:**\n${comment}` : '\n*Aucun commentaire fourni*'}
+
+**Action recommandée:** Contactez le responsable du magasin (${store.managerName || 'non renseigné'}) pour analyser et résoudre le problème signalé.`;
+    
+    // Envoyer la notification
+    const success = await notifyOwner({ title, content });
+    
+    if (success) {
+      console.log(`[NPS] Notification envoyée pour feedback négatif - Magasin: ${store.name}, Score: ${score}`);
+    } else {
+      console.warn(`[NPS] Échec de l'envoi de notification pour feedback négatif - Magasin: ${store.name}, Score: ${score}`);
+    }
+  } catch (error) {
+    console.error('[NPS] Erreur lors de l\'envoi de la notification:', error);
+  }
+}
+
+/**
+ * Enregistre un score NPS et envoie une notification si le feedback est négatif
  */
 export async function saveNPSScore(data: Omit<InsertNPSScore, 'category'>) {
   const db = await getDb();
@@ -933,6 +970,11 @@ export async function saveNPSScore(data: Omit<InsertNPSScore, 'category'>) {
     ...data,
     category,
   });
+  
+  // Envoyer une notification si le feedback est négatif (score <= 6)
+  if (data.score <= 6) {
+    await notifyNegativeFeedback(data.storeId, data.score, data.comment);
+  }
   
   return result;
 }

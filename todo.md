@@ -928,3 +928,31 @@
 - [x] Tous les tests passent (14/14) ✅
 - [x] Créer un checkpoint
 - [x] Corriger l'erreur React "Rendered more hooks" dans FeedbackAdmin.tsx
+
+
+## Système de Notifications pour Feedbacks Négatifs
+
+### Backend - Fonction de Notification
+- [x] Créer la fonction `notifyNegativeFeedback()` dans server/db.ts
+- [x] Détecter les feedbacks négatifs (score ≤ 6)
+- [x] Récupérer les informations du magasin (nom, ville, responsable)
+- [x] Envoyer la notification avec détails du feedback via `notifyOwner()`
+- [x] Gérer les erreurs d'envoi de notification (try/catch + logs)
+- [x] Formater le message avec markdown (score, commentaire, action recommandée)
+
+### Intégration dans le Flux NPS
+- [x] Modifier `saveNPSScore()` pour déclencher la notification
+- [x] Ajouter la logique conditionnelle (score ≤ 6)
+- [x] Inclure les détails du feedback dans la notification
+- [x] Logger les notifications envoyées (succès/échec)
+- [x] Notification asynchrone sans bloquer la soumission
+
+### Tests et Validation
+- [x] Créer 15 tests unitaires (server/notification-nps.test.ts)
+- [x] Tester avec différents scores (0-10)
+- [x] Vérifier que seuls les scores ≤ 6 déclenchent une notification
+- [x] Tester le contenu de la notification (titre, magasin, ville, commentaire)
+- [x] Tester la gestion des erreurs (notification échouée/exception)
+- [x] Tester le seuil de déclenchement (0-6 oui, 7-10 non)
+- [x] Tous les tests passent (15/15) ✅
+- [x] Créer un checkpoint
