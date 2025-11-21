@@ -1045,10 +1045,10 @@ export default function ZoneEditor() {
                       onClick={() => {
                         if (planogram) {
                           window.location.href = `/planograms/location/${location.id}`;
-                        } else {
-                          setSelectedLocationForPlanogram(location);
-                          setShowCreatePlanogramDialog(true);
-                        }
+                         } else {
+                           setSelectedLocationForPlanogram(location.id);
+                           setShowCreatePlanogramDialog(true);
+                         }
                       }}
                       className={`p-3 bg-white border-2 rounded-lg transition-all ${
                         !isPositioned 
@@ -1151,10 +1151,10 @@ export default function ZoneEditor() {
                         <span className="font-medium">Magasin :</span> {store?.name}
                       </div>
                       <div className="text-sm">
-                        <span className="font-medium">Emplacement :</span> {selectedLocationForPlanogram?.name}
+                        <span className="font-medium">Emplacement :</span> {planogramLocations?.find(loc => loc.id === selectedLocationForPlanogram)?.name}
                       </div>
                       <div className="text-sm">
-                        <span className="font-medium">Étagères :</span> {selectedLocationForPlanogram?.shelfCount}
+                        <span className="font-medium">Étagères :</span> {planogramLocations?.find(loc => loc.id === selectedLocationForPlanogram)?.shelfCount}
                       </div>
                     </div>
                   </div>
@@ -1184,7 +1184,7 @@ export default function ZoneEditor() {
                           setNewPlanogramName('');
                           setNewPlanogramDescription('');
                           
-                          window.location.href = `/planograms/location/${selectedLocationForPlanogram!.id}`;
+                          window.location.href = `/planograms/location/${selectedLocationForPlanogram}`;
                         } catch (error) {
                           toast.error("Erreur lors de la création du planogramme");
                         }
@@ -1370,7 +1370,7 @@ export default function ZoneEditor() {
                                 size="sm" 
                                 className="w-full"
                                 onClick={() => {
-                                  setSelectedLocationForPlanogram(location);
+                                  setSelectedLocationForPlanogram(location.id);
                                   setShowCreatePlanogramDialog(true);
                                 }}
                               >
