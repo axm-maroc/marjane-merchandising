@@ -156,51 +156,51 @@ const productCategoriesData = [
   { 
     name: "Boissons", 
     products: [
-      { name: "Coca-Cola 1.5L", photo: "https://images.unsplash.com/photo-1554866585-c4db4d2b3eb2?w=400&h=400&fit=crop" },
-      { name: "Eau minérale Sidi Ali 1.5L", photo: "https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400&h=400&fit=crop" },
+      { name: "Coca-Cola 1.5L", photo: "https://images.unsplash.com/photo-1554866585-cd94860890b7?w=400&h=400&fit=crop" },
+      { name: "Eau minérale Sidi Ali 1.5L", photo: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400&h=400&fit=crop" },
       { name: "Jus d'orange Tropicana 1L", photo: "https://images.unsplash.com/photo-1600271886742-f049cd1f3033?w=400&h=400&fit=crop" },
-      { name: "Sprite 1.5L", photo: "https://images.unsplash.com/photo-1599599810694-b5ac4dd0b2d7?w=400&h=400&fit=crop" },
-      { name: "Fanta Orange 1.5L", photo: "https://images.unsplash.com/photo-1599599810694-b5ac4dd0b2d7?w=400&h=400&fit=crop" }
+      { name: "Sprite 1.5L", photo: "https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?w=400&h=400&fit=crop" },
+      { name: "Fanta Orange 1.5L", photo: "https://images.unsplash.com/photo-1624517452488-04869289c4ca?w=400&h=400&fit=crop" }
     ] 
   },
   { 
     name: "Produits Laitiers", 
     products: [
-      { name: "Lait Centrale Laitière 1L", photo: "https://images.unsplash.com/photo-1563636619-e0db3814a5be?w=400&h=400&fit=crop" },
+      { name: "Lait Centrale Laitière 1L", photo: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&h=400&fit=crop" },
       { name: "Yaourt Danone Nature", photo: "https://images.unsplash.com/photo-1488477181946-6428a0291840?w=400&h=400&fit=crop" },
-      { name: "Fromage Vache qui rit", photo: "https://images.unsplash.com/photo-1452894895917-7aa521cf6fb4?w=400&h=400&fit=crop" },
-      { name: "Beurre Président", photo: "https://images.unsplash.com/photo-1452894895917-7aa521cf6fb4?w=400&h=400&fit=crop" },
-      { name: "Crème fraîche", photo: "https://images.unsplash.com/photo-1488477181946-6428a0291840?w=400&h=400&fit=crop" }
+      { name: "Fromage Vache qui rit", photo: "https://images.unsplash.com/photo-1618164436241-4473940d1f5c?w=400&h=400&fit=crop" },
+      { name: "Beurre Président", photo: "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=400&h=400&fit=crop" },
+      { name: "Crème fraîche", photo: "https://images.unsplash.com/photo-1628088062854-d1870b4553da?w=400&h=400&fit=crop" }
     ] 
   },
   { 
     name: "Épicerie", 
     products: [
-      { name: "Huile Lesieur 1L", photo: "https://images.unsplash.com/photo-1587734356604-642c18f540eb?w=400&h=400&fit=crop" },
-      { name: "Riz Taureau 1kg", photo: "https://images.unsplash.com/photo-1586190936529-746f75a3993e?w=400&h=400&fit=crop" },
-      { name: "Pâtes Tria", photo: "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=400&h=400&fit=crop" },
-      { name: "Sucre Cosumar 1kg", photo: "https://images.unsplash.com/photo-1599599810694-b5ac4dd0b2d7?w=400&h=400&fit=crop" },
-      { name: "Farine 1kg", photo: "https://images.unsplash.com/photo-1599599810694-b5ac4dd0b2d7?w=400&h=400&fit=crop" }
+      { name: "Huile Lesieur 1L", photo: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&h=400&fit=crop" },
+      { name: "Riz Taureau 1kg", photo: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop" },
+      { name: "Pâtes Tria", photo: "https://images.unsplash.com/photo-1551462147-37cbd8ab0d9d?w=400&h=400&fit=crop" },
+      { name: "Sucre Cosumar 1kg", photo: "https://images.unsplash.com/photo-1518264803984-e4a3e5c0f3ce?w=400&h=400&fit=crop" },
+      { name: "Farine 1kg", photo: "https://images.unsplash.com/photo-1628088062854-d1870b4553da?w=400&h=400&fit=crop" }
     ] 
   },
   { 
     name: "Hygiène", 
     products: [
-      { name: "Shampoing Dove", photo: "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&h=400&fit=crop" },
-      { name: "Savon Lux", photo: "https://images.unsplash.com/photo-1600271886742-f049cd1f3033?w=400&h=400&fit=crop" },
-      { name: "Dentifrice Signal", photo: "https://images.unsplash.com/photo-1587854692152-cbe660dbde0e?w=400&h=400&fit=crop" },
-      { name: "Gel douche Palmolive", photo: "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&h=400&fit=crop" },
-      { name: "Déodorant Rexona", photo: "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&h=400&fit=crop" }
+      { name: "Shampoing Dove", photo: "https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?w=400&h=400&fit=crop" },
+      { name: "Savon Lux", photo: "https://images.unsplash.com/photo-1600857544200-b5e6e6c6b600?w=400&h=400&fit=crop" },
+      { name: "Dentifrice Signal", photo: "https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=400&h=400&fit=crop" },
+      { name: "Gel douche Palmolive", photo: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop" },
+      { name: "Déodorant Rexona", photo: "https://images.unsplash.com/photo-1615397349754-cfa2066a298e?w=400&h=400&fit=crop" }
     ] 
   },
   { 
     name: "Entretien", 
     products: [
-      { name: "Lessive Ariel", photo: "https://images.unsplash.com/photo-1599599810694-b5ac4dd0b2d7?w=400&h=400&fit=crop" },
-      { name: "Liquide vaisselle Paic", photo: "https://images.unsplash.com/photo-1599599810694-b5ac4dd0b2d7?w=400&h=400&fit=crop" },
-      { name: "Javel Lacroix", photo: "https://images.unsplash.com/photo-1599599810694-b5ac4dd0b2d7?w=400&h=400&fit=crop" },
-      { name: "Éponges Spontex", photo: "https://images.unsplash.com/photo-1599599810694-b5ac4dd0b2d7?w=400&h=400&fit=crop" },
-      { name: "Sacs poubelle", photo: "https://images.unsplash.com/photo-1599599810694-b5ac4dd0b2d7?w=400&h=400&fit=crop" }
+      { name: "Lessive Ariel", photo: "https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?w=400&h=400&fit=crop" },
+      { name: "Liquide vaisselle Paic", photo: "https://images.unsplash.com/photo-1563453392212-326f5e854473?w=400&h=400&fit=crop" },
+      { name: "Javel Lacroix", photo: "https://images.unsplash.com/photo-1585421514738-01798e348b17?w=400&h=400&fit=crop" },
+      { name: "Éponges Spontex", photo: "https://images.unsplash.com/photo-1585421514738-01798e348b17?w=400&h=400&fit=crop" },
+      { name: "Sacs poubelle", photo: "https://images.unsplash.com/photo-1604187351574-c75ca79f5807?w=400&h=400&fit=crop" }
     ] 
   }
 ];

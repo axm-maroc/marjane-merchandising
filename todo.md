@@ -722,3 +722,13 @@
 - [x] Mettre à jour les produits avec les vraies photos (Unsplash)
 - [x] Tester l'affichage dans l'éditeur de planogrammes
 - [x] Vérifier que tous les tests passent (101/105)
+
+
+## Remplacement des photos par vraies photos Marjane
+- [x] Rechercher les vraies photos de produits (Unsplash)
+- [x] Récupérer les URLs des photos de Coca-Cola, packs de boissons, produits alimentaires
+- [x] Mettre à jour le script seed-demo-data.mjs avec les vraies URLs spécifiques
+- [x] Régénérer les données avec les vraies photos
+- [x] Vérifier que les photos correspondent aux désignations
+- [x] Tester l'affichage dans l'éditeur de planogrammes
+- [x] Valider que tous les tests passent (101/105)
