@@ -58,7 +58,16 @@ export default function CreatePlanogram() {
     { enabled: !!storeId }
   );
   const { data: products } = trpc.products.list.useQuery();
-  // const createMutation = trpc.planogramLocations.create.useMutation(); // TODO: Implement create mutation
+  // @ts-ignore - Type will be available after server restart
+  const createMutation = trpc.planogramLocations.create.useMutation({
+    onSuccess: (result: any) => {
+      toast.success("Planogramme créé avec succès !");
+      setLocation(`/planogram/${result.locationId}`);
+    },
+    onError: (error: any) => {
+      toast.error(`Erreur: ${error.message}`);
+    },
+  });
 
   // Filter products by selected theme
   const filteredProducts = products?.filter(product => {
@@ -95,13 +104,17 @@ export default function CreatePlanogram() {
       return;
     }
 
-    try {
-      // TODO: Implement planogram creation
-      toast.success("Planogramme créé avec succès !");
-      // setLocation(`/planogram/${result.id}`);
-    } catch (error) {
-      toast.error("Erreur lors de la création du planogramme");
-    }
+    createMutation.mutate({
+      storeId,
+      name,
+      location,
+      zoneId: zoneId || undefined,
+      theme: selectedTheme,
+      width,
+      height,
+      depth,
+      productIds: Array.from(selectedProducts),
+    });
   };
 
   const canProceedStep1 = storeId && name && location;

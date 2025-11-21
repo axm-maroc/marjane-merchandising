@@ -90,6 +90,21 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         return await db.updatePlanogramLocationPosition(input.locationId, input.positionX, input.positionY, input.zoneId);
       }),
+    create: publicProcedure
+      .input(z.object({
+        storeId: z.number(),
+        name: z.string(),
+        location: z.string(),
+        zoneId: z.number().optional(),
+        theme: z.string(),
+        width: z.number(),
+        height: z.number(),
+        depth: z.number(),
+        productIds: z.array(z.number()),
+      }))
+      .mutation(async ({ input }) => {
+        return await db.createPlanogramWithProducts(input);
+      }),
   }),
 
   // Planograms

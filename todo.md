@@ -1030,3 +1030,76 @@
 - [ ] Tester le flux critique : score ≤ 3 → notification + SMS
 - [ ] Vérifier que tous les tests passent
 - [ ] Créer un checkpoint final
+
+
+## Fonctionnalités Planogrammes Manquantes - Priorité 1
+
+### Import/Export CSV/XLSX
+- [ ] Installer la bibliothèque `xlsx` pour manipulation de fichiers Excel
+- [ ] Créer la fonction `importProductsFromCSV()` dans server/db.ts
+- [ ] Créer la fonction `exportPlanogramToCSV()` dans server/db.ts
+- [ ] Créer la fonction `exportPlanogramToXLSX()` dans server/db.ts
+- [ ] Ajouter les procédures tRPC pour import/export
+- [ ] Créer l'interface d'import avec upload de fichier
+- [ ] Créer les boutons d'export CSV/XLSX dans PlanogramView
+- [ ] Définir le format CSV standard (colonnes: produit, quantité, facings, niveau, position)
+- [ ] Gérer les erreurs d'import (format invalide, produits introuvables)
+- [ ] Créer des tests unitaires pour import/export
+
+### Drag & Drop pour Produits
+- [ ] Installer la bibliothèque `@dnd-kit/core` pour drag & drop
+- [ ] Créer le composant `PlanogramEditor` avec zones droppables
+- [ ] Implémenter le drag des produits depuis la liste
+- [ ] Implémenter le drop sur les étagères du planogramme
+- [ ] Mettre à jour la position des produits en temps réel
+- [ ] Créer la fonction `updateProductPosition()` dans server/db.ts
+- [ ] Ajouter la procédure tRPC `planograms.updateProductPosition`
+- [ ] Sauvegarder automatiquement une version après chaque modification
+- [ ] Ajouter des indicateurs visuels (zones de drop, preview)
+- [ ] Gérer les contraintes (capacité max par étagère, dimensions produits)
+
+### Finaliser la Création de Planogrammes
+- [x] Implémenter la mutation tRPC `planogramLocations.create`
+- [x] Créer la fonction backend `createPlanogramWithProducts()` complète
+- [x] Connecter le formulaire CreatePlanogram au backend
+- [x] Gérer la création des produits associés au planogramme (position, quantity, facings)
+- [x] Rediriger vers la page de visualisation après création
+- [x] Ajouter une notification de succès/erreur
+- [x] Créer l'entrée d'historique automatiquement
+- [ ] Créer des tests unitaires pour la création
+
+## Fonctionnalités Planogrammes Manquantes - Priorité 2
+
+### Duplication de Planogrammes
+- [ ] Créer la fonction `duplicatePlanogram()` dans server/db.ts
+- [ ] Copier tous les produits et leurs positions
+- [ ] Incrémenter automatiquement la version
+- [ ] Ajouter la procédure tRPC `planograms.duplicate`
+- [ ] Ajouter un bouton "Dupliquer" dans PlanogramView
+- [ ] Permettre de choisir le magasin/zone de destination
+- [ ] Créer des tests unitaires
+
+### Templates Réutilisables
+- [ ] Créer la table `planogramTemplates` dans le schéma
+- [ ] Ajouter un champ `isTemplate` dans la table planograms
+- [ ] Créer la fonction `createTemplateFromPlanogram()` dans server/db.ts
+- [ ] Créer la fonction `applyTemplate()` dans server/db.ts
+- [ ] Ajouter les procédures tRPC correspondantes
+- [ ] Créer la page `/templates` pour gérer les templates
+- [ ] Permettre d'appliquer un template à plusieurs magasins
+- [ ] Créer des tests unitaires
+
+### Modification des Dimensions
+- [ ] Ajouter la fonction `updatePlanogramDimensions()` dans server/db.ts
+- [ ] Ajouter la procédure tRPC `planograms.updateDimensions`
+- [ ] Créer un modal d'édition des dimensions dans PlanogramView
+- [ ] Valider que les produits existants rentrent dans les nouvelles dimensions
+- [ ] Sauvegarder automatiquement une version après modification
+- [ ] Créer des tests unitaires
+
+## Validation Globale
+- [ ] Vérifier que toutes les fonctionnalités demandées sont implémentées
+- [ ] Tester le flux complet : création → modification → versioning → export
+- [ ] Tester l'import/export CSV/XLSX avec des données réelles
+- [ ] Tester le drag & drop sur différents navigateurs
+- [ ] Créer un checkpoint final

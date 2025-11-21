@@ -1268,3 +1268,82 @@ export async function getNegativeFeedbackStats(storeId?: number) {
     resolved,
   };
 }
+
+
+/**
+ * Crée un planogramme complet avec ses produits
+ */
+export async function createPlanogramWithProducts(data: {
+  storeId: number;
+  name: string;
+  location: string;
+  zoneId?: number;
+  theme: string;
+  width: number;
+  height: number;
+  depth: number;
+  productIds: number[];
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // 1. Créer l'emplacement du planogramme
+  const locationResult = await db.insert(planogramLocations).values({
+    storeId: data.storeId,
+    name: data.name,
+    location: data.location,
+    zone: data.theme,
+    zoneId: data.zoneId || null,
+  });
+
+  const locationId = Number(locationResult[0].insertId);
+
+  // 2. Créer le planogramme
+  const planogramResult = await db.insert(planograms).values({
+    locationId,
+    name: data.name,
+    version: 1,
+    status: "draft",
+    width: data.width,
+    height: data.height,
+    depth: data.depth,
+  });
+
+  const planogramId = Number(planogramResult[0].insertId);
+
+  // 3. Ajouter les produits au planogramme
+  if (data.productIds.length > 0) {
+    const productValues = data.productIds.map((productId, index) => ({
+      planogramId,
+      productId,
+      position: index + 1,
+      quantity: 1,
+      facings: 1,
+      shelfLevel: 1,
+    }));
+
+    await db.insert(planogramProducts).values(productValues);
+  }
+
+  // 4. Créer l'entrée d'historique
+  await db.insert(planogramHistory).values({
+    planogramId,
+    userId: null, // TODO: Add user context
+    version: 1,
+    changeType: "created",
+    changeDescription: `Planogramme créé avec ${data.productIds.length} produits`,
+    snapshotData: JSON.stringify({
+      name: data.name,
+      width: data.width,
+      height: data.height,
+      depth: data.depth,
+      productCount: data.productIds.length,
+    }),
+  });
+
+  return {
+    locationId,
+    planogramId,
+    success: true,
+  };
+}
