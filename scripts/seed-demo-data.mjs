@@ -204,8 +204,7 @@ async function seedDemoData() {
           weight: Math.floor(Math.random() * 2000) + 100,
           width: Math.floor(Math.random() * 20) + 5,
           height: Math.floor(Math.random() * 20) + 5,
-          depth: Math.floor(Math.random() * 30) + 10,
-          imageUrl: `https://picsum.photos/seed/${productName.replace(/\s+/g, '-').toLowerCase()}/400/400`
+          depth: Math.floor(Math.random() * 30) + 10
         });
         productIds.push(result.insertId);
       }

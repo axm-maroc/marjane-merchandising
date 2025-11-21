@@ -689,9 +689,3 @@
 - [x] Supprimer les données associées (zones, emplacements, planogrammes, stocks)
 - [x] Vérifier que seules les données Marjane réelles restent
 - [x] Exécuter le script de nettoyage et régénération
-
-
-## Restauration des photos des produits
-- [x] Modifier le script seed-demo-data.mjs pour ajouter des URLs de photos
-- [x] Régénérer les données avec les photos des produits
-- [x] Vérifier que les photos s'affichent correctement dans l'interface
