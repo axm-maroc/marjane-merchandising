@@ -560,6 +560,53 @@ export const appRouter = router({
         return { success: true };
       }),
   }),
+
+  // Analytics Dashboard
+  analytics: router({
+    globalKPIs: publicProcedure.query(async () => {
+      return await db.getGlobalKPIs();
+    }),
+    storePerformance: publicProcedure
+      .input(z.object({ 
+        period: z.enum(['week', 'month', 'year']).optional() 
+      }))
+      .query(async ({ input }) => {
+        return await db.getStorePerformance(input.period || 'month');
+      }),
+    topProducts: publicProcedure
+      .input(z.object({ 
+        limit: z.number().optional(),
+        storeId: z.number().optional()
+      }))
+      .query(async ({ input }) => {
+        return await db.getTopProducts(input.limit || 10, input.storeId);
+      }),
+    salesTrends: publicProcedure
+      .input(z.object({ 
+        period: z.enum(['week', 'month', 'year']).optional() 
+      }))
+      .query(async ({ input }) => {
+        return await db.getSalesTrends(input.period || 'month');
+      }),
+  }),
+
+  // Import/Export Planogrammes
+  planogramExport: router({
+    toCSV: publicProcedure
+      .input(z.object({ planogramId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.exportPlanogramToCSV(input.planogramId);
+      }),
+    fromCSV: publicProcedure
+      .input(z.object({
+        storeId: z.number(),
+        csvData: z.string(),
+        name: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        return await db.importPlanogramFromCSV(input.storeId, input.csvData, input.name);
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

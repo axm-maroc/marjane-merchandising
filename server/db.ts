@@ -915,3 +915,276 @@ export async function getStockAlerts(storeId: number, threshold: number = 0.2) {
     return (a.daysUntilStockout || 999) - (b.daysUntilStockout || 999);
   });
 }
+
+
+// ============================================================================
+// Analytics Functions
+// ============================================================================
+
+export async function getGlobalKPIs() {
+  const db = await getDb();
+  if (!db) return null;
+
+  // Calculer les KPIs globaux
+  const storesList = await db.select().from(stores);
+  const productsList = await db.select().from(products);
+  
+  // Stock total
+  const stockData = await db.select({
+    totalStock: sql<number>`SUM(${stockHistory.quantity})`,
+    totalValue: sql<number>`SUM(${stockHistory.quantity} * ${products.unitPrice})`,
+  })
+  .from(stockHistory)
+  .leftJoin(products, eq(stockHistory.productId, products.id))
+  .where(eq(stockHistory.movementType, 'in'));
+
+  // Taux de rotation moyen (calculé sur les 30 derniers jours)
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  
+  const salesData = await db.select({
+    totalSales: sql<number>`SUM(${stockHistory.quantity})`,
+  })
+  .from(stockHistory)
+  .where(
+    and(
+      eq(stockHistory.movementType, 'out'),
+      sql`${stockHistory.recordedAt} >= ${thirtyDaysAgo}`
+    )
+  );
+
+  const totalStock = stockData[0]?.totalStock || 0;
+  const totalSales = salesData[0]?.totalSales || 0;
+  const rotationRate = totalStock > 0 ? (totalSales / totalStock) * 100 : 0;
+
+  return {
+    totalStores: storesList.length,
+    totalProducts: productsList.length,
+    totalStock: totalStock,
+    stockValue: stockData[0]?.totalValue || 0,
+    rotationRate: Math.round(rotationRate * 10) / 10,
+    totalSales: totalSales,
+  };
+}
+
+export async function getStorePerformance(period: 'week' | 'month' | 'year' = 'month') {
+  const db = await getDb();
+  if (!db) return [];
+
+  // Calculer la date de début selon la période
+  const startDate = new Date();
+  if (period === 'week') {
+    startDate.setDate(startDate.getDate() - 7);
+  } else if (period === 'month') {
+    startDate.setMonth(startDate.getMonth() - 1);
+  } else {
+    startDate.setFullYear(startDate.getFullYear() - 1);
+  }
+
+  // Récupérer les performances par magasin
+  const performance = await db.select({
+    storeId: stores.id,
+    storeName: stores.name,
+    storeCity: stores.city,
+    totalSales: sql<number>`SUM(CASE WHEN ${stockHistory.movementType} = 'out' THEN ${stockHistory.quantity} ELSE 0 END)`,
+    totalStock: sql<number>`SUM(CASE WHEN ${stockHistory.movementType} = 'in' THEN ${stockHistory.quantity} ELSE 0 END)`,
+    revenue: sql<number>`SUM(CASE WHEN ${stockHistory.movementType} = 'out' THEN ${stockHistory.quantity} * ${products.unitPrice} ELSE 0 END)`,
+  })
+  .from(stores)
+  .leftJoin(stockHistory, eq(stores.id, stockHistory.storeId))
+  .leftJoin(products, eq(stockHistory.productId, products.id))
+  .where(sql`${stockHistory.recordedAt} >= ${startDate}`)
+  .groupBy(stores.id, stores.name, stores.city);
+
+  return performance.map(p => ({
+    ...p,
+    rotationRate: p.totalStock > 0 ? Math.round((p.totalSales / p.totalStock) * 1000) / 10 : 0,
+  }));
+}
+
+export async function getTopProducts(limit: number = 10, storeId?: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  // Calculer les ventes des 30 derniers jours
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const conditions = [
+    eq(stockHistory.movementType, 'out'),
+    sql`${stockHistory.recordedAt} >= ${thirtyDaysAgo}`,
+  ];
+
+  if (storeId) {
+    conditions.push(eq(stockHistory.storeId, storeId));
+  }
+
+  const topProducts = await db.select({
+    productId: products.id,
+    productName: products.name,
+    productBarcode: products.barcode,
+    totalSales: sql<number>`SUM(${stockHistory.quantity})`,
+    revenue: sql<number>`SUM(${stockHistory.quantity} * ${products.unitPrice})`,
+    avgPrice: products.unitPrice,
+  })
+  .from(products)
+  .leftJoin(stockHistory, eq(products.id, stockHistory.productId))
+  .where(and(...conditions))
+  .groupBy(products.id, products.name, products.barcode, products.unitPrice)
+  .orderBy(sql`SUM(${stockHistory.quantity}) DESC`)
+  .limit(limit);
+
+  return topProducts;
+}
+
+export async function getSalesTrends(period: 'week' | 'month' | 'year' = 'month') {
+  const db = await getDb();
+  if (!db) return [];
+
+  // Calculer la date de début selon la période
+  const startDate = new Date();
+  if (period === 'week') {
+    startDate.setDate(startDate.getDate() - 7);
+  } else if (period === 'month') {
+    startDate.setMonth(startDate.getMonth() - 1);
+  } else {
+    startDate.setFullYear(startDate.getFullYear() - 1);
+  }
+
+  // Grouper par jour pour avoir les tendances
+  const trends = await db.select({
+    date: sql<string>`DATE(${stockHistory.recordedAt})`,
+    totalSales: sql<number>`SUM(CASE WHEN ${stockHistory.movementType} = 'out' THEN ${stockHistory.quantity} ELSE 0 END)`,
+    totalEntries: sql<number>`SUM(CASE WHEN ${stockHistory.movementType} = 'in' THEN ${stockHistory.quantity} ELSE 0 END)`,
+    revenue: sql<number>`SUM(CASE WHEN ${stockHistory.movementType} = 'out' THEN ${stockHistory.quantity} * ${products.unitPrice} ELSE 0 END)`,
+  })
+  .from(stockHistory)
+  .leftJoin(products, eq(stockHistory.productId, products.id))
+  .where(sql`${stockHistory.recordedAt} >= ${startDate}`)
+  .groupBy(sql`DATE(${stockHistory.recordedAt})`)
+  .orderBy(sql`DATE(${stockHistory.recordedAt}) ASC`);
+
+  return trends;
+}
+
+
+// ============================================================================
+// Import/Export Planogrammes
+// ============================================================================
+
+export async function exportPlanogramToCSV(planogramId: number) {
+  const db = await getDb();
+  if (!db) return null;
+
+  // Récupérer le planogramme
+  const planogram = await db.select().from(planograms).where(eq(planograms.id, planogramId)).limit(1);
+  if (planogram.length === 0) return null;
+
+  // Récupérer les produits du planogramme
+  const planogramProductsList = await db.select({
+    productId: planogramProducts.productId,
+    productName: products.name,
+    productBarcode: products.barcode,
+    positionX: planogramProducts.positionX,
+    facings: planogramProducts.facings,
+    shelfLevel: planogramProducts.shelfLevel,
+  })
+  .from(planogramProducts)
+  .leftJoin(products, eq(planogramProducts.productId, products.id))
+  .where(eq(planogramProducts.planogramId, planogramId));
+
+  // Générer le CSV
+  const headers = ['Product ID', 'Product Name', 'Barcode', 'Position', 'Facings', 'Shelf Level'];
+  const rows = planogramProductsList.map(p => [
+    p.productId,
+    p.productName || '',
+    p.productBarcode || '',
+    p.positionX || 0,
+    p.facings || 1,
+    p.shelfLevel || 1,
+  ]);
+
+  const csvContent = [
+    headers.join(','),
+    ...rows.map(row => row.join(','))
+  ].join('\n');
+
+  return {
+    planogramId,
+    planogramName: planogram[0].name,
+    csvContent,
+    productCount: planogramProductsList.length,
+  };
+}
+
+export async function importPlanogramFromCSV(storeId: number, csvData: string, name: string, locationId?: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Parser le CSV
+  const lines = csvData.trim().split('\n');
+  if (lines.length < 2) {
+    throw new Error("CSV file is empty or invalid");
+  }
+
+  // Ignorer la première ligne (headers)
+  const dataLines = lines.slice(1);
+
+  // Si locationId n'est pas fourni, trouver le premier emplacement du magasin
+  let targetLocationId = locationId;
+  if (!targetLocationId) {
+    const locations = await db.select().from(planogramLocations).where(eq(planogramLocations.storeId, storeId)).limit(1);
+    if (locations.length === 0) {
+      throw new Error("No planogram location found for this store");
+    }
+    targetLocationId = locations[0].id;
+  }
+
+  // Créer le planogramme
+  const newPlanogram = await db.insert(planograms).values({
+    name,
+    locationId: targetLocationId,
+    status: 'draft',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  }).$returningId();
+
+  const planogramId = newPlanogram[0].id;
+
+  // Importer les produits
+  let importedCount = 0;
+  for (const line of dataLines) {
+    const [productIdStr, productName, barcode, positionStr, facingsStr, shelfLevelStr] = line.split(',');
+    
+    const productId = parseInt(productIdStr);
+    const position = parseInt(positionStr) || 0;
+    const facings = parseInt(facingsStr) || 1;
+    const shelfLevel = parseInt(shelfLevelStr) || 1;
+
+    if (isNaN(productId)) continue;
+
+    // Vérifier que le produit existe
+    const product = await db.select().from(products).where(eq(products.id, productId)).limit(1);
+    if (product.length === 0) continue;
+
+    // Ajouter le produit au planogramme
+    await db.insert(planogramProducts).values({
+      planogramId,
+      productId,
+      positionX: position,
+      facings,
+      shelfLevel,
+    });
+
+    importedCount++;
+  }
+
+  // Sauvegarder une version
+  await savePlanogramVersion(planogramId, `Import CSV: ${importedCount} produits importés`);
+
+  return {
+    planogramId,
+    name,
+    importedCount,
+  };
+}

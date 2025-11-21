@@ -875,3 +875,58 @@
 - [x] Supprimé les 6 magasins de test et toutes leurs données associées
 - [x] Vérifié que la logique de filtrage existante fonctionne correctement
 - [x] Testé la cascade complète : Magasin → Zone → Planogramme → Produits (5 boissons affichées)
+
+
+## Fonctionnalités Manquantes du Cahier des Charges
+
+### 🔴 Priorité Haute - À implémenter en priorité
+- [ ] **Import/Export CSV/XLSX des planogrammes**
+  - [ ] Créer une procédure tRPC pour exporter un planogramme en CSV
+  - [ ] Créer une procédure tRPC pour importer un planogramme depuis CSV
+  - [ ] Ajouter un bouton "Exporter" dans l'éditeur de zones
+  - [ ] Ajouter un bouton "Importer" dans l'éditeur de zones
+  - [ ] Tester l'import/export avec un planogramme existant
+
+- [ ] **Dashboard Analytique Interactif**
+  - [ ] Créer une page Dashboard avec KPIs globaux
+  - [ ] Afficher CA/m² par magasin
+  - [ ] Afficher taux de rotation moyen
+  - [ ] Afficher top 10 produits par ventes
+  - [ ] Ajouter des graphiques de comparaison inter-magasins
+  - [ ] Ajouter des filtres par période (semaine, mois, année)
+
+- [ ] **Versioning des Planogrammes**
+  - [ ] Ajouter une table `planogramVersions` dans le schéma
+  - [ ] Créer une procédure pour sauvegarder une version
+  - [ ] Créer une procédure pour restaurer une version
+  - [ ] Ajouter un historique des versions dans l'interface
+  - [ ] Permettre la comparaison entre versions
+
+### 🟡 Priorité Moyenne - À implémenter après
+- [ ] **Simulateur d'Impact**
+  - [ ] Créer une page de simulation de scénarios
+  - [ ] Permettre de modifier un planogramme en mode simulation
+  - [ ] Calculer l'impact prévisionnel sur CA
+  - [ ] Calculer l'impact prévisionnel sur marge
+  - [ ] Calculer l'impact prévisionnel sur ruptures
+  - [ ] Comparer avec le planogramme actuel
+
+- [ ] **Gestion des Assortiments**
+  - [ ] Créer une table `assortmentModels` dans le schéma
+  - [ ] Créer une page de gestion des modèles d'assortiment
+  - [ ] Permettre de créer des modèles par format magasin
+  - [ ] Implémenter des tests A/B pour évaluer l'impact
+  - [ ] Générer des rapports de performance par modèle
+
+### 🟢 Priorité Basse - À implémenter plus tard
+- [ ] **Synchronisation Multicanale**
+  - [ ] Créer des connecteurs API pour Odoo
+  - [ ] Créer des connecteurs API pour WMS
+  - [ ] Créer des connecteurs API pour Marjane.ma (e-commerce)
+  - [ ] Implémenter la synchronisation automatique des stocks
+  - [ ] Implémenter la synchronisation des prix et promotions
+
+- [ ] **Intégration Power BI/Tableau**
+  - [ ] Créer des endpoints d'export de données pour Power BI
+  - [ ] Créer des endpoints d'export de données pour Tableau
+  - [ ] Documenter les APIs pour les équipes BI
