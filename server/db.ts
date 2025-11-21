@@ -1188,3 +1188,176 @@ export async function importPlanogramFromCSV(storeId: number, csvData: string, n
     importedCount,
   };
 }
+
+
+/**
+ * Récupère les métriques des produits pour la simulation d'impact
+ */
+export async function getProductMetricsForSimulation(planogramId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  // Récupérer les produits du planogramme
+  const planogramProductsList = await db
+    .select({
+      productId: planogramProducts.productId,
+      facings: planogramProducts.facings,
+      shelfLevel: planogramProducts.shelfLevel,
+    })
+    .from(planogramProducts)
+    .where(eq(planogramProducts.planogramId, planogramId));
+
+  // Récupérer les données de ventes et stock pour chaque produit
+  const metrics = await Promise.all(
+    planogramProductsList.map(async (pp) => {
+      // Récupérer les données du produit
+      const product = await db
+        .select()
+        .from(products)
+        .where(eq(products.id, pp.productId))
+        .limit(1);
+
+      if (product.length === 0) return null;
+
+      const p = product[0];
+
+      // Calculer les ventes des 30 derniers jours
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const salesData = await db
+        .select({
+          totalQuantity: sql<number>`SUM(${stockHistory.quantity})`,
+        })
+        .from(stockHistory)
+        .where(
+          and(
+            eq(stockHistory.productId, pp.productId),
+            eq(stockHistory.movementType, 'sale'),
+            gte(stockHistory.recordedAt, thirtyDaysAgo)
+          )
+        );
+
+      const currentSales = salesData[0]?.totalQuantity || 0;
+
+      // Récupérer le stock actuel
+      const currentStockData = await db
+        .select({
+          totalQuantity: sql<number>`SUM(${stockHistory.quantity})`,
+        })
+        .from(stockHistory)
+        .where(eq(stockHistory.productId, pp.productId));
+
+      const currentStock = currentStockData[0]?.totalQuantity || 0;
+
+      // Calculer la rotation (jours de stock)
+      const stockRotation = currentSales > 0 ? (currentStock / currentSales) * 30 : 0;
+
+      // Récupérer la marge (estimation basée sur la catégorie)
+      const margin = p.categoryId === 1 ? 15 : p.categoryId === 2 ? 20 : 25;
+
+      return {
+        productId: pp.productId,
+        name: p.name,
+        currentSales,
+        currentMargin: margin,
+        unitPrice: p.unitPrice,
+        currentStock,
+        stockRotation,
+      };
+    })
+  );
+
+  return metrics.filter((m) => m !== null);
+}
+
+/**
+ * Récupère les changements de planogramme entre deux versions
+ */
+export async function getPlanogramChanges(
+  currentPlanogramId: number,
+  newPlanogramId: number
+) {
+  const db = await getDb();
+  if (!db) return [];
+
+  // Récupérer les produits du planogramme actuel
+  const currentProductsList = await db
+    .select({
+      productId: planogramProducts.productId,
+      facings: planogramProducts.facings,
+      shelfLevel: planogramProducts.shelfLevel,
+    })
+    .from(planogramProducts)
+    .where(eq(planogramProducts.planogramId, currentPlanogramId));
+
+  // Récupérer les produits du nouveau planogramme
+  const newProductsList = await db
+    .select({
+      productId: planogramProducts.productId,
+      facings: planogramProducts.facings,
+      shelfLevel: planogramProducts.shelfLevel,
+    })
+    .from(planogramProducts)
+    .where(eq(planogramProducts.planogramId, newPlanogramId));
+
+  // Calculer les changements
+  const changes = [];
+
+  // Produits modifiés ou conservés
+  for (const newProduct of newProductsList) {
+    const currentProduct = currentProductsList.find(
+      (p) => p.productId === newProduct.productId
+    );
+
+    if (currentProduct) {
+      // Produit modifié
+      if (
+        currentProduct.facings !== newProduct.facings ||
+        currentProduct.shelfLevel !== newProduct.shelfLevel
+      ) {
+        changes.push({
+          productId: newProduct.productId,
+          currentFacings: currentProduct.facings,
+          newFacings: newProduct.facings,
+          currentShelfLevel: currentProduct.shelfLevel,
+          newShelfLevel: newProduct.shelfLevel,
+          isNewProduct: false,
+          isRemovedProduct: false,
+        });
+      }
+    } else {
+      // Nouveau produit
+      changes.push({
+        productId: newProduct.productId,
+        currentFacings: 0,
+        newFacings: newProduct.facings,
+        currentShelfLevel: 0,
+        newShelfLevel: newProduct.shelfLevel,
+        isNewProduct: true,
+        isRemovedProduct: false,
+      });
+    }
+  }
+
+  // Produits supprimés
+  for (const currentProduct of currentProductsList) {
+    const newProduct = newProductsList.find(
+      (p) => p.productId === currentProduct.productId
+    );
+
+    if (!newProduct) {
+      changes.push({
+        productId: currentProduct.productId,
+        currentFacings: currentProduct.facings,
+        newFacings: 0,
+        currentShelfLevel: currentProduct.shelfLevel,
+        newShelfLevel: 0,
+        isNewProduct: false,
+        isRemovedProduct: true,
+      });
+    }
+  }
+
+  return changes;
+}

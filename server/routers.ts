@@ -607,6 +607,40 @@ export const appRouter = router({
         return await db.importPlanogramFromCSV(input.storeId, input.csvData, input.name);
       }),
   }),
+
+
+  // Simulateur d'Impact
+  impactSimulator: router({
+    simulate: publicProcedure
+      .input(z.object({
+        planogramId: z.number(),
+        changes: z.array(z.object({
+          productId: z.number(),
+          currentFacings: z.number(),
+          newFacings: z.number(),
+          currentShelfLevel: z.number(),
+          newShelfLevel: z.number(),
+          isNewProduct: z.boolean().optional(),
+          isRemovedProduct: z.boolean().optional(),
+        })),
+      }))
+      .query(async ({ input }) => {
+        const { simulateImpact } = await import('./impact-simulator');
+        const productMetrics = await db.getProductMetricsForSimulation(input.planogramId);
+        return simulateImpact(input.changes, productMetrics || []);
+      }),
+    compareVersions: publicProcedure
+      .input(z.object({
+        currentPlanogramId: z.number(),
+        newPlanogramId: z.number(),
+      }))
+      .query(async ({ input }) => {
+        const { simulateImpact } = await import('./impact-simulator');
+        const changes = await db.getPlanogramChanges(input.currentPlanogramId, input.newPlanogramId);
+        const productMetrics = await db.getProductMetricsForSimulation(input.currentPlanogramId);
+        return simulateImpact(changes, productMetrics || []);
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

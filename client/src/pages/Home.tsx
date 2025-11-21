@@ -1,7 +1,7 @@
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Store, Package, LayoutGrid, TrendingUp, AlertTriangle, Share2, BarChart3, Smartphone } from "lucide-react";
+import { Store, Package, LayoutGrid, TrendingUp, AlertTriangle, Share2, BarChart3, Smartphone, Zap } from "lucide-react";
 import { Link } from "wouter";
 import { APP_TITLE } from "@/const";
 
@@ -73,6 +73,14 @@ export default function Home() {
       href: "/mobile",
       color: "text-emerald-600",
       bgColor: "bg-emerald-50",
+    },
+    {
+      icon: Zap,
+      title: "Simulateur d'Impact",
+      description: "Visualisez l'impact des changements de planogrammes sur les KPIs",
+      href: "/impact-simulator",
+      color: "text-yellow-600",
+      bgColor: "bg-yellow-50",
     },
   ];
 
