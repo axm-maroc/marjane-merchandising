@@ -199,6 +199,7 @@ async function seedDemoData() {
           brand: productName.split(' ')[0],
           categoryId: categoryIds[category.name],
           description: `Produit ${productName}`,
+          photoUrl: `https://picsum.photos/seed/${productName.replace(/\s+/g, '-')}/400/400`,
           unitPrice: Math.floor(Math.random() * 50) + 10,
           barcode: `${Math.floor(Math.random() * 9000000000000) + 1000000000000}`,
           weight: Math.floor(Math.random() * 2000) + 100,

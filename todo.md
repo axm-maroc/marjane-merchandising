@@ -689,3 +689,16 @@
 - [x] Supprimer les données associées (zones, emplacements, planogrammes, stocks)
 - [x] Vérifier que seules les données Marjane réelles restent
 - [x] Exécuter le script de nettoyage et régénération
+
+
+## Correction des erreurs d'images vides
+- [ ] Corriger les balises img avec src="" dans StoreDetail.tsx
+- [ ] Ajouter une vérification conditionnelle pour ne pas afficher les images si l'URL est vide
+- [ ] Tester la page de détail des magasins
+
+
+## Correction de l'affichage des photos des produits
+- [x] Vérifier que les produits ont des imageUrl dans la base de données
+- [x] Modifier le script seed-demo-data.mjs pour ajouter photoUrl
+- [x] Régénérer les données avec les photos des produits
+- [x] Vérifier que les produits ont bien des photoUrl (Picsum Photos)
