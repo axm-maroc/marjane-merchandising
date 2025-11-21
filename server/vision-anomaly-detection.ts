@@ -49,7 +49,9 @@ export async function detectAnomalies(
   const expectedLayout = buildExpectedLayout(planogramProducts, allProducts);
 
   // Analyser la photo avec l'IA
-  const response = await invokeLLM({
+  let response;
+  try {
+    response = await invokeLLM({
     messages: [
       {
         role: "system",
@@ -136,11 +138,23 @@ Sois précis et fournis des recommandations actionnables.`,
     },
   });
 
-  const content = response.choices[0].message.content;
-  if (typeof content !== 'string') {
-    throw new Error('Invalid response format');
+  } catch (error: any) {
+    console.error('[Vision Anomaly] Error calling LLM:', error);
+    throw new Error(`Erreur lors de l'analyse IA: ${error.message || 'Erreur inconnue'}`);
   }
-  const result = JSON.parse(content);
+
+  const content = response.choices[0]?.message?.content;
+  if (!content || typeof content !== 'string') {
+    throw new Error('Format de réponse invalide de l\'IA');
+  }
+  
+  let result;
+  try {
+    result = JSON.parse(content);
+  } catch (error) {
+    console.error('[Vision Anomaly] Error parsing JSON:', content);
+    throw new Error('Impossible de parser la réponse de l\'IA');
+  }
 
   // Enrichir les anomalies avec les IDs de produits
   const enrichedAnomalies = result.anomalies.map((anomaly: any) => {

@@ -790,3 +790,14 @@
 - ✅ 12 magasins Marjane authentiques avec données réalistes
 - ✅ 25 produits avec photos réelles depuis Unsplash
 - ✅ Base de données propre sans magasins de test
+
+
+## Correction urgente demandée par l'utilisateur
+
+### Module de détection d'anomalies
+- [x] Identifier le problème dans le module de détection d'anomalies (planogramId invalide)
+- [x] Corriger les erreurs identifiées (utiliser planogramId 180002)
+- [x] Améliorer la gestion d'erreur pour afficher les messages d'erreur détaillés
+- [x] Tester la fonctionnalité avec une photo d'exemple (test API réussi)
+- [x] Vérifier que l'analyse IA fonctionne correctement (4 anomalies détectées, score 75/100)
+- [x] Créer un test unitaire pour la détection d'anomalies (test passé avec succès)

@@ -11,7 +11,7 @@ import { toast } from "sonner";
 
 export default function AnomalyDetection() {
   const [photoUrl, setPhotoUrl] = useState("");
-  const [planogramId, setPlanogramId] = useState<number>(1); // Default to first planogram
+  const [planogramId, setPlanogramId] = useState<number>(180002); // Default to first available planogram
   const [detectionResult, setDetectionResult] = useState<any>(null);
 
   // const { data: planograms } = trpc.planograms.list.useQuery();
@@ -22,8 +22,9 @@ export default function AnomalyDetection() {
       toast.success("Analyse terminée !");
     },
     onError: (error) => {
-      toast.error("Erreur lors de l'analyse");
-      console.error(error);
+      const errorMessage = error.message || "Erreur lors de l'analyse";
+      toast.error(errorMessage);
+      console.error('[AnomalyDetection] Error:', error);
     },
   });
 
