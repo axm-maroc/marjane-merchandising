@@ -862,3 +862,16 @@
 - [x] La logique de filtrage existante fonctionne correctement
 - [x] Tester avec le planogramme boissons (affiche uniquement les 5 boissons)
 - [x] Vérifier que les autres planogrammes fonctionnent correctement
+
+
+## Bug signalé - Filtre Planogramme dans Suivi des Stocks
+### Problème
+- [x] Le filtre Planogramme ne fonctionnait pas correctement (bloqué par les magasins de test)
+- [x] Objectif : cascade de filtres Magasin → Zones du magasin → Planogrammes de la zone → Produits du planogramme
+
+### Corrections apportées
+- [x] Identifié le problème : 6 magasins de test "Test Store Filters" bloquaient le chargement
+- [x] Mis à jour le script de nettoyage avec les bons IDs (240001-240006)
+- [x] Supprimé les 6 magasins de test et toutes leurs données associées
+- [x] Vérifié que la logique de filtrage existante fonctionne correctement
+- [x] Testé la cascade complète : Magasin → Zone → Planogramme → Produits (5 boissons affichées)

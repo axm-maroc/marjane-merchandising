@@ -11,7 +11,7 @@ async function cleanTestStores() {
 
   try {
     // IDs des magasins de test à supprimer
-    const testStoreIds = [210001, 210002, 210003, 210004, 210005, 210006, 210007, 210008, 210009, 210010, 210011, 210012];
+    const testStoreIds = [240001, 240002, 240003, 240004, 240005, 240006];
     const idsString = testStoreIds.join(',');
 
     // Afficher les magasins avant suppression
