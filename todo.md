@@ -713,3 +713,12 @@
 - [x] Grille responsive (1/2/3 colonnes selon la taille d'écran)
 - [x] Gestion d'erreur pour les images manquantes
 - [x] Tester l'éditeur amélioré
+
+
+## Réintégration des photos réelles de produits
+- [x] Rechercher l'ancienne fonctionnalité de sélection de photos dans l'historique
+- [x] Retrouver les URLs des photos réelles de produits (Unsplash - Coca-Cola, eau, produits laitiers, etc.)
+- [x] Réintégrer la logique de sélection de photos réelles dans le script de génération
+- [x] Mettre à jour les produits avec les vraies photos (Unsplash)
+- [x] Tester l'affichage dans l'éditeur de planogrammes
+- [x] Vérifier que tous les tests passent (101/105)

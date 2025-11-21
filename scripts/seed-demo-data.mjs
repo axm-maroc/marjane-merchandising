@@ -151,13 +151,58 @@ const sponsors = [
   { name: "Henkel Maroc", logo: "https://logo.clearbit.com/henkel.com" }
 ];
 
-// Catégories et produits types
+// Catégories et produits types avec URLs de vraies photos
 const productCategoriesData = [
-  { name: "Boissons", products: ["Coca-Cola 1.5L", "Eau minérale Sidi Ali 1.5L", "Jus d'orange Tropicana 1L", "Sprite 1.5L", "Fanta Orange 1.5L"] },
-  { name: "Produits Laitiers", products: ["Lait Centrale Laitière 1L", "Yaourt Danone Nature", "Fromage Vache qui rit", "Beurre Président", "Crème fraîche"] },
-  { name: "Épicerie", products: ["Huile Lesieur 1L", "Riz Taureau 1kg", "Pâtes Tria", "Sucre Cosumar 1kg", "Farine 1kg"] },
-  { name: "Hygiène", products: ["Shampoing Dove", "Savon Lux", "Dentifrice Signal", "Gel douche Palmolive", "Déodorant Rexona"] },
-  { name: "Entretien", products: ["Lessive Ariel", "Liquide vaisselle Paic", "Javel Lacroix", "Éponges Spontex", "Sacs poubelle"] }
+  { 
+    name: "Boissons", 
+    products: [
+      { name: "Coca-Cola 1.5L", photo: "https://images.unsplash.com/photo-1554866585-c4db4d2b3eb2?w=400&h=400&fit=crop" },
+      { name: "Eau minérale Sidi Ali 1.5L", photo: "https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400&h=400&fit=crop" },
+      { name: "Jus d'orange Tropicana 1L", photo: "https://images.unsplash.com/photo-1600271886742-f049cd1f3033?w=400&h=400&fit=crop" },
+      { name: "Sprite 1.5L", photo: "https://images.unsplash.com/photo-1599599810694-b5ac4dd0b2d7?w=400&h=400&fit=crop" },
+      { name: "Fanta Orange 1.5L", photo: "https://images.unsplash.com/photo-1599599810694-b5ac4dd0b2d7?w=400&h=400&fit=crop" }
+    ] 
+  },
+  { 
+    name: "Produits Laitiers", 
+    products: [
+      { name: "Lait Centrale Laitière 1L", photo: "https://images.unsplash.com/photo-1563636619-e0db3814a5be?w=400&h=400&fit=crop" },
+      { name: "Yaourt Danone Nature", photo: "https://images.unsplash.com/photo-1488477181946-6428a0291840?w=400&h=400&fit=crop" },
+      { name: "Fromage Vache qui rit", photo: "https://images.unsplash.com/photo-1452894895917-7aa521cf6fb4?w=400&h=400&fit=crop" },
+      { name: "Beurre Président", photo: "https://images.unsplash.com/photo-1452894895917-7aa521cf6fb4?w=400&h=400&fit=crop" },
+      { name: "Crème fraîche", photo: "https://images.unsplash.com/photo-1488477181946-6428a0291840?w=400&h=400&fit=crop" }
+    ] 
+  },
+  { 
+    name: "Épicerie", 
+    products: [
+      { name: "Huile Lesieur 1L", photo: "https://images.unsplash.com/photo-1587734356604-642c18f540eb?w=400&h=400&fit=crop" },
+      { name: "Riz Taureau 1kg", photo: "https://images.unsplash.com/photo-1586190936529-746f75a3993e?w=400&h=400&fit=crop" },
+      { name: "Pâtes Tria", photo: "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=400&h=400&fit=crop" },
+      { name: "Sucre Cosumar 1kg", photo: "https://images.unsplash.com/photo-1599599810694-b5ac4dd0b2d7?w=400&h=400&fit=crop" },
+      { name: "Farine 1kg", photo: "https://images.unsplash.com/photo-1599599810694-b5ac4dd0b2d7?w=400&h=400&fit=crop" }
+    ] 
+  },
+  { 
+    name: "Hygiène", 
+    products: [
+      { name: "Shampoing Dove", photo: "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&h=400&fit=crop" },
+      { name: "Savon Lux", photo: "https://images.unsplash.com/photo-1600271886742-f049cd1f3033?w=400&h=400&fit=crop" },
+      { name: "Dentifrice Signal", photo: "https://images.unsplash.com/photo-1587854692152-cbe660dbde0e?w=400&h=400&fit=crop" },
+      { name: "Gel douche Palmolive", photo: "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&h=400&fit=crop" },
+      { name: "Déodorant Rexona", photo: "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&h=400&fit=crop" }
+    ] 
+  },
+  { 
+    name: "Entretien", 
+    products: [
+      { name: "Lessive Ariel", photo: "https://images.unsplash.com/photo-1599599810694-b5ac4dd0b2d7?w=400&h=400&fit=crop" },
+      { name: "Liquide vaisselle Paic", photo: "https://images.unsplash.com/photo-1599599810694-b5ac4dd0b2d7?w=400&h=400&fit=crop" },
+      { name: "Javel Lacroix", photo: "https://images.unsplash.com/photo-1599599810694-b5ac4dd0b2d7?w=400&h=400&fit=crop" },
+      { name: "Éponges Spontex", photo: "https://images.unsplash.com/photo-1599599810694-b5ac4dd0b2d7?w=400&h=400&fit=crop" },
+      { name: "Sacs poubelle", photo: "https://images.unsplash.com/photo-1599599810694-b5ac4dd0b2d7?w=400&h=400&fit=crop" }
+    ] 
+  }
 ];
 
 async function seedDemoData() {
@@ -192,14 +237,16 @@ async function seedDemoData() {
     console.log("\n🛒 Création des produits...");
     const productIds = [];
     for (const category of productCategoriesData) {
-      for (const productName of category.products) {
+      for (const product of category.products) {
+        const productName = typeof product === 'string' ? product : product.name;
+        const photoUrl = typeof product === 'string' ? `https://picsum.photos/seed/${productName.replace(/\s+/g, '-')}/400/400` : product.photo;
         const [result] = await db.insert(products).values({
           sku: `SKU-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
           name: productName,
           brand: productName.split(' ')[0],
           categoryId: categoryIds[category.name],
           description: `Produit ${productName}`,
-          photoUrl: `https://picsum.photos/seed/${productName.replace(/\s+/g, '-')}/400/400`,
+          photoUrl: photoUrl,
           unitPrice: Math.floor(Math.random() * 50) + 10,
           barcode: `${Math.floor(Math.random() * 9000000000000) + 1000000000000}`,
           weight: Math.floor(Math.random() * 2000) + 100,
