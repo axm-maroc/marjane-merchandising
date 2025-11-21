@@ -25,6 +25,8 @@ import MobileCamera from "./pages/mobile/Camera";
 import MobileAnomalies from "./pages/mobile/Anomalies";
 import MobileProfile from "./pages/mobile/Profile";
 import StrategicKPIs from "./pages/StrategicKPIs";
+import CustomerFeedback from "./pages/CustomerFeedback";
+import FeedbackAdmin from "./pages/FeedbackAdmin";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -46,6 +48,8 @@ function Router() {
       <Route path="/anomalies" component={AnomalyDetection} />
       <Route path="/recommendations" component={Recommendations} />
       <Route path="/kpis" component={StrategicKPIs} />
+      <Route path="/feedback/:storeId" component={CustomerFeedback} />
+      <Route path="/feedback-admin" component={FeedbackAdmin} />
       
       {/* Routes mobiles */}
       <Route path="/mobile">

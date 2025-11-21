@@ -893,3 +893,37 @@
 - [x] Comparaison KPIs demandés vs implémentés (couverture 100%)
 - [x] Actions requises documentées
 - [x] Estimation du temps de développement
+
+
+## Formulaire de Feedback Client NPS avec QR Code
+
+### Formulaire Public
+- [x] Créer la page publique /feedback/:storeId
+- [x] Design mobile-first optimisé pour tablette/smartphone
+- [x] Échelle de notation 0-10 interactive avec couleurs (rouge/bleu/vert)
+- [x] Champ de commentaire optionnel (500 caractères max)
+- [x] Champ email optionnel avec validation
+- [x] Validation et soumission du feedback
+- [x] Page de remerciement après soumission avec informations du magasin
+- [x] Design gradient et animations
+
+### Génération de QR Codes
+- [x] Créer la page d'administration /feedback-admin
+- [x] Générer les QR codes stylisés par magasin (qr-code-styling)
+- [x] Afficher les QR codes avec nom du magasin et statistiques NPS
+- [x] Bouton de téléchargement des QR codes (PNG)
+- [x] Impression directe des QR codes avec template professionnel
+- [x] Statistiques de feedback par magasin (promoteurs/passifs/détracteurs)
+- [x] Copie de l'URL du formulaire dans le presse-papier
+- [x] Lien d'accès depuis la page KPIs Stratégiques
+
+### Tests et Validation
+- [x] Créer 14 tests unitaires (server/feedback.test.ts)
+- [x] Tester la soumission avec différents scores (promoteur/passif/détracteur)
+- [x] Tester la validation des scores (0-10)
+- [x] Tester les champs optionnels (commentaire, email)
+- [x] Vérifier le calcul du NPS après soumission
+- [x] Tester le filtrage par période
+- [x] Tester le flux complet d'intégration
+- [x] Tous les tests passent (14/14) ✅
+- [x] Créer un checkpoint

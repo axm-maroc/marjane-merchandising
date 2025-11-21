@@ -13,7 +13,8 @@ import {
   Smile,
   Clock,
   Target,
-  ArrowLeft
+  ArrowLeft,
+  QrCode
 } from "lucide-react";
 import { Link } from "wouter";
 import { Bar, Line } from "react-chartjs-2";
@@ -155,6 +156,12 @@ export default function StrategicKPIs() {
                 Indicateurs de performance clés pour le pilotage stratégique
               </p>
             </div>
+            <Link href="/feedback-admin">
+              <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700">
+                <QrCode className="w-4 h-4" />
+                QR Codes Feedback
+              </Button>
+            </Link>
           </div>
         </div>
       </header>
