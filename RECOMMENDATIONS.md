@@ -110,4 +110,3 @@ Voir `client/src/pages/ZoneEditor-tools-improved.tsx` pour un exemple d'impléme
 ---
 
 **Dernière mise à jour** : 20 novembre 2025
-**Auteur** : Manus AI Agent

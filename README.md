@@ -48,7 +48,7 @@ Solution complète d'optimisation merchandising pour les hypermarchés Marjane a
 - **MySQL/TiDB** comme base de données
 
 ### Authentification
-- **Manus OAuth** intégré
+- **OAuth** intégré
 - Gestion des rôles (admin/user)
 
 ### Tests
@@ -66,7 +66,6 @@ cd marjane-merchandising
 pnpm install
 
 # Configurer les variables d'environnement
-# (Les secrets sont injectés automatiquement par la plateforme Manus)
 
 # Pousser le schéma vers la base de données
 pnpm db:push
@@ -149,7 +148,7 @@ pnpm test:coverage
 
 ## 🔐 Sécurité
 
-- Authentification OAuth Manus
+- Authentification OAuth
 - Variables d'environnement sécurisées
 - Validation des entrées avec Zod
 - Protection CSRF
@@ -157,12 +156,12 @@ pnpm test:coverage
 
 ## 📝 Variables d'Environnement
 
-Les variables suivantes sont automatiquement injectées par la plateforme Manus :
+Les variables suivantes sont requises :
 
 - `DATABASE_URL` - Connexion MySQL/TiDB
 - `JWT_SECRET` - Secret pour les sessions
 - `OAUTH_SERVER_URL` - URL du serveur OAuth
-- `BUILT_IN_FORGE_API_KEY` - Clé API Manus
+- `BUILT_IN_FORGE_API_KEY` - Clé API
 - `VITE_APP_TITLE` - Titre de l'application
 - `VITE_APP_LOGO` - Logo de l'application
 
@@ -184,7 +183,6 @@ Développé pour **Marjane Maroc** - Leader de la grande distribution au Maroc
 
 ## 🔗 Liens Utiles
 
-- [Documentation Manus](https://docs.manus.im)
 - [Site Marjane](https://www.marjane.ma)
 - [Drizzle ORM](https://orm.drizzle.team)
 - [tRPC](https://trpc.io)
