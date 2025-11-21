@@ -206,19 +206,10 @@ export const appRouter = router({
           depth: input.depth,
         });
         
-        // Ajouter les produits au planogramme
-        for (const productId of input.productIds) {
-          await db.addProductToPlanogram({
-            planogramId: planogram.id,
-            productId,
-            position: 0, // Position par défaut, sera mise à jour lors du placement
-          });
-        }
-        
         // Sauvegarder automatiquement la version initiale
-        await db.savePlanogramVersion(planogram.id, "Création initiale du planogramme");
+        await db.savePlanogramVersion(planogram, "Création initiale du planogramme");
         
-        return planogram;
+        return { id: planogram };
       }),
     updateStatus: publicProcedure
       .input(z.object({
@@ -812,7 +803,13 @@ export const appRouter = router({
         rotationThreshold: z.number().optional(),
       }))
       .mutation(async ({ input }) => {
-        await db.createPromotionRule(input);
+        const ruleData = {
+          ...input,
+          marginThreshold: input.marginThreshold ? String(input.marginThreshold) : undefined,
+          seasonalityFactor: input.seasonalityFactor ? String(input.seasonalityFactor) : undefined,
+          rotationThreshold: input.rotationThreshold ? String(input.rotationThreshold) : undefined,
+        };
+        await db.createPromotionRule(ruleData);
         return { success: true };
       }),
     analyzeMargin: publicProcedure
@@ -849,16 +846,16 @@ export const appRouter = router({
           planogramId: input.planogramId,
           scenarioName: input.scenarioName,
           description: input.description,
-          baselineCA: input.baselineCA,
-          baselineMargin: input.baselineMargin,
+          baselineCA: String(input.baselineCA),
+          baselineMargin: String(input.baselineMargin),
           baselineStockouts: input.baselineStockouts,
-          projectedCA: simulation.projectedCA,
-          projectedMargin: simulation.projectedMargin,
+          projectedCA: String(simulation.projectedCA),
+          projectedMargin: String(simulation.projectedMargin),
           projectedStockouts: Math.round(simulation.projectedStockouts),
-          caImpactPercent: simulation.caImpactPercent,
-          marginImpactPercent: simulation.marginImpactPercent,
-          stockoutReductionPercent: simulation.stockoutReductionPercent,
-          confidenceScore: simulation.confidenceScore,
+          caImpactPercent: String(simulation.caImpactPercent),
+          marginImpactPercent: String(simulation.marginImpactPercent),
+          stockoutReductionPercent: String(simulation.stockoutReductionPercent),
+          confidenceScore: String(simulation.confidenceScore),
           status: "simulated",
         });
 

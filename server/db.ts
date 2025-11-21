@@ -196,8 +196,8 @@ export async function createPlanogramLocation(data: {
   // Récupérer le planogramme créé
   const planogram = await getPlanogramLocationById(insertedId);
   if (!planogram) throw new Error("Failed to create planogram location");
-  
-  return planogram;
+
+  return planogram.id;
 }
 
 export async function updatePlanogramLocationZone(locationId: number, zoneId: number | null) {
@@ -1294,35 +1294,31 @@ export async function createPlanogramWithProducts(data: {
   if (!db) throw new Error("Database not available");
 
   // 1. Créer l'emplacement du planogramme
-  const locationResult = await db.insert(planogramLocations).values({
+  const [locationResult] = await db.insert(planogramLocations).values({
     storeId: data.storeId,
     name: data.name,
-    location: data.location,
     zone: data.theme,
     zoneId: data.zoneId || null,
-  });
+  }).$returningId();
 
-  const locationId = Number(locationResult[0].insertId);
+  const locationId = locationResult.id;
 
   // 2. Créer le planogramme
-  const planogramResult = await db.insert(planograms).values({
+  const [planogramResult] = await db.insert(planograms).values({
     locationId,
     name: data.name,
     version: 1,
     status: "draft",
-    width: data.width,
-    height: data.height,
-    depth: data.depth,
-  });
+  }).$returningId();
 
-  const planogramId = Number(planogramResult[0].insertId);
+  const planogramId = planogramResult.id;
 
   // 3. Ajouter les produits au planogramme
   if (data.productIds.length > 0) {
     const productValues = data.productIds.map((productId, index) => ({
       planogramId,
       productId,
-      position: index + 1,
+      positionX: (index + 1) * 100,
       quantity: 1,
       facings: 1,
       shelfLevel: 1,
@@ -1334,24 +1330,16 @@ export async function createPlanogramWithProducts(data: {
   // 4. Créer l'entrée d'historique
   await db.insert(planogramHistory).values({
     planogramId,
-    userId: null, // TODO: Add user context
     version: 1,
     changeType: "created",
-    changeDescription: `Planogramme créé avec ${data.productIds.length} produits`,
-    snapshotData: JSON.stringify({
+    comment: `Planogramme créé avec ${data.productIds.length} produits`,
+    snapshot: JSON.stringify({
       name: data.name,
-      width: data.width,
-      height: data.height,
-      depth: data.depth,
       productCount: data.productIds.length,
     }),
   });
 
-  return {
-    locationId,
-    planogramId,
-    success: true,
-  };
+  return planogramId;
 }
 
 
@@ -1475,17 +1463,22 @@ export async function applyTemplateToStores(
 
   // Créer un planogramme pour chaque magasin
   for (const storeId of storeIds) {
+    // Créer une location pour ce magasin
+    const [location] = await db.insert(planogramLocations).values({
+      storeId,
+      name: locationName,
+      shelfCount: 4,
+      shelfWidth: 2000,
+      shelfHeight: 300,
+      shelfDepth: 400,
+    }).$returningId();
+
     // Créer le planogramme
     const [newPlanogram] = await db.insert(planograms).values({
-      storeId,
-      location: locationName,
+      locationId: location.id,
       name: `${template.name} - ${locationName}`,
       status: "draft",
       version: 1,
-      width: sourcePlanogram.width,
-      height: sourcePlanogram.height,
-      depth: sourcePlanogram.depth,
-      shelfCount: sourcePlanogram.shelfCount,
       salesTarget: sourcePlanogram.salesTarget,
     }).$returningId();
 
@@ -1505,6 +1498,7 @@ export async function applyTemplateToStores(
     await db.insert(planogramHistory).values({
       planogramId: newPlanogram.id,
       version: 1,
+      changeType: "created",
       comment: `Créé depuis le template "${template.name}"`,
     });
 
@@ -1584,8 +1578,8 @@ export async function analyzeMarginAndSeasonality(storeId: number) {
     // Récupérer les ventes et marges par produit
     const result = await db.select({
       productId: planogramProducts.productId,
-      totalSales: sql<number>`SUM(CAST(${salesForecasts.forecastedQuantity} AS DECIMAL(15,2)))`,
-      avgMargin: sql<number>`AVG(CAST(${products.margin} AS DECIMAL(5,2)))`,
+      totalSales: sql<number>`SUM(CAST(${salesForecasts.predictedQuantity} AS DECIMAL(15,2)))`,
+      avgRevenue: sql<number>`AVG(CAST(${salesForecasts.predictedRevenue} AS DECIMAL(15,2)))`,
     })
     .from(planogramProducts)
     .leftJoin(salesForecasts, eq(planogramProducts.productId, salesForecasts.productId))
