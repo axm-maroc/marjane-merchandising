@@ -425,3 +425,49 @@ export const stockoutHistory = mysqlTable("stockoutHistory", {
 
 export type StockoutHistory = typeof stockoutHistory.$inferSelect;
 export type InsertStockoutHistory = typeof stockoutHistory.$inferInsert;
+
+
+/**
+ * Règles de mise en avant automatisées par IA
+ */
+export const aiPromotionRules = mysqlTable("aiPromotionRules", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  ruleType: mysqlEnum("ruleType", ["margin_based", "seasonality_based", "rotation_based", "hybrid"]).notNull(),
+  marginThreshold: decimal("marginThreshold", { precision: 5, scale: 2 }),
+  seasonalityFactor: decimal("seasonalityFactor", { precision: 5, scale: 2 }),
+  rotationThreshold: decimal("rotationThreshold", { precision: 5, scale: 2 }),
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type AIPromotionRule = typeof aiPromotionRules.$inferSelect;
+export type InsertAIPromotionRule = typeof aiPromotionRules.$inferInsert;
+
+/**
+ * Simulations d'impact pour les scénarios de réimplantation
+ */
+export const impactSimulations = mysqlTable("impactSimulations", {
+  id: int("id").autoincrement().primaryKey(),
+  planogramId: int("planogramId").notNull(),
+  scenarioName: varchar("scenarioName", { length: 255 }).notNull(),
+  description: text("description"),
+  baselineCA: decimal("baselineCA", { precision: 15, scale: 2 }),
+  baselineMargin: decimal("baselineMargin", { precision: 15, scale: 2 }),
+  baselineStockouts: int("baselineStockouts"),
+  projectedCA: decimal("projectedCA", { precision: 15, scale: 2 }),
+  projectedMargin: decimal("projectedMargin", { precision: 15, scale: 2 }),
+  projectedStockouts: int("projectedStockouts"),
+  caImpactPercent: decimal("caImpactPercent", { precision: 5, scale: 2 }),
+  marginImpactPercent: decimal("marginImpactPercent", { precision: 5, scale: 2 }),
+  stockoutReductionPercent: decimal("stockoutReductionPercent", { precision: 5, scale: 2 }),
+  confidenceScore: decimal("confidenceScore", { precision: 5, scale: 2 }),
+  status: mysqlEnum("status", ["draft", "simulated", "approved", "applied"]).default("draft").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ImpactSimulation = typeof impactSimulations.$inferSelect;
+export type InsertImpactSimulation = typeof impactSimulations.$inferInsert;

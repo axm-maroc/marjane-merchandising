@@ -795,7 +795,89 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         return await db.deleteTemplate(input.templateId);
       }),
+   }),
+
+  // Règles de mise en avant automatisées par IA
+  aiRules: router({
+    getAll: publicProcedure.query(async () => {
+      return await db.getAllPromotionRules();
+    }),
+    create: protectedProcedure
+      .input(z.object({
+        name: z.string(),
+        description: z.string().optional(),
+        ruleType: z.enum(["margin_based", "seasonality_based", "rotation_based", "hybrid"]),
+        marginThreshold: z.number().optional(),
+        seasonalityFactor: z.number().optional(),
+        rotationThreshold: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        await db.createPromotionRule(input);
+        return { success: true };
+      }),
+    analyzeMargin: publicProcedure
+      .input(z.object({ storeId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.analyzeMarginAndSeasonality(input.storeId);
+      }),
+  }),
+
+  // Simulateur d'impact
+  impactSimulator: router({
+    create: protectedProcedure
+      .input(z.object({
+        planogramId: z.number(),
+        scenarioName: z.string(),
+        description: z.string().optional(),
+        baselineCA: z.number(),
+        baselineMargin: z.number(),
+        baselineStockouts: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        const simulation = await db.simulateImpact(
+          input.planogramId,
+          input.baselineCA,
+          input.baselineMargin,
+          input.baselineStockouts
+        );
+
+        if (!simulation) {
+          throw new Error("Failed to simulate impact");
+        }
+
+        const simulationId = await db.createImpactSimulation({
+          planogramId: input.planogramId,
+          scenarioName: input.scenarioName,
+          description: input.description,
+          baselineCA: input.baselineCA,
+          baselineMargin: input.baselineMargin,
+          baselineStockouts: input.baselineStockouts,
+          projectedCA: simulation.projectedCA,
+          projectedMargin: simulation.projectedMargin,
+          projectedStockouts: Math.round(simulation.projectedStockouts),
+          caImpactPercent: simulation.caImpactPercent,
+          marginImpactPercent: simulation.marginImpactPercent,
+          stockoutReductionPercent: simulation.stockoutReductionPercent,
+          confidenceScore: simulation.confidenceScore,
+          status: "simulated",
+        });
+
+        return { simulationId, ...simulation };
+      }),
+    getByPlanogram: publicProcedure
+      .input(z.object({ planogramId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getImpactSimulations(input.planogramId);
+      }),
+    updateStatus: protectedProcedure
+      .input(z.object({
+        simulationId: z.number(),
+        status: z.enum(["draft", "simulated", "approved", "applied"]),
+      }))
+      .mutation(async ({ input }) => {
+        await db.updateSimulationStatus(input.simulationId, input.status);
+        return { success: true };
+      }),
   }),
 });
-
 export type AppRouter = typeof appRouter;

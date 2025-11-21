@@ -7,6 +7,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import PlanogramTemplates from "./pages/PlanogramTemplates";
 import FeedbackDashboard from "./pages/FeedbackDashboard";
+import ImpactSimulator from "./pages/ImpactSimulator";
 import Stores from "./pages/Stores";
 import StoreDetail from "./pages/StoreDetail";
 import PlanogramView from "./pages/PlanogramView";
@@ -53,7 +54,8 @@ function Router() {
       <Route path="/recommendations" component={Recommendations} />
       <Route path="/kpis" component={StrategicKPIs} />
       <Route path="/feedback/:storeId" component={CustomerFeedback} />
-      <Route path="/feedback-admin" component={FeedbackAdmin} />
+      <Route path="/feedback-admin" component={FeedbackDashboard} />
+      <Route path="/impact-simulator" component={ImpactSimulator} />
       
       {/* Routes mobiles */}
       <Route path="/mobile">

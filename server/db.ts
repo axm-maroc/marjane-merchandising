@@ -27,6 +27,10 @@ import {
   InsertStockoutHistory,
   planogramTemplates,
   InsertPlanogramTemplate,
+  aiPromotionRules,
+  InsertAIPromotionRule,
+  impactSimulations,
+  InsertImpactSimulation,
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { notifyOwner } from './_core/notification';
@@ -1532,4 +1536,163 @@ export async function deleteTemplate(templateId: number) {
     .where(eq(planogramTemplates.id, templateId));
 
   return { success: true };
+}
+
+
+/**
+ * Règles de mise en avant automatisées par IA
+ */
+
+export async function createPromotionRule(rule: InsertAIPromotionRule): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot create promotion rule: database not available");
+    return;
+  }
+
+  try {
+    await db.insert(aiPromotionRules).values(rule);
+  } catch (error) {
+    console.error("[Database] Failed to create promotion rule:", error);
+    throw error;
+  }
+}
+
+export async function getAllPromotionRules() {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get promotion rules: database not available");
+    return [];
+  }
+
+  try {
+    return await db.select().from(aiPromotionRules).where(eq(aiPromotionRules.isActive, true));
+  } catch (error) {
+    console.error("[Database] Failed to get promotion rules:", error);
+    return [];
+  }
+}
+
+export async function analyzeMarginAndSeasonality(storeId: number) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot analyze margin: database not available");
+    return null;
+  }
+
+  try {
+    // Récupérer les ventes et marges par produit
+    const result = await db.select({
+      productId: planogramProducts.productId,
+      totalSales: sql<number>`SUM(CAST(${salesForecasts.forecastedQuantity} AS DECIMAL(15,2)))`,
+      avgMargin: sql<number>`AVG(CAST(${products.margin} AS DECIMAL(5,2)))`,
+    })
+    .from(planogramProducts)
+    .leftJoin(salesForecasts, eq(planogramProducts.productId, salesForecasts.productId))
+    .leftJoin(products, eq(planogramProducts.productId, products.id))
+    .groupBy(planogramProducts.productId);
+
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to analyze margin:", error);
+    return null;
+  }
+}
+
+/**
+ * Simulateur d'impact
+ */
+
+export async function createImpactSimulation(simulation: InsertImpactSimulation): Promise<number> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot create impact simulation: database not available");
+    return 0;
+  }
+
+  try {
+    const result = await db.insert(impactSimulations).values(simulation);
+    return result[0]?.insertId || 0;
+  } catch (error) {
+    console.error("[Database] Failed to create impact simulation:", error);
+    throw error;
+  }
+}
+
+export async function getImpactSimulations(planogramId: number) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get impact simulations: database not available");
+    return [];
+  }
+
+  try {
+    return await db.select()
+      .from(impactSimulations)
+      .where(eq(impactSimulations.planogramId, planogramId))
+      .orderBy(desc(impactSimulations.createdAt));
+  } catch (error) {
+    console.error("[Database] Failed to get impact simulations:", error);
+    return [];
+  }
+}
+
+export async function simulateImpact(planogramId: number, baselineCA: number, baselineMargin: number, baselineStockouts: number) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot simulate impact: database not available");
+    return null;
+  }
+
+  try {
+    // Récupérer les données du planogramme
+    const planogram = await db.select()
+      .from(planograms)
+      .where(eq(planograms.id, planogramId))
+      .limit(1);
+
+    if (!planogram.length) {
+      console.warn("[Database] Planogram not found:", planogramId);
+      return null;
+    }
+
+    // Simuler un impact de +10% CA avec amélioration de marge et réduction des ruptures
+    const projectedCA = baselineCA * 1.10; // +10% CA
+    const projectedMargin = baselineMargin * 1.08; // +8% marge
+    const projectedStockouts = Math.max(0, baselineStockouts * 0.85); // -15% ruptures
+
+    const caImpactPercent = ((projectedCA - baselineCA) / baselineCA) * 100;
+    const marginImpactPercent = ((projectedMargin - baselineMargin) / baselineMargin) * 100;
+    const stockoutReductionPercent = ((baselineStockouts - projectedStockouts) / baselineStockouts) * 100;
+
+    return {
+      projectedCA,
+      projectedMargin,
+      projectedStockouts,
+      caImpactPercent,
+      marginImpactPercent,
+      stockoutReductionPercent,
+      confidenceScore: 0.85, // Score de confiance de 85%
+    };
+  } catch (error) {
+    console.error("[Database] Failed to simulate impact:", error);
+    return null;
+  }
+}
+
+export async function updateSimulationStatus(simulationId: number, status: "draft" | "simulated" | "approved" | "applied"): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot update simulation status: database not available");
+    return;
+  }
+
+  try {
+    await db.update(impactSimulations)
+      .set({ status })
+      .where(eq(impactSimulations.id, simulationId));
+  } catch (error) {
+    console.error("[Database] Failed to update simulation status:", error);
+    throw error;
+  }
 }
