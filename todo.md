@@ -1232,3 +1232,23 @@
 - [ ] Vérifier la procédure tRPC planogramLocations.create
 - [ ] Vérifier la redirection après création
 - [ ] Tester la création complète
+
+
+## 🔴 Régressions Identifiées
+
+### QR Code
+- [ ] QR code ne fonctionne pas dans FeedbackAdmin
+- [ ] Vérifier la génération des QR codes
+- [ ] Vérifier l'affichage des QR codes
+- [ ] Tester le scan du QR code
+
+### Gestion des Magasins
+- [ ] Accès gestion des magasins non fonctionnel
+- [ ] Vérifier les permissions d'accès
+- [ ] Vérifier les routes
+
+### Planogramme 2D/3D
+- [ ] Planogramme 3D ne fonctionne pas
+- [ ] Planogramme 2D manque de photos
+- [ ] Ajouter des images pour les produits
+- [ ] Vérifier le rendu 3D
