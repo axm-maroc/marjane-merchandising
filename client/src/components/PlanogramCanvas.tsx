@@ -169,14 +169,7 @@ export default function PlanogramCanvas({
                     }}
                   >
                     <GripVertical className={`w-4 h-4 ${isPlaced ? "text-slate-300" : "text-slate-400"}`} />
-                    <img 
-                      src={product.imageUrl} 
-                      alt={product.name} 
-                      className="w-12 h-12 object-contain rounded" 
-                      onError={(e) => {
-                        e.currentTarget.src = 'https://images.unsplash.com/photo-1599599810694-b5ac4dd0b2d7?w=400&h=400&fit=crop';
-                      }}
-                    />
+                    <img src={product.imageUrl} alt={product.name} className="w-12 h-12 object-contain rounded" />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-slate-900 truncate">{product.name}</p>
                       <Badge variant="outline" className="text-xs mt-1">

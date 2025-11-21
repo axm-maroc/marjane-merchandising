@@ -606,7 +606,7 @@ function InteractivePlanogramEditor({
   const availableProducts = (allProducts || []).map(p => ({
     id: p.id,
     name: p.name,
-    imageUrl: p.photoUrl || 'https://images.unsplash.com/photo-1599599810694-b5ac4dd0b2d7?w=400&h=400&fit=crop',
+    imageUrl: p.photoUrl || '',
     category: 'Produit',
   }));
 
