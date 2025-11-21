@@ -1133,3 +1133,138 @@ export async function recordStockout(data: Omit<InsertStockoutHistory, 'createdA
   const result = await db.insert(stockoutHistory).values(data);
   return result;
 }
+
+
+/**
+ * Récupère la liste des feedbacks négatifs avec filtres
+ */
+export async function getNegativeFeedbacks(filters?: {
+  storeId?: number;
+  status?: "pending" | "in_progress" | "resolved";
+  startDate?: Date;
+  endDate?: Date;
+}) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const conditions = [sql`${npsScores.score} <= 6`];
+
+  if (filters?.storeId) {
+    conditions.push(eq(npsScores.storeId, filters.storeId));
+  }
+
+  if (filters?.status) {
+    conditions.push(eq(npsScores.status, filters.status));
+  }
+
+  if (filters?.startDate) {
+    conditions.push(sql`${npsScores.createdAt} >= ${filters.startDate}`);
+  }
+
+  if (filters?.endDate) {
+    conditions.push(sql`${npsScores.createdAt} <= ${filters.endDate}`);
+  }
+
+  const result = await db
+    .select({
+      id: npsScores.id,
+      storeId: npsScores.storeId,
+      storeName: stores.name,
+      storeCity: stores.city,
+      score: npsScores.score,
+      category: npsScores.category,
+      comment: npsScores.comment,
+      customerEmail: npsScores.customerEmail,
+      status: npsScores.status,
+      resolvedAt: npsScores.resolvedAt,
+      resolvedBy: npsScores.resolvedBy,
+      resolverName: users.name,
+      createdAt: npsScores.createdAt,
+    })
+    .from(npsScores)
+    .innerJoin(stores, eq(npsScores.storeId, stores.id))
+    .leftJoin(users, eq(npsScores.resolvedBy, users.id))
+    .where(and(...conditions))
+    .orderBy(desc(npsScores.createdAt));
+
+  return result;
+}
+
+/**
+ * Met à jour le statut d'un feedback
+ */
+export async function updateFeedbackStatus(
+  feedbackId: number,
+  status: "pending" | "in_progress" | "resolved",
+  userId?: number
+) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const updateData: any = {
+    status,
+  };
+
+  if (status === "resolved") {
+    updateData.resolvedAt = new Date();
+    if (userId) {
+      updateData.resolvedBy = userId;
+    }
+  } else if (status === "pending" || status === "in_progress") {
+    // Réinitialiser resolvedAt si on repasse en pending ou in_progress
+    updateData.resolvedAt = null;
+    updateData.resolvedBy = null;
+  }
+
+  await db
+    .update(npsScores)
+    .set(updateData)
+    .where(eq(npsScores.id, feedbackId));
+
+  return { success: true };
+}
+
+/**
+ * Récupère les statistiques des feedbacks négatifs
+ */
+export async function getNegativeFeedbackStats(storeId?: number) {
+  const db = await getDb();
+  if (!db) return { total: 0, pending: 0, inProgress: 0, resolved: 0 };
+
+  const conditions = [sql`${npsScores.score} <= 6`];
+
+  if (storeId) {
+    conditions.push(eq(npsScores.storeId, storeId));
+  }
+
+  const query = db
+    .select({
+      status: npsScores.status,
+      count: sql<number>`COUNT(*)`,
+    })
+    .from(npsScores)
+    .where(and(...conditions))
+    .groupBy(npsScores.status);
+
+  const result = await query;
+
+  let pending = 0;
+  let inProgress = 0;
+  let resolved = 0;
+
+  result.forEach((r) => {
+    const count = Number(r.count);
+    if (r.status === "pending") pending = count;
+    else if (r.status === "in_progress") inProgress = count;
+    else if (r.status === "resolved") resolved = count;
+  });
+
+  const total = pending + inProgress + resolved;
+
+  return {
+    total,
+    pending,
+    inProgress,
+    resolved,
+  };
+}

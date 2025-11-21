@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE npsScores \nADD COLUMN status ENUM('pending', 'in_progress', 'resolved') DEFAULT 'pending' NOT NULL,\nADD COLUMN resolvedAt TIMESTAMP NULL,\nADD COLUMN resolvedBy INT NULL;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2ysLRxkn5svVbvo.899a3d8366ac --database LebYPrKjTRfaTHWQfHeBAy --execute ALTER TABLE npsScores \nADD COLUMN status ENUM('pending', 'in_progress', 'resolved') DEFAULT 'pending' NOT NULL,\nADD COLUMN resolvedAt TIMESTAMP NULL,\nADD COLUMN resolvedBy INT NULL;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1093
+}

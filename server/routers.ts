@@ -1,7 +1,7 @@
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import * as db from "./db";
 import { z } from "zod";
 import * as aiRec from "./ai-recommendations";
@@ -630,6 +630,40 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         return await db.recordStockout(input);
+      }),
+  }),
+
+  // Gestion des feedbacks négatifs
+  feedback: router({
+    // Récupérer les feedbacks négatifs avec filtres
+    getNegative: publicProcedure
+      .input(z.object({
+        storeId: z.number().optional(),
+        status: z.enum(["pending", "in_progress", "resolved"]).optional(),
+        startDate: z.date().optional(),
+        endDate: z.date().optional(),
+      }))
+      .query(async ({ input }) => {
+        return await db.getNegativeFeedbacks(input);
+      }),
+    
+    // Mettre à jour le statut d'un feedback
+    updateStatus: protectedProcedure
+      .input(z.object({
+        feedbackId: z.number(),
+        status: z.enum(["pending", "in_progress", "resolved"]),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        return await db.updateFeedbackStatus(input.feedbackId, input.status, ctx.user.id);
+      }),
+    
+    // Récupérer les statistiques des feedbacks négatifs
+    getStats: publicProcedure
+      .input(z.object({
+        storeId: z.number().optional(),
+      }))
+      .query(async ({ input }) => {
+        return await db.getNegativeFeedbackStats(input.storeId);
       }),
   }),
 });

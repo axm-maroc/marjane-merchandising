@@ -956,3 +956,77 @@
 - [x] Tester le seuil de déclenchement (0-6 oui, 7-10 non)
 - [x] Tous les tests passent (15/15) ✅
 - [x] Créer un checkpoint
+
+
+## Recommandation 1 : Tableau de Bord des Feedbacks Négatifs
+
+### Backend - Schéma et Fonctions
+- [x] Ajouter le champ `status` (pending/in_progress/resolved) dans la table npsScores
+- [x] Ajouter le champ `resolvedAt` (timestamp) dans la table npsScores
+- [x] Ajouter le champ `resolvedBy` (userId) dans la table npsScores
+- [x] Créer la fonction `getNegativeFeedbacks()` avec filtres (magasin, période, statut)
+- [x] Créer la fonction `updateFeedbackStatus()` pour changer le statut
+- [x] Créer la fonction `getNegativeFeedbackStats()` pour les statistiques
+- [x] Créer les procédures tRPC correspondantes (feedback.getNegative, feedback.updateStatus, feedback.getStats)
+
+### Frontend - Interface
+- [x] Créer la page `/feedback-dashboard` pour le tableau de bord
+- [x] Afficher la liste chronologique des feedbacks négatifs
+- [x] Ajouter des filtres (magasin, statut)
+- [x] Afficher les badges de statut colorés (en attente/en cours/résolu)
+- [x] Permettre de changer le statut d'un feedback (3 boutons)
+- [x] Afficher les détails (score, commentaire, date, magasin, ville, email)
+- [x] Afficher les statistiques en haut (total, pending, in_progress, resolved)
+- [x] Ajouter la route dans App.tsx
+- [ ] Ajouter un lien depuis la page KPIs Stratégiques
+
+### Tests
+- [ ] Créer des tests pour getNegativeFeedbacks()
+- [ ] Tester les filtres (magasin, période, statut)
+- [ ] Tester updateFeedbackStatus()
+
+## Recommandation 2 : Système de Réponse aux Clients
+
+### Backend - Email
+- [ ] Créer la fonction `sendEmailToCustomer()` utilisant l'API Manus
+- [ ] Valider le format email avant envoi
+- [ ] Logger les emails envoyés
+- [ ] Créer la procédure tRPC `feedback.sendResponse`
+
+### Frontend - Interface
+- [ ] Ajouter un bouton "Répondre au client" dans le tableau de bord
+- [ ] Créer un dialog/modal pour composer l'email
+- [ ] Pré-remplir le sujet avec le contexte (magasin, score)
+- [ ] Champ de texte pour le message personnalisé
+- [ ] Afficher un message de confirmation après envoi
+- [ ] Marquer automatiquement le feedback comme "en cours" après envoi
+
+### Tests
+- [ ] Tester sendEmailToCustomer() avec email valide
+- [ ] Tester la validation d'email
+- [ ] Tester le cas où l'email n'est pas fourni
+
+## Recommandation 3 : Alertes SMS pour Feedbacks Critiques
+
+### Backend - SMS
+- [ ] Rechercher une API SMS gratuite ou intégrée (Twilio/Vonage)
+- [ ] Créer la fonction `sendSMSAlert()` pour les scores ≤ 3
+- [ ] Ajouter le champ `managerPhone` dans la table stores si absent
+- [ ] Intégrer l'envoi SMS dans `notifyNegativeFeedback()`
+- [ ] Gérer les erreurs d'envoi SMS
+
+### Configuration
+- [ ] Documenter comment configurer les credentials SMS
+- [ ] Ajouter les variables d'environnement nécessaires
+- [ ] Créer un système de fallback si SMS échoue
+
+### Tests
+- [ ] Tester l'envoi SMS pour score ≤ 3
+- [ ] Vérifier que score 4-6 n'envoie pas de SMS
+- [ ] Tester la gestion des erreurs SMS
+
+## Validation Globale
+- [ ] Tester le flux complet : feedback négatif → notification → tableau de bord → réponse client
+- [ ] Tester le flux critique : score ≤ 3 → notification + SMS
+- [ ] Vérifier que tous les tests passent
+- [ ] Créer un checkpoint final

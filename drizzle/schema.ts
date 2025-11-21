@@ -381,6 +381,9 @@ export const npsScores = mysqlTable("npsScores", {
   category: mysqlEnum("category", ["promoter", "passive", "detractor"]).notNull(),
   comment: text("comment"),
   customerEmail: varchar("customerEmail", { length: 320 }),
+  status: mysqlEnum("status", ["pending", "in_progress", "resolved"]).default("pending").notNull(),
+  resolvedAt: timestamp("resolvedAt"),
+  resolvedBy: int("resolvedBy"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
