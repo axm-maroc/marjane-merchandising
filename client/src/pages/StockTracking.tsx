@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, TrendingUp, TrendingDown, Package, AlertCircle, BarChart3, Download, AlertTriangle } from "lucide-react";
 import { Link } from "wouter";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Line, Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -96,20 +96,29 @@ export default function StockTracking() {
   }, [products, planogramProductsData, selectedPlanogramId]);
   
   // Auto-select first store, zone, planogram and product
-  useMemo(() => {
+  useEffect(() => {
     if (!selectedStoreId && stores && stores.length > 0) {
       setSelectedStoreId(stores[0].id);
     }
+  }, [stores, selectedStoreId]);
+
+  useEffect(() => {
     if (!selectedZoneId && zones && zones.length > 0) {
       setSelectedZoneId(zones[0].id);
     }
+  }, [zones, selectedZoneId]);
+
+  useEffect(() => {
     if (!selectedPlanogramId && planograms && planograms.length > 0) {
       setSelectedPlanogramId(planograms[0].id);
     }
+  }, [planograms, selectedPlanogramId]);
+
+  useEffect(() => {
     if (!selectedProductId && filteredProducts && filteredProducts.length > 0) {
       setSelectedProductId(filteredProducts[0].id);
     }
-  }, [stores, zones, planograms, filteredProducts, selectedStoreId, selectedZoneId, selectedPlanogramId, selectedProductId]);
+  }, [filteredProducts, selectedProductId]);
 
   const { data: stockHistory } = trpc.stock.history.useQuery(
     {

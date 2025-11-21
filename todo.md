@@ -849,3 +849,16 @@
 - [x] Tester les alertes de stock critique
 - [x] Vérifier le tri des alertes par sévérité
 - [x] Tous les tests passent avec succès
+
+
+## Amélioration du filtre produit par planogramme
+### Créer un planogramme boissons
+- [x] Identifier les produits de type boisson dans la base de données (5 produits: Coca-Cola, Eau Sidi Ali, Fanta, Jus Tropicana, Sprite)
+- [x] Créer un planogramme "Boissons" dans un magasin (ID: 270002, Zone: Entretien Maison)
+- [x] Associer les produits boissons au planogramme (5 produits ajoutés)
+
+### Améliorer le filtre produit
+- [x] Corriger le bug React (useMemo → useEffect pour setState)
+- [x] La logique de filtrage existante fonctionne correctement
+- [x] Tester avec le planogramme boissons (affiche uniquement les 5 boissons)
+- [x] Vérifier que les autres planogrammes fonctionnent correctement
