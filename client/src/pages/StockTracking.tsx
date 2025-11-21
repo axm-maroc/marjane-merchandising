@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, TrendingUp, TrendingDown, Package, AlertCircle, BarChart3 } from "lucide-react";
+import { ArrowLeft, TrendingUp, TrendingDown, Package, AlertCircle, BarChart3, Download, AlertTriangle } from "lucide-react";
 import { Link } from "wouter";
 import { useState, useMemo } from "react";
 import { Line, Bar } from "react-chartjs-2";
@@ -134,6 +134,25 @@ export default function StockTracking() {
     { enabled: !!selectedStoreId }
   );
 
+  // Charger les prévisions de stock
+  const { data: stockForecast } = trpc.stock.forecast.useQuery(
+    {
+      storeId: selectedStoreId || 0,
+      productId: selectedProductId || 0,
+      days: 30,
+    },
+    { enabled: !!selectedStoreId && !!selectedProductId }
+  );
+
+  // Charger les alertes de stock
+  const { data: stockAlerts } = trpc.stock.alerts.useQuery(
+    {
+      storeId: selectedStoreId || 0,
+      threshold: 0.2,
+    },
+    { enabled: !!selectedStoreId }
+  );
+
   const selectedProduct = useMemo(() => {
     return products?.find(p => p.id === selectedProductId);
   }, [products, selectedProductId]);
@@ -238,6 +257,31 @@ export default function StockTracking() {
     };
   }, [stockHistory]);
 
+  const forecastChartData = useMemo(() => {
+    if (!stockForecast || !stockForecast.forecast || stockForecast.forecast.length === 0) {
+      return null;
+    }
+
+    const labels = stockForecast.forecast.map((f: any) => 
+      new Date(f.date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
+    );
+
+    return {
+      labels,
+      datasets: [
+        {
+          label: 'Stock projeté',
+          data: stockForecast.forecast.map((f: any) => f.projectedStock),
+          borderColor: 'rgb(147, 51, 234)',
+          backgroundColor: 'rgba(147, 51, 234, 0.1)',
+          fill: true,
+          tension: 0.4,
+          borderDash: [5, 5],
+        },
+      ],
+    };
+  }, [stockForecast]);
+
   const currentStock = stockSummary?.currentStock || 0;
   const totalIn = stockSummary?.totalIn || 0;
   const totalOut = stockSummary?.totalOut || 0;
@@ -247,6 +291,50 @@ export default function StockTracking() {
     if (!forecasts || !selectedProductId) return null;
     return forecasts.find(f => f.productId === selectedProductId);
   }, [forecasts, selectedProductId]);
+
+  // Fonction d'export CSV
+  const exportToCSV = () => {
+    if (!selectedStore || !selectedProduct || !stockHistory) return;
+
+    const headers = ['Date', 'Type', 'Quantité', 'Stock Actuel'];
+    const rows = stockHistory.map((record: any) => [
+      new Date(record.recordedAt).toLocaleDateString('fr-FR'),
+      record.movementType === 'in' ? 'Entrée' : 'Sortie',
+      record.quantity,
+      '', // Stock actuel sera calculé
+    ]);
+
+    // Ajouter les prévisions si disponibles
+    if (stockForecast && stockForecast.forecast) {
+      rows.push(['', '', '', '']); // Ligne vide
+      rows.push(['PRÉVISIONS', '', '', '']);
+      stockForecast.forecast.forEach((f: any) => {
+        rows.push([
+          new Date(f.date).toLocaleDateString('fr-FR'),
+          'Prévision',
+          f.projectedSales,
+          f.projectedStock,
+        ]);
+      });
+    }
+
+    const csvContent = [
+      `Historique de Stock - ${selectedStore.name} - ${selectedProduct.name}`,
+      '',
+      headers.join(','),
+      ...rows.map(row => row.join(',')),
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `stock_${selectedStore.name}_${selectedProduct.name}_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
@@ -420,6 +508,51 @@ export default function StockTracking() {
               </Card>
             </div>
 
+            {/* Stock Alerts */}
+            {stockAlerts && stockAlerts.length > 0 && (
+              <Card className="border-red-200 bg-red-50 mb-6">
+                <CardHeader>
+                  <CardTitle className="text-red-900 flex items-center gap-2">
+                    <AlertTriangle className="w-5 h-5" />
+                    Alertes de Stock Critique
+                  </CardTitle>
+                  <CardDescription className="text-red-700">
+                    {stockAlerts.length} produit(s) nécessitent une attention immédiate
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {stockAlerts.slice(0, 5).map((alert: any) => (
+                      <div key={alert.productId} className="flex items-center justify-between p-3 bg-white rounded-lg border border-red-200">
+                        <div className="flex-1">
+                          <div className="font-medium text-slate-900">{alert.productName}</div>
+                          <div className="text-sm text-slate-600">
+                            Stock actuel: {alert.currentStock} unités
+                            {alert.daysUntilStockout && (
+                              <span className="ml-2 text-red-600 font-medium">
+                                • Rupture dans {alert.daysUntilStockout} jour(s)
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <Badge 
+                          variant={alert.severity === 'critical' ? 'destructive' : 'secondary'}
+                          className={
+                            alert.severity === 'high' ? 'bg-orange-500 text-white' :
+                            alert.severity === 'medium' ? 'bg-yellow-500 text-white' : ''
+                          }
+                        >
+                          {alert.severity === 'critical' ? 'Critique' :
+                           alert.severity === 'high' ? 'Élevé' :
+                           alert.severity === 'medium' ? 'Moyen' : 'Faible'}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               {/* Stock Evolution Chart */}
@@ -486,6 +619,112 @@ export default function StockTracking() {
                   )}
                 </CardContent>
               </Card>
+            </div>
+
+            {/* Stock Forecast Chart */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              <Card className="border-slate-200">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-slate-900">Prévisions de Stock (30 prochains jours)</CardTitle>
+                      <CardDescription className="text-slate-600">
+                        Projection basée sur l'historique de ventes
+                      </CardDescription>
+                    </div>
+                    <Button onClick={exportToCSV} variant="outline" size="sm">
+                      <Download className="w-4 h-4 mr-2" />
+                      Export CSV
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {forecastChartData ? (
+                    <Line
+                      data={forecastChartData}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: {
+                            display: true,
+                            position: 'top',
+                          },
+                        },
+                        scales: {
+                          y: {
+                            beginAtZero: true,
+                            ticks: {
+                              callback: function(value) {
+                                return value + ' unités';
+                              }
+                            }
+                          }
+                        }
+                      }}
+                      height={300}
+                    />
+                  ) : (
+                    <div className="text-center py-8 text-slate-600">
+                      Aucune donnée disponible
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Forecast Summary */}
+              {stockForecast && (
+                <Card className="border-slate-200">
+                  <CardHeader>
+                    <CardTitle className="text-slate-900">Résumé des Prévisions</CardTitle>
+                    <CardDescription className="text-slate-600">
+                      Indicateurs clés pour la gestion du stock
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                        <div className="text-sm text-slate-600">Ventes moyennes par jour</div>
+                        <div className="text-lg font-bold text-slate-900">
+                          {stockForecast.averageDailySales} unités
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                        <div className="text-sm text-slate-600">Stock actuel</div>
+                        <div className="text-lg font-bold text-slate-900">
+                          {stockForecast.currentStock} unités
+                        </div>
+                      </div>
+                      {stockForecast.daysUntilStockout !== null && (
+                        <div className={`flex items-center justify-between p-3 rounded-lg ${
+                          stockForecast.daysUntilStockout < 7 ? 'bg-red-50' : 'bg-green-50'
+                        }`}>
+                          <div className={`text-sm ${
+                            stockForecast.daysUntilStockout < 7 ? 'text-red-700' : 'text-green-700'
+                          }`}>
+                            Jours avant rupture
+                          </div>
+                          <div className={`text-lg font-bold ${
+                            stockForecast.daysUntilStockout < 7 ? 'text-red-600' : 'text-green-600'
+                          }`}>
+                            {stockForecast.daysUntilStockout} jours
+                          </div>
+                        </div>
+                      )}
+                      {stockForecast.daysUntilStockout && stockForecast.daysUntilStockout < 7 && (
+                        <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                          <div className="flex items-center gap-2 text-yellow-800">
+                            <AlertTriangle className="w-4 h-4" />
+                            <span className="text-sm font-medium">
+                              Réapprovisionnement recommandé
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
 
             {/* Forecast */}

@@ -283,6 +283,23 @@ export const appRouter = router({
       .query(async ({ input }) => {
         return await db.getStockSummary(input.storeId, input.productId);
       }),
+    forecast: publicProcedure
+      .input(z.object({
+        storeId: z.number(),
+        productId: z.number(),
+        days: z.number().default(30),
+      }))
+      .query(async ({ input }) => {
+        return await db.getStockForecast(input.storeId, input.productId, input.days);
+      }),
+    alerts: publicProcedure
+      .input(z.object({
+        storeId: z.number(),
+        threshold: z.number().default(0.2), // 20% du stock moyen
+      }))
+      .query(async ({ input }) => {
+        return await db.getStockAlerts(input.storeId, input.threshold);
+      }),
   }),
 
   // Sales Forecasts

@@ -799,3 +799,119 @@ export async function getSponsorshipRevenue(storeId?: number, startDate?: Date, 
   const result = await query;
   return result[0] || { totalRevenue: 0, activeContracts: 0, expiredContracts: 0 };
 }
+
+
+// Stock Forecast Functions
+export async function getStockForecast(storeId: number, productId: number, days: number = 30) {
+  const db = await getDb();
+  if (!db) return { forecast: [], daysUntilStockout: null, averageDailySales: 0 };
+  
+  // Get stock history for the last 30 days to calculate average daily sales
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  
+  const history = await db
+    .select()
+    .from(stockHistory)
+    .where(
+      and(
+        eq(stockHistory.storeId, storeId),
+        eq(stockHistory.productId, productId),
+        gte(stockHistory.recordedAt, thirtyDaysAgo)
+      )
+    )
+    .orderBy(stockHistory.recordedAt);
+  
+  // Calculate current stock
+  let currentStock = 0;
+  history.forEach(record => {
+    if (record.movementType === 'in') {
+      currentStock += record.quantity;
+    } else {
+      currentStock -= record.quantity;
+    }
+  });
+  
+  // Calculate average daily sales (out movements)
+  const totalSales = history
+    .filter(r => r.movementType === 'out')
+    .reduce((sum, r) => sum + r.quantity, 0);
+  const averageDailySales = history.length > 0 ? totalSales / 30 : 0;
+  
+  // Generate forecast for the next N days
+  const forecast = [];
+  let projectedStock = currentStock;
+  
+  for (let i = 1; i <= days; i++) {
+    projectedStock = Math.max(0, projectedStock - averageDailySales);
+    const forecastDate = new Date();
+    forecastDate.setDate(forecastDate.getDate() + i);
+    
+    forecast.push({
+      date: forecastDate.toISOString().split('T')[0],
+      projectedStock: Math.round(projectedStock),
+      projectedSales: Math.round(averageDailySales),
+    });
+  }
+  
+  // Calculate days until stockout
+  let daysUntilStockout = null;
+  if (averageDailySales > 0) {
+    daysUntilStockout = Math.floor(currentStock / averageDailySales);
+  }
+  
+  return {
+    forecast,
+    daysUntilStockout,
+    averageDailySales: Math.round(averageDailySales * 10) / 10,
+    currentStock,
+  };
+}
+
+export async function getStockAlerts(storeId: number, threshold: number = 0.2) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Get all products in the store
+  const allProducts = await db.select().from(products);
+  
+  const alerts = [];
+  
+  for (const product of allProducts) {
+    // Get stock summary
+    const summary = await getStockSummary(storeId, product.id);
+    if (!summary) continue;
+    
+    const { currentStock, totalIn, totalOut } = summary;
+    
+    // Calculate average stock (total in / 2 as a simple estimate)
+    const averageStock = totalIn / 2;
+    const criticalThreshold = averageStock * threshold;
+    
+    // Get forecast to calculate days until stockout
+    const forecast = await getStockForecast(storeId, product.id, 30);
+    
+    // Alert if stock is below threshold or stockout is imminent
+    if (currentStock < criticalThreshold || (forecast.daysUntilStockout && forecast.daysUntilStockout < 7)) {
+      alerts.push({
+        productId: product.id,
+        productName: product.name,
+        currentStock,
+        criticalThreshold: Math.round(criticalThreshold),
+        daysUntilStockout: forecast.daysUntilStockout,
+        severity: currentStock === 0 ? 'critical' : 
+                  (forecast.daysUntilStockout && forecast.daysUntilStockout < 3) ? 'high' : 
+                  (forecast.daysUntilStockout && forecast.daysUntilStockout < 7) ? 'medium' : 'low',
+      });
+    }
+  }
+  
+  // Sort by severity and days until stockout
+  return alerts.sort((a, b) => {
+    const severityOrder: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
+    if (severityOrder[a.severity] !== severityOrder[b.severity]) {
+      return severityOrder[a.severity] - severityOrder[b.severity];
+    }
+    return (a.daysUntilStockout || 999) - (b.daysUntilStockout || 999);
+  });
+}

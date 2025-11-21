@@ -811,10 +811,7 @@
 - [x] Confirmer la suppression de toutes les données associées (zones, emplacements, planogrammes, etc.)
 
 
-## Bug signalé - Suivi des Stocks
-- [ ] Corriger le filtre produit qui ne remonte pas de données
-- [ ] Vérifier la logique de filtrage dans StockTracking.tsx
-- [ ] Tester le filtre avec différents produits
+
 
 
 ## Bug corrigé - Suivi des Stocks
@@ -822,3 +819,33 @@
 - [x] Vérifier la logique de filtrage dans StockTracking.tsx
 - [x] Tester le filtre avec différents produits (Coca-Cola 1.5L affiche 1451 unités)
 - [x] Confirmer que le filtre fonctionne avec et sans planogramme sélectionné
+
+
+## Améliorations du module Suivi des Stocks
+### 1. Graphiques de prévisions de stock
+- [x] Créer une procédure tRPC pour calculer les prévisions de stock (stock.forecast)
+- [x] Ajouter un graphique de tendance pour les 30 prochains jours
+- [x] Afficher les prévisions basées sur l'historique de ventes
+- [x] Créer la fonction getStockForecast dans db.ts
+- [x] Ajouter le graphique de prévisions dans StockTracking.tsx
+
+### 2. Alertes de stock critique
+- [x] Ajouter une section d'alertes dans l'interface
+- [x] Définir des seuils de stock critique (par défaut : 20% du stock moyen)
+- [x] Afficher les produits en rupture imminente avec badges d'alerte
+- [x] Calculer le nombre de jours avant rupture de stock
+- [x] Créer la fonction getStockAlerts dans db.ts
+- [x] Ajouter les badges de sévérité (Critique, Élevé, Moyen, Faible)
+
+### 3. Export CSV/Excel
+- [x] Ajouter un bouton d'export dans l'interface
+- [x] Créer une fonction pour générer un fichier CSV
+- [x] Inclure toutes les données : historique, stock actuel, prévisions
+- [x] Télécharger automatiquement le fichier
+- [x] Implémenter la fonction exportToCSV dans StockTracking.tsx
+
+### Tests
+- [x] Créer des tests unitaires pour les prévisions de stock (7 tests)
+- [x] Tester les alertes de stock critique
+- [x] Vérifier le tri des alertes par sévérité
+- [x] Tous les tests passent avec succès
