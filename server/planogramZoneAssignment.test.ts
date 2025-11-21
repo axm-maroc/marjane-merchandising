@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { describe, it, expect } from "vitest";
 import { appRouter } from "./routers";
 import type { TrpcContext } from "./_core/context";
+import { getTestStoreId } from "./_test/helpers";
 
 type AuthenticatedUser = NonNullable<TrpcContext["user"]>;
 
@@ -37,12 +38,13 @@ describe("Planogram Zone Assignment", () => {
     const caller = appRouter.createCaller(ctx);
 
     // Récupérer une zone
-    const zones = await caller.zones.byStore({ storeId: 1 });
+    const storeId = await getTestStoreId();
+    const zones = await caller.zones.byStore({ storeId });
     expect(zones.length).toBeGreaterThan(0);
     const zone = zones[0];
 
     // Récupérer un emplacement
-    const locations = await caller.planogramLocations.byStore({ storeId: 1 });
+    const locations = await caller.planogramLocations.byStore({ storeId });
     expect(locations.length).toBeGreaterThan(0);
     const location = locations[0];
 
@@ -66,7 +68,8 @@ describe("Planogram Zone Assignment", () => {
     const caller = appRouter.createCaller(ctx);
 
     // Récupérer un emplacement avec une zone
-    const locations = await caller.planogramLocations.byStore({ storeId: 1 });
+    const storeId = await getTestStoreId();
+    const locations = await caller.planogramLocations.byStore({ storeId });
     const locationWithZone = locations.find(loc => loc.zoneId !== null);
     
     if (locationWithZone) {
@@ -90,18 +93,19 @@ describe("Planogram Zone Assignment", () => {
     const caller = appRouter.createCaller(ctx);
 
     // Récupérer les zones
-    const zones = await caller.zones.byStore({ storeId: 1 });
+    const storeId = await getTestStoreId();
+    const zones = await caller.zones.byStore({ storeId });
     expect(zones.length).toBeGreaterThan(0);
     const zone = zones[0];
 
     // Récupérer tous les emplacements
-    const locations = await caller.planogramLocations.byStore({ storeId: 1 });
+    const locations = await caller.planogramLocations.byStore({ storeId });
     
     // Filtrer par zone
     const locationsInZone = locations.filter(loc => loc.zoneId === zone.id);
     
     // Vérifier qu'on peut récupérer les planogrammes de ces emplacements
-    const planograms = await caller.planograms.byStore({ storeId: 1 });
+    const planograms = await caller.planograms.byStore({ storeId });
     const planogramsInZone = planograms.filter(p => 
       locationsInZone.some(loc => loc.id === p.locationId)
     );
@@ -115,10 +119,11 @@ describe("Planogram Zone Assignment", () => {
     const caller = appRouter.createCaller(ctx);
 
     // Récupérer les zones
-    const zones = await caller.zones.byStore({ storeId: 1 });
+    const storeId = await getTestStoreId();
+    const zones = await caller.zones.byStore({ storeId });
     
     // Récupérer tous les emplacements
-    const locations = await caller.planogramLocations.byStore({ storeId: 1 });
+    const locations = await caller.planogramLocations.byStore({ storeId });
     
     // Compter pour chaque zone
     zones.forEach(zone => {
@@ -134,9 +139,10 @@ describe("Zone Editor Integration", () => {
     const caller = appRouter.createCaller(ctx);
 
     // Récupérer une zone avec des planogrammes
-    const zones = await caller.zones.byStore({ storeId: 1 });
-    const locations = await caller.planogramLocations.byStore({ storeId: 1 });
-    const planograms = await caller.planograms.byStore({ storeId: 1 });
+    const storeId = await getTestStoreId();
+    const zones = await caller.zones.byStore({ storeId });
+    const locations = await caller.planogramLocations.byStore({ storeId });
+    const planograms = await caller.planograms.byStore({ storeId });
 
     zones.forEach(zone => {
       // Emplacements de cette zone
@@ -162,7 +168,8 @@ describe("Zone Editor Integration", () => {
     const caller = appRouter.createCaller(ctx);
 
     // Récupérer une zone
-    const zones = await caller.zones.byStore({ storeId: 1 });
+    const storeId = await getTestStoreId();
+    const zones = await caller.zones.byStore({ storeId });
     expect(zones.length).toBeGreaterThan(0);
     const zone = zones[0];
 
@@ -190,8 +197,9 @@ describe("Badge Display on Canvas", () => {
     const caller = appRouter.createCaller(ctx);
 
     // Récupérer les données
-    const zones = await caller.zones.byStore({ storeId: 1 });
-    const locations = await caller.planogramLocations.byStore({ storeId: 1 });
+    const storeId = await getTestStoreId();
+    const zones = await caller.zones.byStore({ storeId });
+    const locations = await caller.planogramLocations.byStore({ storeId });
 
     zones.forEach(zone => {
       // Compter les emplacements de cette zone

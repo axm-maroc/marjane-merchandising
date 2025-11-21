@@ -702,3 +702,14 @@
 - [x] Modifier le script seed-demo-data.mjs pour ajouter photoUrl
 - [x] Régénérer les données avec les photos des produits
 - [x] Vérifier que les produits ont bien des photoUrl (Picsum Photos)
+
+
+## Amélioration de l'éditeur de planogrammes
+- [x] Analyser l'éditeur de planogrammes actuel (CreatePlanogram.tsx)
+- [x] Créer une interface de sélection visuelle des produits avec grille de photos
+- [x] Remplacer la liste textuelle par des cartes produits avec photos
+- [x] Afficher le nom, la marque, le prix et la photo de chaque produit
+- [x] Ajouter badge de sélection vert et overlay hover
+- [x] Grille responsive (1/2/3 colonnes selon la taille d'écran)
+- [x] Gestion d'erreur pour les images manquantes
+- [x] Tester l'éditeur amélioré

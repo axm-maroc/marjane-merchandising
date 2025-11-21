@@ -436,27 +436,63 @@ export default function CreatePlanogram() {
                 </div>
 
                 {/* Products Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[500px] overflow-y-auto">
                   {filteredProducts?.map((product) => (
                     <div
                       key={product.id}
                       onClick={() => toggleProduct(product.id)}
-                      className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                      className={`group relative rounded-lg border-2 cursor-pointer transition-all overflow-hidden ${
                         selectedProducts.has(product.id)
-                          ? "border-green-600 bg-green-50"
-                          : "border-slate-200 hover:border-slate-300"
+                          ? "border-green-600 bg-green-50 shadow-md"
+                          : "border-slate-200 hover:border-green-300 hover:shadow-sm"
                       }`}
                     >
-                      <div className="flex items-start gap-3">
-                        <Checkbox
-                          checked={selectedProducts.has(product.id)}
-                          className="mt-1"
-                        />
-                        <div className="flex-1">
-                          <div className="font-medium text-slate-900">{product.name}</div>
-                          <div className="text-sm text-slate-600 mt-1">
-                            {product.brand || "Sans marque"} • {(product.unitPrice / 100).toFixed(2)} MAD
+                      {/* Photo du produit */}
+                      <div className="relative aspect-square bg-slate-100">
+                        {product.photoUrl ? (
+                          <img
+                            src={product.photoUrl}
+                            alt={product.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.src = 'https://via.placeholder.com/400x400?text=Pas+de+photo';
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-slate-400">
+                            <Package className="w-16 h-16" />
                           </div>
+                        )}
+                        
+                        {/* Badge de sélection */}
+                        {selectedProducts.has(product.id) && (
+                          <div className="absolute top-2 right-2 bg-green-600 text-white rounded-full p-1.5">
+                            <CheckCircle2 className="w-5 h-5" />
+                          </div>
+                        )}
+                        
+                        {/* Overlay hover */}
+                        <div className={`absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors ${
+                          selectedProducts.has(product.id) ? 'bg-green-600/10' : ''
+                        }`} />
+                      </div>
+                      
+                      {/* Informations du produit */}
+                      <div className="p-3">
+                        <div className="font-medium text-slate-900 line-clamp-2 mb-1">
+                          {product.name}
+                        </div>
+                        <div className="text-sm text-slate-600 mb-2">
+                          {product.brand || "Sans marque"}
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-lg font-bold text-green-600">
+                            {(product.unitPrice / 100).toFixed(2)} MAD
+                          </span>
+                          <Checkbox
+                            checked={selectedProducts.has(product.id)}
+                            className="pointer-events-none"
+                          />
                         </div>
                       </div>
                     </div>
