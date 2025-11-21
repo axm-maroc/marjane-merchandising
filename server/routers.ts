@@ -276,6 +276,79 @@ export const appRouter = router({
         
         return { success: true };
       }),
+    exportCSV: publicProcedure
+      .input(z.object({ planogramId: z.number() }))
+      .query(async ({ input }) => {
+        const { exportPlanogramToCSV } = await import('./planogram-import-export');
+        const csvContent = await exportPlanogramToCSV(input.planogramId);
+        return { content: csvContent };
+      }),
+    exportXLSX: publicProcedure
+      .input(z.object({ planogramId: z.number() }))
+      .mutation(async ({ input }) => {
+        const { exportPlanogramToXLSX } = await import('./planogram-import-export');
+        const buffer = await exportPlanogramToXLSX(input.planogramId);
+        return { buffer: buffer.toString('base64') };
+      }),
+    importCSV: publicProcedure
+      .input(z.object({ 
+        planogramId: z.number(),
+        csvContent: z.string()
+      }))
+      .mutation(async ({ input }) => {
+        const { importProductsFromCSV } = await import('./planogram-import-export');
+        const result = await importProductsFromCSV(input.planogramId, input.csvContent);
+        
+        if (result.success && result.imported > 0) {
+          await db.savePlanogramVersion(
+            input.planogramId,
+            `Import de ${result.imported} produits depuis CSV`
+          );
+        }
+        
+        return result;
+      }),
+    importXLSX: publicProcedure
+      .input(z.object({ 
+        planogramId: z.number(),
+        fileBase64: z.string()
+      }))
+      .mutation(async ({ input }) => {
+        const { importProductsFromXLSX } = await import('./planogram-import-export');
+        const buffer = Buffer.from(input.fileBase64, 'base64');
+        const result = await importProductsFromXLSX(input.planogramId, buffer);
+        
+        if (result.success && result.imported > 0) {
+          await db.savePlanogramVersion(
+            input.planogramId,
+            `Import de ${result.imported} produits depuis XLSX`
+          );
+        }
+        
+        return result;
+      }),
+    updateProductsPositions: publicProcedure
+      .input(z.object({
+        planogramId: z.number(),
+        updates: z.array(z.object({
+          id: z.number(),
+          quantity: z.number().optional(),
+          facings: z.number().optional(),
+          shelfLevel: z.number().optional(),
+          positionX: z.number().optional(),
+        })),
+      }))
+      .mutation(async ({ input }) => {
+        const result = await db.updateProductsPositions(input.planogramId, input.updates);
+        
+        // Sauvegarder automatiquement une version
+        await db.savePlanogramVersion(
+          input.planogramId,
+          `Mise à jour des positions de ${result.updated} produits`
+        );
+        
+        return result;
+      }),
   }),
 
   // Stock History
@@ -679,6 +752,48 @@ export const appRouter = router({
       }))
       .query(async ({ input }) => {
         return await db.getNegativeFeedbackStats(input.storeId);
+      }),
+  }),
+
+  // Templates de planogrammes
+  templates: router({
+    getAll: publicProcedure
+      .query(async () => {
+        return await db.getAllTemplates();
+      }),
+    create: publicProcedure
+      .input(z.object({
+        name: z.string(),
+        description: z.string().optional(),
+        category: z.string().optional(),
+        sourcePlanogramId: z.number(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        return await db.createTemplateFromPlanogram(
+          input.name,
+          input.description,
+          input.category,
+          input.sourcePlanogramId,
+          ctx.user?.id
+        );
+      }),
+    applyToStores: publicProcedure
+      .input(z.object({
+        templateId: z.number(),
+        storeIds: z.array(z.number()),
+        locationName: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        return await db.applyTemplateToStores(
+          input.templateId,
+          input.storeIds,
+          input.locationName
+        );
+      }),
+    delete: publicProcedure
+      .input(z.object({ templateId: z.number() }))
+      .mutation(async ({ input }) => {
+        return await db.deleteTemplate(input.templateId);
       }),
   }),
 });

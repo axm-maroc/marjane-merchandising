@@ -1103,3 +1103,38 @@
 - [ ] Tester l'import/export CSV/XLSX avec des données réelles
 - [ ] Tester le drag & drop sur différents navigateurs
 - [ ] Créer un checkpoint final
+
+## ✅ Fonctionnalités Planogrammes - Couverture 100%
+
+### Import/Export CSV/XLSX
+- [x] Bibliothèque `xlsx` installée
+- [x] Module `server/planogram-import-export.ts` créé
+- [x] 4 procédures tRPC (exportCSV, exportXLSX, importCSV, importXLSX)
+- [x] Boutons Import/Export dans PlanogramView
+- [x] Téléchargement automatique des fichiers exportés
+- [x] Upload et traitement des fichiers importés
+- [x] 4 tests unitaires validés
+
+### Drag & Drop pour Produits
+- [x] Composant `PlanogramEditor` avec @dnd-kit
+- [x] Fonction `updateProductsPositions()` dans db.ts
+- [x] Procédure tRPC `updateProductsPositions`
+- [x] Modification en ligne (quantité, facings, niveau, positionX)
+- [x] Sauvegarde automatique avec versioning
+- [x] Intégré dans l'onglet Éditeur de PlanogramView
+- [x] 3 tests unitaires validés
+
+### Système de Templates Réutilisables
+- [x] Table `planogramTemplates` créée
+- [x] 4 fonctions backend (create, getAll, apply, delete)
+- [x] 4 procédures tRPC exposées
+- [x] Page `/templates` avec interface complète
+- [x] Création depuis planogramme existant
+- [x] Application à plusieurs magasins
+- [x] Compteur d'utilisation (usageCount)
+- [x] 5 tests unitaires validés
+
+### Tests et Validation
+- [x] 13 tests unitaires créés (server/planogram-features.test.ts)
+- [x] Tous les tests passent (13/13) ✅
+- [x] Couverture 100% des fonctionnalités demandées

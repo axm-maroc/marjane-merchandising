@@ -25,6 +25,8 @@ import {
   InsertNPSScore,
   stockoutHistory,
   InsertStockoutHistory,
+  planogramTemplates,
+  InsertPlanogramTemplate,
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { notifyOwner } from './_core/notification';
@@ -1346,4 +1348,188 @@ export async function createPlanogramWithProducts(data: {
     planogramId,
     success: true,
   };
+}
+
+
+/**
+ * Met à jour les positions et propriétés de plusieurs produits dans un planogramme
+ */
+export async function updateProductsPositions(
+  planogramId: number,
+  updates: Array<{
+    id: number;
+    quantity?: number;
+    facings?: number;
+    shelfLevel?: number;
+    positionX?: number;
+  }>
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Mettre à jour chaque produit
+  for (const update of updates) {
+    const { id, ...fields } = update;
+    
+    if (Object.keys(fields).length > 0) {
+      await db
+        .update(planogramProducts)
+        .set(fields)
+        .where(eq(planogramProducts.id, id));
+    }
+  }
+
+  return { success: true, updated: updates.length };
+}
+
+
+/**
+ * Crée un template à partir d'un planogramme existant
+ */
+export async function createTemplateFromPlanogram(
+  name: string,
+  description: string | undefined,
+  category: string | undefined,
+  sourcePlanogramId: number,
+  createdBy: number | undefined
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const [template] = await db.insert(planogramTemplates).values({
+    name,
+    description,
+    category,
+    sourcePlanogramId,
+    createdBy,
+  }).$returningId();
+
+  return template;
+}
+
+/**
+ * Liste tous les templates disponibles
+ */
+export async function getAllTemplates() {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .select({
+      id: planogramTemplates.id,
+      name: planogramTemplates.name,
+      description: planogramTemplates.description,
+      category: planogramTemplates.category,
+      sourcePlanogramId: planogramTemplates.sourcePlanogramId,
+      usageCount: planogramTemplates.usageCount,
+      createdAt: planogramTemplates.createdAt,
+    })
+    .from(planogramTemplates)
+    .orderBy(desc(planogramTemplates.createdAt));
+}
+
+/**
+ * Applique un template à un ou plusieurs magasins
+ */
+export async function applyTemplateToStores(
+  templateId: number,
+  storeIds: number[],
+  locationName: string
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Récupérer le template
+  const [template] = await db
+    .select()
+    .from(planogramTemplates)
+    .where(eq(planogramTemplates.id, templateId))
+    .limit(1);
+
+  if (!template) {
+    throw new Error("Template introuvable");
+  }
+
+  // Récupérer le planogramme source
+  const [sourcePlanogram] = await db
+    .select()
+    .from(planograms)
+    .where(eq(planograms.id, template.sourcePlanogramId))
+    .limit(1);
+
+  if (!sourcePlanogram) {
+    throw new Error("Planogramme source introuvable");
+  }
+
+  // Récupérer les produits du planogramme source
+  const sourceProducts = await db
+    .select()
+    .from(planogramProducts)
+    .where(eq(planogramProducts.planogramId, template.sourcePlanogramId));
+
+  const createdPlanograms: number[] = [];
+
+  // Créer un planogramme pour chaque magasin
+  for (const storeId of storeIds) {
+    // Créer le planogramme
+    const [newPlanogram] = await db.insert(planograms).values({
+      storeId,
+      location: locationName,
+      name: `${template.name} - ${locationName}`,
+      status: "draft",
+      version: 1,
+      width: sourcePlanogram.width,
+      height: sourcePlanogram.height,
+      depth: sourcePlanogram.depth,
+      shelfCount: sourcePlanogram.shelfCount,
+      salesTarget: sourcePlanogram.salesTarget,
+    }).$returningId();
+
+    // Copier les produits
+    for (const product of sourceProducts) {
+      await db.insert(planogramProducts).values({
+        planogramId: newPlanogram.id,
+        productId: product.productId,
+        shelfLevel: product.shelfLevel,
+        positionX: product.positionX,
+        facings: product.facings,
+        quantity: product.quantity,
+      });
+    }
+
+    // Créer l'historique
+    await db.insert(planogramHistory).values({
+      planogramId: newPlanogram.id,
+      version: 1,
+      comment: `Créé depuis le template "${template.name}"`,
+    });
+
+    createdPlanograms.push(newPlanogram.id);
+  }
+
+  // Incrémenter le compteur d'utilisation du template
+  await db
+    .update(planogramTemplates)
+    .set({ usageCount: sql`${planogramTemplates.usageCount} + ${storeIds.length}` })
+    .where(eq(planogramTemplates.id, templateId));
+
+  return {
+    success: true,
+    created: createdPlanograms.length,
+    planogramIds: createdPlanograms,
+  };
+}
+
+/**
+ * Supprime un template
+ */
+export async function deleteTemplate(templateId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db
+    .delete(planogramTemplates)
+    .where(eq(planogramTemplates.id, templateId));
+
+  return { success: true };
 }

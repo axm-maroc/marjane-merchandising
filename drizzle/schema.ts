@@ -190,6 +190,24 @@ export type PlanogramHistory = typeof planogramHistory.$inferSelect;
 export type InsertPlanogramHistory = typeof planogramHistory.$inferInsert;
 
 /**
+ * Templates de planogrammes réutilisables
+ */
+export const planogramTemplates = mysqlTable("planogramTemplates", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  category: varchar("category", { length: 100 }),
+  sourcePlanogramId: int("sourcePlanogramId").notNull(),
+  createdBy: int("createdBy"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  usageCount: int("usageCount").default(0).notNull(),
+});
+
+export type PlanogramTemplate = typeof planogramTemplates.$inferSelect;
+export type InsertPlanogramTemplate = typeof planogramTemplates.$inferInsert;
+
+/**
  * Historique des stocks
  */
 export const stockHistory = mysqlTable("stockHistory", {

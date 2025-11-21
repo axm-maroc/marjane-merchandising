@@ -9,6 +9,7 @@ import { useMemo, useState } from "react";
 import PlanogramCanvas from "@/components/PlanogramCanvas";
 import { exportPlanogramToPDF } from "@/utils/pdfExport";
 import { toast } from "sonner";
+import PlanogramEditor from "@/components/PlanogramEditor";
 
 export default function PlanogramView() {
   const params = useParams();
@@ -31,6 +32,129 @@ export default function PlanogramView() {
     { planogramId: activePlanogram?.id || 0 },
     { enabled: !!activePlanogram }
   );
+
+  // @ts-ignore - Types will be available after server restart
+  const exportCSVMutation = trpc.planograms.exportCSV.useQuery(
+    { planogramId: activePlanogram?.id || 0 },
+    { enabled: false }
+  );
+
+  // @ts-ignore - Types will be available after server restart
+  const exportXLSXMutation = trpc.planograms.exportXLSX.useMutation();
+  // @ts-ignore - Types will be available after server restart
+  const importCSVMutation = trpc.planograms.importCSV.useMutation();
+  // @ts-ignore - Types will be available after server restart
+  const importXLSXMutation = trpc.planograms.importXLSX.useMutation();
+
+  const handleExportCSV = async () => {
+    if (!activePlanogram) return;
+
+    try {
+      toast.info("Export CSV en cours...");
+      const result = await exportCSVMutation.refetch();
+      
+      if (result.data) {
+        const blob = new Blob([result.data.content], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `planogramme-${activePlanogram.name}-${activePlanogram.version}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast.success("CSV exporté avec succès !");
+      }
+    } catch (error) {
+      console.error('Error exporting CSV:', error);
+      toast.error("Erreur lors de l'export CSV");
+    }
+  };
+
+  const handleExportXLSX = async () => {
+    if (!activePlanogram) return;
+
+    try {
+      toast.info("Export XLSX en cours...");
+      const result = await exportXLSXMutation.mutateAsync({ planogramId: activePlanogram.id });
+      
+      if (result.buffer) {
+        const buffer = Uint8Array.from(atob(result.buffer), c => c.charCodeAt(0));
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `planogramme-${activePlanogram.name}-${activePlanogram.version}.xlsx`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast.success("XLSX exporté avec succès !");
+      }
+    } catch (error) {
+      console.error('Error exporting XLSX:', error);
+      toast.error("Erreur lors de l'export XLSX");
+    }
+  };
+
+  const handleImportFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!activePlanogram) return;
+    
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      toast.info(`Import de ${file.name} en cours...`);
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const content = e.target?.result;
+        if (!content) return;
+
+        try {
+          let result;
+          if (file.name.endsWith('.csv')) {
+            result = await importCSVMutation.mutateAsync({
+              planogramId: activePlanogram.id,
+              csvContent: content as string,
+            });
+          } else if (file.name.endsWith('.xlsx')) {
+            const base64 = btoa(
+              new Uint8Array(content as ArrayBuffer)
+                .reduce((data, byte) => data + String.fromCharCode(byte), '')
+            );
+            result = await importXLSXMutation.mutateAsync({
+              planogramId: activePlanogram.id,
+              fileBase64: base64,
+            });
+          }
+
+          if (result) {
+            if (result.success) {
+              toast.success(`${result.imported} produits importés avec succès !`);
+              if (result.errors.length > 0) {
+                toast.warning(`${result.errors.length} erreurs d'import`);
+                console.warn('Import errors:', result.errors);
+              }
+            } else {
+              toast.error(`Erreur d'import: ${result.errors.join(', ')}`);
+            }
+          }
+        } catch (error) {
+          console.error('Error importing file:', error);
+          toast.error("Erreur lors de l'import");
+        }
+      };
+
+      if (file.name.endsWith('.csv')) {
+        reader.readAsText(file);
+      } else {
+        reader.readAsArrayBuffer(file);
+      }
+    } catch (error) {
+      console.error('Error reading file:', error);
+      toast.error("Erreur lors de la lecture du fichier");
+    }
+
+    // Reset input
+    event.target.value = '';
+  };
 
   const handleExportPDF = async () => {
     if (!activePlanogram || !location) return;
@@ -119,8 +243,46 @@ export default function PlanogramView() {
                     className="gap-2"
                   >
                     <FileDown className="w-4 h-4" />
-                    Exporter PDF
+                    Export PDF
                   </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleExportCSV()}
+                    className="gap-2"
+                  >
+                    <FileDown className="w-4 h-4" />
+                    Export CSV
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleExportXLSX()}
+                    className="gap-2"
+                  >
+                    <FileDown className="w-4 h-4" />
+                    Export XLSX
+                  </Button>
+                  <label htmlFor="import-file">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                      asChild
+                    >
+                      <span>
+                        <FileDown className="w-4 h-4 rotate-180" />
+                        Importer
+                      </span>
+                    </Button>
+                  </label>
+                  <input
+                    id="import-file"
+                    type="file"
+                    accept=".csv,.xlsx"
+                    className="hidden"
+                    onChange={handleImportFile}
+                  />
                   <Badge variant={activePlanogram.status === "active" ? "default" : "secondary"} className="text-sm px-3 py-1">
                     {activePlanogram.status === "active" ? "Actif" : activePlanogram.status === "draft" ? "Brouillon" : "Archivé"}
                   </Badge>
@@ -210,10 +372,29 @@ export default function PlanogramView() {
 
                 {/* Interactive Editor */}
                 <TabsContent value="editor">
-                  <InteractivePlanogramEditor 
-                    location={location}
-                    activePlanogram={activePlanogram}
-                    planogramProducts={planogramProducts || []}
+                  <PlanogramEditor
+                    products={(planogramProducts || []).map(pp => ({
+                      id: pp.id,
+                      productId: pp.productId,
+                      productName: pp.product?.name || 'Produit inconnu',
+                      quantity: pp.quantity,
+                      facings: pp.facings,
+                      shelfLevel: pp.shelfLevel,
+                      positionX: pp.positionX,
+                    }))}
+                    onSave={async (products) => {
+                      // @ts-ignore - Type will be available after server restart
+                      await trpc.planograms.updateProductsPositions.mutateAsync({
+                        planogramId: activePlanogram.id,
+                        updates: products.map(p => ({
+                          id: p.id,
+                          quantity: p.quantity,
+                          facings: p.facings,
+                          shelfLevel: p.shelfLevel,
+                          positionX: p.positionX,
+                        })),
+                      });
+                    }}
                   />
                 </TabsContent>
 
