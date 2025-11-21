@@ -10,18 +10,9 @@ export default function StoreDetail() {
   const params = useParams();
   const storeId = useMemo(() => parseInt(params.id || "0"), [params.id]);
   
-  const { data: store, isLoading: storeLoading, error: storeError } = trpc.stores.getById.useQuery(
-    { id: storeId },
-    { enabled: storeId > 0 }
-  );
-  const { data: zones, isLoading: zonesLoading } = trpc.zones.byStore.useQuery(
-    { storeId },
-    { enabled: storeId > 0 && !!store }
-  );
-  const { data: locations, isLoading: locationsLoading } = trpc.planogramLocations.byStore.useQuery(
-    { storeId },
-    { enabled: storeId > 0 && !!store }
-  );
+  const { data: store, isLoading: storeLoading } = trpc.stores.getById.useQuery({ id: storeId });
+  const { data: zones, isLoading: zonesLoading } = trpc.zones.byStore.useQuery({ storeId });
+  const { data: locations, isLoading: locationsLoading } = trpc.planogramLocations.byStore.useQuery({ storeId });
 
   if (storeLoading) {
     return (
@@ -34,18 +25,14 @@ export default function StoreDetail() {
     );
   }
 
-  if (!storeLoading && (!store || storeError)) {
+  if (!store) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
         <Card className="max-w-md">
           <CardContent className="py-12 text-center">
             <Store className="w-16 h-16 text-slate-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-slate-900 mb-2">Magasin introuvable</h3>
-            <p className="text-slate-600 mb-4">
-              {storeId > 0 
-                ? `Le magasin avec l'ID ${storeId} n'existe pas` 
-                : "ID de magasin invalide"}
-            </p>
+            <p className="text-slate-600 mb-4">Le magasin demandé n'existe pas</p>
             <Link href="/stores">
               <Button>Retour aux magasins</Button>
             </Link>
@@ -54,9 +41,6 @@ export default function StoreDetail() {
       </div>
     );
   }
-
-  // TypeScript guard: à ce stade, store est forcément défini
-  if (!store) return null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
