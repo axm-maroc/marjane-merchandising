@@ -2,7 +2,9 @@ import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";import { 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
   TrendingUp, 
   TrendingDown, 
   AlertTriangle, 
@@ -231,6 +233,15 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <main className="container py-8">
+        {/* Tabs */}
+        <Tabs defaultValue="analytics" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="kpis">KPIs Stratégiques</TabsTrigger>
+          </TabsList>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="space-y-6">
         {/* KPIs Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {/* Taux de conformité */}
@@ -417,6 +428,26 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </div>
+          </TabsContent>
+
+          {/* KPIs Tab */}
+          <TabsContent value="kpis" className="space-y-6">
+            <Card className="border-slate-200">
+              <CardHeader>
+                <CardTitle className="text-lg">Indicateurs Clés de Performance Stratégiques</CardTitle>
+                <CardDescription>CA/m², Rotation, Rupture, NPS, Temps d'actualisation</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <p className="text-slate-600 mb-4">Accédez aux KPIs stratégiques détaillés</p>
+                  <Link href="/kpis">
+                    <Button>Voir les KPIs Stratégiques →</Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
