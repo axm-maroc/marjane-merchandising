@@ -809,3 +809,16 @@
 - [x] Exécuter le nettoyage avec succès
 - [x] Vérifier que seuls les 12 magasins Marjane authentiques restent
 - [x] Confirmer la suppression de toutes les données associées (zones, emplacements, planogrammes, etc.)
+
+
+## Bug signalé - Suivi des Stocks
+- [ ] Corriger le filtre produit qui ne remonte pas de données
+- [ ] Vérifier la logique de filtrage dans StockTracking.tsx
+- [ ] Tester le filtre avec différents produits
+
+
+## Bug corrigé - Suivi des Stocks
+- [x] Corriger le filtre produit qui ne remonte pas de données
+- [x] Vérifier la logique de filtrage dans StockTracking.tsx
+- [x] Tester le filtre avec différents produits (Coca-Cola 1.5L affiche 1451 unités)
+- [x] Confirmer que le filtre fonctionne avec et sans planogramme sélectionné

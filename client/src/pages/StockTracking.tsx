@@ -85,12 +85,14 @@ export default function StockTracking() {
   const filteredProducts = useMemo(() => {
     if (!products) return [];
     
-    // Si aucun planogramme sélectionné, retourner tous les produits
-    if (!selectedPlanogramId || !planogramProductsData) return products;
+    // Si un planogramme est sélectionné, filtrer les produits du planogramme
+    if (selectedPlanogramId && planogramProductsData && planogramProductsData.length > 0) {
+      const productIdsInPlanogram = planogramProductsData.map((pp: any) => pp.productId);
+      return products.filter(p => productIdsInPlanogram.includes(p.id));
+    }
     
-    // Filtrer les produits qui sont dans le planogramme
-    const productIdsInPlanogram = planogramProductsData.map((pp: any) => pp.productId);
-    return products.filter(p => productIdsInPlanogram.includes(p.id));
+    // Si aucun planogramme sélectionné, retourner tous les produits
+    return products;
   }, [products, planogramProductsData, selectedPlanogramId]);
   
   // Auto-select first store, zone, planogram and product
