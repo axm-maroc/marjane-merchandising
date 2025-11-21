@@ -741,3 +741,13 @@
 - [x] Améliorer l'alignement et la lisibilité des boutons
 - [x] Vérifier que tous les boutons et contrôles sont visibles
 - [x] Tester l'affichage
+
+
+## Push vers GitHub
+- [ ] Créer un README.md complet avec documentation du projet
+- [ ] Initialiser le dépôt Git local
+- [ ] Ajouter tous les fichiers au staging
+- [ ] Créer le commit initial
+- [ ] Configurer le remote GitHub
+- [ ] Pousser vers GitHub (https://github.com/axm-maroc/marjane-merchandising.git)
+- [ ] Vérifier que le push a réussi
