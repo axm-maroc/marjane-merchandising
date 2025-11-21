@@ -732,3 +732,12 @@
 - [x] Vérifier que les photos correspondent aux désignations
 - [x] Tester l'affichage dans l'éditeur de planogrammes
 - [x] Valider que tous les tests passent (101/105)
+
+
+## Correction de l'affichage dans l'Éditeur de Zones
+- [x] Analyser l'affichage actuel des sections Outils et Planogrammes
+- [x] Corriger la mise en page et l'espacement des éléments
+- [x] Remplacer la grille 3 colonnes par une liste verticale
+- [x] Améliorer l'alignement et la lisibilité des boutons
+- [x] Vérifier que tous les boutons et contrôles sont visibles
+- [x] Tester l'affichage

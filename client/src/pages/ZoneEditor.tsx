@@ -724,36 +724,36 @@ export default function ZoneEditor() {
                   <Square className="w-4 h-4 text-blue-600" />
                   <Label className="font-semibold">Outils de dessin</Label>
                 </div>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="space-y-2">
                   <Button
                     variant={currentTool === 'select' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setCurrentTool('select')}
-                    className="flex flex-col items-center gap-1 h-auto py-3"
+                    className="w-full justify-start gap-2"
                     title="Sélectionner et déplacer les zones"
                   >
-                    <Move className="w-5 h-5" />
-                    <span className="text-xs">Sélectionner</span>
+                    <Move className="w-4 h-4" />
+                    <span>Sélectionner</span>
                   </Button>
                   <Button
                     variant={currentTool === 'rectangle' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setCurrentTool('rectangle')}
-                    className="flex flex-col items-center gap-1 h-auto py-3"
+                    className="w-full justify-start gap-2"
                     title="Dessiner une nouvelle zone"
                   >
-                    <Square className="w-5 h-5" />
-                    <span className="text-xs">Rectangle</span>
+                    <Square className="w-4 h-4" />
+                    <span>Rectangle</span>
                   </Button>
                   <Button
                     variant={currentTool === 'delete' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setCurrentTool('delete')}
-                    className="flex flex-col items-center gap-1 h-auto py-3"
+                    className="w-full justify-start gap-2"
                     title="Supprimer une zone"
                   >
-                    <Trash2 className="w-5 h-5" />
-                    <span className="text-xs">Supprimer</span>
+                    <Trash2 className="w-4 h-4" />
+                    <span>Supprimer</span>
                   </Button>
                 </div>
               </div>
