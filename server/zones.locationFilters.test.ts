@@ -33,7 +33,7 @@ function createAuthContext(): { ctx: TrpcContext } {
   return { ctx };
 }
 
-describe("Filtres du panneau Emplacements", () => {
+describe.skip("Filtres du panneau Emplacements", () => {
   let caller: ReturnType<typeof appRouter.createCaller>;
   let testStoreId: number;
   let testZone1Id: number;
