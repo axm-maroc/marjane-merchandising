@@ -12,10 +12,12 @@ import { exportPlanogramToPDF } from "@/utils/pdfExport";
 import { toast } from "sonner";
 import PlanogramEditor from "@/components/PlanogramEditor";
 import ProductCard from "@/components/ProductCard";
+import { useModuleNavigation } from "@/hooks/useModuleNavigation";
 
 export default function PlanogramView() {
   const params = useParams();
   const locationId = useMemo(() => parseInt(params.id || "0"), [params.id]);
+  const { goBackToModule } = useModuleNavigation();
   
   const { data: location } = trpc.planogramLocations.getById.useQuery({ id: locationId });
   const { data: planograms } = trpc.planograms.byLocation.useQuery({ locationId });
@@ -216,11 +218,9 @@ export default function PlanogramView() {
       <header className="bg-white border-b border-slate-200 shadow-sm">
         <div className="container py-6">
           <div className="flex items-center gap-4">
-            <Link href={`/stores/${location.storeId}`}>
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-            </Link>
+            <Button variant="ghost" size="icon" onClick={goBackToModule}>
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
             <div className="flex-1">
               <h1 className="text-3xl font-bold text-slate-900">{location.name}</h1>
               <p className="text-slate-600 mt-1">Zone: {location.zone}</p>

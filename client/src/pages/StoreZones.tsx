@@ -12,8 +12,10 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Plus, Building2, DollarSign, Calendar, AlertCircle, Edit, Trash2, Grid3x3 } from "lucide-react";
 import { Link } from "wouter";
 import { toast } from "sonner";
+import { useModuleNavigation } from "@/hooks/useModuleNavigation";
 
 export default function StoreZones() {
+  const { goBackToModule } = useModuleNavigation();
   const [, params] = useRoute("/stores/:id/zones");
   const storeId = parseInt(params?.id || "0");
   
@@ -103,11 +105,9 @@ export default function StoreZones() {
     <div className="container py-8">
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href={`/stores/${storeId}`}>
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </Link>
+          <Button variant="ghost" size="icon" onClick={goBackToModule}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
           <div>
             <h1 className="text-3xl font-bold">Zones du Magasin</h1>
             <p className="text-muted-foreground">{store?.name}</p>

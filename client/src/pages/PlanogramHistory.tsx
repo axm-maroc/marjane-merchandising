@@ -9,8 +9,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { toast } from "sonner";
 import { ArrowLeft, Clock, GitCompare, RotateCcw, MessageSquare } from "lucide-react";
 import { Link } from "wouter";
+import { useModuleNavigation } from "@/hooks/useModuleNavigation";
 
 export default function PlanogramHistory() {
+  const { goBackToModule } = useModuleNavigation();
   const params = useParams();
   const planogramId = parseInt(params.id || "0");
   
@@ -90,12 +92,10 @@ export default function PlanogramHistory() {
       <header className="bg-white border-b border-slate-200">
         <div className="container py-6">
           <div className="flex items-center gap-4 mb-4">
-            <Link href={`/planograms/location/${planogram.locationId}`}>
-              <Button variant="ghost" size="sm" className="gap-2">
-                <ArrowLeft className="w-4 h-4" />
-                Retour
-              </Button>
-            </Link>
+            <Button variant="ghost" size="sm" className="gap-2" onClick={goBackToModule}>
+              <ArrowLeft className="w-4 h-4" />
+              Retour
+            </Button>
           </div>
           <div className="flex items-center justify-between">
             <div>

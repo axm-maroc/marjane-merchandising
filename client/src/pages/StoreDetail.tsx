@@ -5,10 +5,12 @@ import { Badge } from "@/components/ui/badge";
 import { Store, MapPin, Phone, User, ArrowLeft, LayoutGrid, Calendar, Grid3x3, DollarSign } from "lucide-react";
 import { Link, useParams } from "wouter";
 import { useMemo } from "react";
+import { useModuleNavigation } from "@/hooks/useModuleNavigation";
 
 export default function StoreDetail() {
   const params = useParams();
   const storeId = useMemo(() => parseInt(params.id || "0"), [params.id]);
+  const { goBackToModule } = useModuleNavigation();
   
   const { data: store, isLoading: storeLoading } = trpc.stores.getById.useQuery({ id: storeId });
   const { data: zones, isLoading: zonesLoading } = trpc.zones.byStore.useQuery({ storeId });
@@ -48,11 +50,9 @@ export default function StoreDetail() {
       <header className="bg-white border-b border-slate-200 shadow-sm">
         <div className="container py-6">
           <div className="flex items-center gap-4">
-            <Link href="/stores">
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-            </Link>
+            <Button variant="ghost" size="icon" onClick={goBackToModule}>
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
             <div className="flex-1">
               <h1 className="text-3xl font-bold text-slate-900">{store.name}</h1>
               <p className="text-slate-600 mt-1 flex items-center gap-2">

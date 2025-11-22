@@ -22,6 +22,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Link, useLocation } from "wouter";
 import ProductCard from "@/components/ProductCard";
+import { useModuleNavigation } from "@/hooks/useModuleNavigation";
 
 const THEMES = [
   { id: "boissons", label: "Boissons", icon: Wine, color: "blue", categories: ["Boissons"] },
@@ -32,6 +33,7 @@ const THEMES = [
 ];
 
 export default function CreatePlanogram() {
+  const { goBackToModule } = useModuleNavigation();
   const [, setLocation] = useLocation();
   const [step, setStep] = useState(1);
   
@@ -131,11 +133,9 @@ export default function CreatePlanogram() {
       <header className="bg-white border-b border-slate-200 shadow-sm">
         <div className="container py-6">
           <div className="flex items-center gap-4">
-            <Link href="/planograms">
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-            </Link>
+            <Button variant="ghost" size="icon" onClick={goBackToModule}>
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
             <div className="flex items-center gap-3">
               <div className="p-3 bg-green-100 rounded-lg">
                 <Plus className="w-6 h-6 text-green-600" />
