@@ -14,7 +14,10 @@ import {
   BarChart3,
   Download,
   Calendar,
-  ArrowLeft
+  ArrowLeft,
+  RotateCcw,
+  Smile,
+  Clock
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { Link } from "wouter";
@@ -57,8 +60,7 @@ export default function Dashboard() {
   const [selectedStore, setSelectedStore] = useState<string>("all");
   const [selectedStoreId, setSelectedStoreId] = useState<number>(0);
 
-  // Icônes supplémentaires pour les KPIs
-  const { RotateCcw, Smile, Clock } = require('lucide-react');
+
 
   // Déterminer le nombre de jours en fonction de la période
   const getDaysFromPeriod = (period: TimePeriod): number => {
@@ -87,12 +89,12 @@ export default function Dashboard() {
   const { data: stores } = trpc.stores.list.useQuery();
   const { data: products } = trpc.products.list.useQuery();
   const { data: locations } = trpc.planogramLocations.list.useQuery();
-  const { data: anomalies } = trpc.anomalies.byPlanogram.useQuery({ planogramId: 1 });
+  const { data: anomalies } = trpc.anomalies.byPlanogram.useQuery({ planogramId: 1 }, { enabled: false });
   const { data: stockData } = trpc.stock.history.useQuery({ 
     storeId: selectedStore === "all" ? 1 : parseInt(selectedStore), 
     productId: 1,
     startDate: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000)
-  });
+  }, { enabled: false });
 
   // Charger les KPIs stratégiques
   const { data: revenuePerSqm } = trpc.kpis.revenuePerSqm.useQuery(

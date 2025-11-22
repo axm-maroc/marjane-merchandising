@@ -1,5 +1,5 @@
-import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +19,7 @@ import {
   Legend,
   Filler
 } from 'chart.js';
+import { useModuleNavigation } from "@/hooks/useModuleNavigation";
 
 // Register ChartJS components
 ChartJS.register(
@@ -34,6 +35,7 @@ ChartJS.register(
 );
 
 export default function StockTracking() {
+  const { goBackToModule } = useModuleNavigation();
   const { data: stores } = trpc.stores.list.useQuery();
   const { data: products } = trpc.products.list.useQuery();
   
@@ -252,11 +254,14 @@ export default function StockTracking() {
       <header className="bg-white border-b border-slate-200 shadow-sm">
         <div className="container py-6">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard">
-              <Button variant="ghost" size="icon" title="Retour au Dashboard">
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-            </Link>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              title="Retour au module précédent"
+              onClick={() => goBackToModule()}
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
             <div>
               <h1 className="text-3xl font-bold text-slate-900">Suivi des Stocks</h1>
               <p className="text-slate-600 mt-1">Historique et prévisions de stock par produit</p>
