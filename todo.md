@@ -1278,10 +1278,10 @@
 
 ## Enrichissement avec données réalistes
 - [x] Créer le composant PlanogramRenderer 2D/3D
+- [x] Créer la page AdminDataEnrichment pour ajouter les données
+- [x] Créer ZoneEditorV2 avec drag & drop fonctionnel des planogrammes
 - [ ] Remplir les planogrammes BAZ-5 et autres avec produits réels
 - [ ] Générer des photos 2D/3D des planogrammes remplis
 - [ ] Insérer les données de stock historique pour le Dashboard
 - [ ] Ajouter les données de ventes pour les KPIs
-- [ ] Insérer les données de conformité et anomalies
-- [ ] Refactoriser l'Éditeur de Zones avec drag & drop des planogrammes
-- [ ] Tester le drag & drop avec impact sur les données réelles
+- [ ] Intégrer PlanogramRenderer dans PlanogramView

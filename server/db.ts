@@ -2087,3 +2087,71 @@ export async function deletePlanograms(planogramIds: number[]) {
     return { success: false, deleted: 0, error: String(error) };
   }
 }
+
+
+// Enrichissement des données réalistes
+export async function seedRealisticData() {
+  const db = await getDb();
+  if (!db) return { success: false, message: "Database not available" };
+
+  try {
+    const productCategories = {
+      boissons: [
+        { name: "Coca-Cola 1.5L", price: 15 },
+        { name: "Sprite 1.5L", price: 14 },
+        { name: "Fanta Orange 1.5L", price: 13 },
+        { name: "Eau Sidi Ali 1.5L", price: 4 },
+        { name: "Jus Tropicana 1L", price: 18 },
+      ],
+      epicerie: [
+        { name: "Riz Taureau 1kg", price: 25 },
+        { name: "Huile Lesieur 1L", price: 45 },
+        { name: "Sucre Cristal 1kg", price: 12 },
+        { name: "Farine Tamawine 1kg", price: 8 },
+        { name: "Pâtes Barilla 500g", price: 20 },
+      ],
+      hygiene: [
+        { name: "Shampoing Dove 400ml", price: 35 },
+        { name: "Déodorant Rexona 150ml", price: 22 },
+        { name: "Dentifrice Signal 100ml", price: 12 },
+        { name: "Savon Lux 125g", price: 8 },
+        { name: "Lessive Ariel 2L", price: 55 },
+      ],
+    };
+
+    let productsCreated = 0;
+    const productMap: Record<string, number> = {};
+
+    // Créer les produits
+    for (const products of Object.values(productCategories)) {
+      for (const product of products) {
+        const existing = await db
+          .select()
+          .from(products as any)
+          .where(eq(products.name as any, product.name))
+          .limit(1);
+
+        if (!existing || existing.length === 0) {
+          const result = await db.insert(products as any).values({
+            name: product.name,
+            categoryId: 1,
+            price: product.price,
+            description: `Produit ${product.name}`,
+            imageUrl: `https://via.placeholder.com/150?text=${encodeURIComponent(product.name)}`,
+          });
+          productMap[product.name] = (result as any).insertId;
+          productsCreated++;
+        }
+      }
+    }
+
+    return {
+      success: true,
+      message: `${productsCreated} produits créés`,
+      productsCreated,
+    };
+  } catch (error) {
+    console.error("[Database] Seed error:", error);
+    return { success: false, message: String(error) };
+  }
+}
