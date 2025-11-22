@@ -1274,3 +1274,14 @@
 - [x] Ajouter la barre d'actions en masse avec boutons
 - [x] Ajouter les confirmations de suppression/archivage
 - [x] Implémenter les notifications de succès/erreur
+
+
+## Enrichissement avec données réalistes
+- [x] Créer le composant PlanogramRenderer 2D/3D
+- [ ] Remplir les planogrammes BAZ-5 et autres avec produits réels
+- [ ] Générer des photos 2D/3D des planogrammes remplis
+- [ ] Insérer les données de stock historique pour le Dashboard
+- [ ] Ajouter les données de ventes pour les KPIs
+- [ ] Insérer les données de conformité et anomalies
+- [ ] Refactoriser l'Éditeur de Zones avec drag & drop des planogrammes
+- [ ] Tester le drag & drop avec impact sur les données réelles
