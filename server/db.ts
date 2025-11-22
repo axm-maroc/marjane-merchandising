@@ -1956,3 +1956,134 @@ export async function getPlanogramSearchStats() {
 
   return { totalPlanograms, byStatus, byStore };
 }
+
+
+// Actions en masse pour planogrammes
+export async function archivePlanograms(planogramIds: number[]) {
+  const db = await getDb();
+  if (!db) return { success: false, archived: 0 };
+
+  try {
+    const result = await db
+      .update(planograms)
+      .set({ status: "archived" })
+      .where(sql`${planograms.id} IN (${sql.raw(planogramIds.join(","))})`);
+
+    return { success: true, archived: planogramIds.length };
+  } catch (error) {
+    console.error("[Database] Failed to archive planograms:", error);
+    return { success: false, archived: 0, error: String(error) };
+  }
+}
+
+export async function duplicatePlanogram(planogramId: number, newName: string) {
+  const db = await getDb();
+  if (!db) return null;
+
+  try {
+    // Récupérer le planogramme original
+    const original = await getPlanogramById(planogramId);
+    if (!original) throw new Error("Planogramme introuvable");
+
+    // Récupérer les produits du planogramme original
+    const products = await getPlanogramProducts(planogramId);
+
+    // Créer une copie du planogramme
+    const location = await getPlanogramLocationById(original.locationId);
+    if (!location) throw new Error("Emplacement introuvable");
+
+    // Insérer le nouveau planogramme
+    const result = await db.insert(planograms).values({
+      locationId: original.locationId,
+      name: newName,
+      version: 1,
+      status: "draft",
+      salesTarget: original.salesTarget,
+      startDate: original.startDate,
+      endDate: original.endDate,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    const newPlanogramId = (result as any).insertId;
+
+    // Dupliquer les produits
+    for (const product of products) {
+      await db.insert(planogramProducts).values({
+        planogramId: newPlanogramId,
+        productId: product.productId,
+        quantity: product.quantity,
+        facings: product.facings,
+        shelfLevel: product.shelfLevel,
+        positionX: product.positionX,
+        positionY: product.positionY,
+        width: product.width,
+        height: product.height,
+      });
+    }
+
+    // Sauvegarder la version initiale
+    await savePlanogramVersion(newPlanogramId, `Duplication du planogramme "${original.name}"`);
+
+    return { success: true, newPlanogramId };
+  } catch (error) {
+    console.error("[Database] Failed to duplicate planogram:", error);
+    return { success: false, error: String(error) };
+  }
+}
+
+export async function duplicatePlanograms(planogramIds: number[], nameSuffix: string = " (copie)") {
+  const db = await getDb();
+  if (!db) return { success: false, duplicated: 0, newIds: [] };
+
+  try {
+    const newIds: number[] = [];
+
+    for (const planogramId of planogramIds) {
+      const original = await getPlanogramById(planogramId);
+      if (!original) continue;
+
+      const result = await duplicatePlanogram(planogramId, `${original.name}${nameSuffix}`);
+      if (result?.success && result.newPlanogramId) {
+        newIds.push(result.newPlanogramId);
+      }
+    }
+
+    return { success: true, duplicated: newIds.length, newIds };
+  } catch (error) {
+    console.error("[Database] Failed to duplicate planograms:", error);
+    return { success: false, duplicated: 0, newIds: [], error: String(error) };
+  }
+}
+
+export async function deletePlanograms(planogramIds: number[]) {
+  const db = await getDb();
+  if (!db) return { success: false, deleted: 0 };
+
+  try {
+    // Supprimer les produits associés
+    await db
+      .delete(planogramProducts)
+      .where(sql`${planogramProducts.planogramId} IN (${sql.raw(planogramIds.join(","))})`);
+
+    // Supprimer l'historique
+    await db
+      .delete(planogramHistory)
+      .where(sql`${planogramHistory.planogramId} IN (${sql.raw(planogramIds.join(","))})`);
+
+    // Supprimer les photos
+    await db
+      .delete(planogramPhotos)
+      .where(sql`${planogramPhotos.planogramId} IN (${sql.raw(planogramIds.join(","))})`);
+
+    // Supprimer les planogrammes
+    const result = await db
+      .delete(planograms)
+      .where(sql`${planograms.id} IN (${sql.raw(planogramIds.join(","))})`);
+
+    return { success: true, deleted: planogramIds.length };
+  } catch (error) {
+    console.error("[Database] Failed to delete planograms:", error);
+    return { success: false, deleted: 0, error: String(error) };
+  }
+}

@@ -1265,3 +1265,12 @@
 - [x] Ajouter les filtres multiples en cascade
 - [ ] Créer une barre de recherche avec autocomplétion
 - [x] Ajouter un bouton d'export des résultats de recherche
+
+
+## Actions en masse pour planogrammes
+- [x] Ajouter les procédures tRPC pour archiver plusieurs planogrammes
+- [x] Ajouter les procédures tRPC pour dupliquer plusieurs planogrammes
+- [x] Implémenter la sélection multiple dans PlanogramSearch
+- [x] Ajouter la barre d'actions en masse avec boutons
+- [x] Ajouter les confirmations de suppression/archivage
+- [x] Implémenter les notifications de succès/erreur

@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Search, 
   Filter, 
@@ -12,8 +13,11 @@ import {
   LayoutGrid,
   ArrowLeft,
   Download,
-  Eye,
-  ChevronRight
+  Archive,
+  Copy,
+  Trash2,
+  ChevronRight,
+  AlertCircle
 } from "lucide-react";
 import { Link } from "wouter";
 import { toast } from "sonner";
@@ -36,11 +40,12 @@ export default function PlanogramSearch() {
   });
 
   const [currentPage, setCurrentPage] = useState(0);
+  const [selectedPlanograms, setSelectedPlanograms] = useState<Set<number>>(new Set());
   const pageSize = 20;
 
   // Récupérer les données
   const { data: stores } = trpc.stores.list.useQuery();
-  const { data: searchResults, isLoading } = (trpc.planograms as any).search.useQuery({
+  const { data: searchResults, isLoading, refetch } = (trpc.planograms as any).search.useQuery({
     searchQuery: filters.searchQuery || undefined,
     storeId: filters.storeId || undefined,
     status: filters.status !== "all" ? filters.status : undefined,
@@ -50,6 +55,11 @@ export default function PlanogramSearch() {
     offset: currentPage * pageSize,
   });
   const { data: stats } = (trpc.planograms as any).searchStats.useQuery();
+  
+  // Mutations
+  const archiveMultiple = (trpc.planograms as any).archiveMultiple.useMutation();
+  const duplicateMultiple = (trpc.planograms as any).duplicateMultiple.useMutation();
+  const deleteMultiple = (trpc.planograms as any).deleteMultiple.useMutation();
 
   const handleSearch = (query: string) => {
     setFilters({ ...filters, searchQuery: query });
@@ -80,6 +90,86 @@ export default function PlanogramSearch() {
       endDate: null,
     });
     setCurrentPage(0);
+  };
+
+  const handleSelectAll = () => {
+    if (searchResults?.results) {
+      if (selectedPlanograms.size === searchResults.results.length) {
+        setSelectedPlanograms(new Set<number>());
+      } else {
+        const newSelected = new Set<number>(searchResults.results.map((p: any) => p.id));
+        setSelectedPlanograms(newSelected);
+      }
+    }
+  };
+
+  const handleSelectPlanogram = (id: number) => {
+    const newSelected = new Set(selectedPlanograms);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedPlanograms(newSelected);
+  };
+
+  const handleArchiveSelected = async () => {
+    if (selectedPlanograms.size === 0) {
+      toast.error("Aucun planogramme sélectionné");
+      return;
+    }
+
+    try {
+      await archiveMultiple.mutateAsync({
+        planogramIds: Array.from(selectedPlanograms),
+      });
+      toast.success(`${selectedPlanograms.size} planogramme(s) archivé(s)`);
+      setSelectedPlanograms(new Set());
+      refetch();
+    } catch (error) {
+      toast.error("Erreur lors de l'archivage");
+    }
+  };
+
+  const handleDuplicateSelected = async () => {
+    if (selectedPlanograms.size === 0) {
+      toast.error("Aucun planogramme sélectionné");
+      return;
+    }
+
+    try {
+      await duplicateMultiple.mutateAsync({
+        planogramIds: Array.from(selectedPlanograms),
+        nameSuffix: " (copie)",
+      });
+      toast.success(`${selectedPlanograms.size} planogramme(s) dupliqué(s)`);
+      setSelectedPlanograms(new Set());
+      refetch();
+    } catch (error) {
+      toast.error("Erreur lors de la duplication");
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedPlanograms.size === 0) {
+      toast.error("Aucun planogramme sélectionné");
+      return;
+    }
+
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer ${selectedPlanograms.size} planogramme(s) ? Cette action est irréversible.`)) {
+      return;
+    }
+
+    try {
+      await deleteMultiple.mutateAsync({
+        planogramIds: Array.from(selectedPlanograms),
+      });
+      toast.success(`${selectedPlanograms.size} planogramme(s) supprimé(s)`);
+      setSelectedPlanograms(new Set());
+      refetch();
+    } catch (error) {
+      toast.error("Erreur lors de la suppression");
+    }
   };
 
   const handleExportResults = () => {
@@ -200,7 +290,7 @@ export default function PlanogramSearch() {
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
                 >
                   <option value="">Tous les magasins</option>
-                  {stores?.map((store) => (
+                  {stores?.map((store: any) => (
                     <option key={store.id} value={store.id}>
                       {store.name}
                     </option>
@@ -317,13 +407,77 @@ export default function PlanogramSearch() {
               </div>
             )}
 
+            {/* Barre d'actions en masse */}
+            {selectedPlanograms.size > 0 && (
+              <Card className="border-blue-200 bg-blue-50">
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="w-5 h-5 text-blue-600" />
+                      <span className="text-sm font-medium text-blue-900">
+                        {selectedPlanograms.size} planogramme(s) sélectionné(s)
+                      </span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={handleDuplicateSelected}
+                        variant="outline"
+                        size="sm"
+                        className="gap-2"
+                        disabled={duplicateMultiple.isPending}
+                      >
+                        <Copy className="w-4 h-4" />
+                        Dupliquer
+                      </Button>
+                      <Button
+                        onClick={handleArchiveSelected}
+                        variant="outline"
+                        size="sm"
+                        className="gap-2"
+                        disabled={archiveMultiple.isPending}
+                      >
+                        <Archive className="w-4 h-4" />
+                        Archiver
+                      </Button>
+                      <Button
+                        onClick={handleDeleteSelected}
+                        variant="destructive"
+                        size="sm"
+                        className="gap-2"
+                        disabled={deleteMultiple.isPending}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Supprimer
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Résultats de recherche */}
             <Card>
               <CardHeader>
-                <CardTitle>Résultats</CardTitle>
-                <CardDescription>
-                  {searchResults?.total || 0} planogramme(s) trouvé(s)
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Résultats</CardTitle>
+                    <CardDescription>
+                      {searchResults?.total || 0} planogramme(s) trouvé(s)
+                    </CardDescription>
+                  </div>
+                  {searchResults?.results && searchResults.results.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        checked={selectedPlanograms.size === searchResults.results.length && searchResults.results.length > 0}
+                        onCheckedChange={handleSelectAll}
+                        id="select-all"
+                      />
+                      <label htmlFor="select-all" className="text-sm font-medium cursor-pointer">
+                        Sélectionner tout
+                      </label>
+                    </div>
+                  )}
+                </div>
               </CardHeader>
               <CardContent>
                 {isLoading ? (
@@ -336,13 +490,18 @@ export default function PlanogramSearch() {
                 ) : searchResults?.results && searchResults.results.length > 0 ? (
                   <div className="space-y-3">
                     {searchResults.results.map((planogram: any) => (
-                      <Link
+                      <div
                         key={planogram.id}
-                        href={`/planograms/location/${planogram.locationId}`}
+                        className="p-4 border border-slate-200 rounded-lg hover:border-purple-400 hover:shadow-md transition-all"
                       >
-                        <div className="p-4 border border-slate-200 rounded-lg hover:border-purple-400 hover:shadow-md transition-all cursor-pointer group">
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex-1 min-w-0">
+                        <div className="flex items-start gap-4">
+                          <Checkbox
+                            checked={selectedPlanograms.has(planogram.id)}
+                            onCheckedChange={() => handleSelectPlanogram(planogram.id)}
+                            className="mt-1"
+                          />
+                          <Link href={`/planograms/location/${planogram.locationId}`}>
+                            <div className="flex-1 min-w-0 cursor-pointer group">
                               <div className="flex items-center gap-2 mb-2">
                                 <h3 className="text-lg font-semibold text-slate-900 truncate group-hover:text-purple-600">
                                   {planogram.name}
@@ -369,16 +528,16 @@ export default function PlanogramSearch() {
                                 </div>
                               </div>
                             </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="flex-shrink-0 mt-2"
-                            >
-                              <ChevronRight className="w-5 h-5" />
-                            </Button>
-                          </div>
+                          </Link>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="flex-shrink-0 mt-2"
+                          >
+                            <ChevronRight className="w-5 h-5" />
+                          </Button>
                         </div>
-                      </Link>
+                      </div>
                     ))}
                   </div>
                 ) : (

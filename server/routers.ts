@@ -380,6 +380,28 @@ export const appRouter = router({
       .query(async () => {
         return await db.getPlanogramSearchStats();
       }),
+    archiveMultiple: publicProcedure
+      .input(z.object({
+        planogramIds: z.array(z.number()),
+      }))
+      .mutation(async ({ input }) => {
+        return await db.archivePlanograms(input.planogramIds);
+      }),
+    duplicateMultiple: publicProcedure
+      .input(z.object({
+        planogramIds: z.array(z.number()),
+        nameSuffix: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return await db.duplicatePlanograms(input.planogramIds, input.nameSuffix);
+      }),
+    deleteMultiple: publicProcedure
+      .input(z.object({
+        planogramIds: z.array(z.number()),
+      }))
+      .mutation(async ({ input }) => {
+        return await db.deletePlanograms(input.planogramIds);
+      }),
   }),
 
   // Stock History
