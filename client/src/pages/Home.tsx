@@ -1,9 +1,9 @@
-import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Store, Package, LayoutGrid, TrendingUp, AlertTriangle, Share2, BarChart3, Smartphone, Target } from "lucide-react";
 import { Link } from "wouter";
 import { APP_TITLE } from "@/const";
+import { trpc } from "@/lib/trpc";
 
 export default function Home() {
   const { data: stores, isLoading: storesLoading } = trpc.stores.list.useQuery();

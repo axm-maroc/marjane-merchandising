@@ -55,10 +55,15 @@ function Router() {
       <Route path="/kpis" component={StrategicKPIs} />
       <Route path="/feedback/:storeId" component={CustomerFeedback} />
       <Route path="/feedback-admin" component={FeedbackDashboard} />
+      <Route path="/feedback-admin/qr" component={FeedbackAdmin} />
+      <Route path="/dashboard" component={Dashboard} />
       <Route path="/impact-simulator" component={ImpactSimulator} />
+      <Route path="/stock-tracking" component={StockTracking} />
+      <Route path="/ai-recommendations" component={AIRecommendations} />
+      <Route path="/anomaly-detection" component={AnomalyDetection} />
+      <Route path="/sharing" component={Recommendations} />
       
-      {/* Routes mobiles */}
-      <Route path="/mobile">
+      {/* Routes mobiles */}      <Route path="/mobile">
         {() => (
           <MobileLayout>
             <MobileHome />
@@ -94,7 +99,6 @@ function Router() {
         )}
       </Route>
       
-      <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
     </Switch>
