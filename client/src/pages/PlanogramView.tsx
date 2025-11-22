@@ -3,13 +3,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, LayoutGrid, Box, Calendar, Target, Image as ImageIcon, FileDown, History } from "lucide-react";
+import { ArrowLeft, LayoutGrid, Box, Calendar, Target, Image as ImageIcon, FileDown, History, Package } from "lucide-react";
 import { Link, useParams } from "wouter";
 import { useMemo, useState } from "react";
 import PlanogramCanvas from "@/components/PlanogramCanvas";
 import { exportPlanogramToPDF } from "@/utils/pdfExport";
 import { toast } from "sonner";
 import PlanogramEditor from "@/components/PlanogramEditor";
+import ProductCard from "@/components/ProductCard";
 
 export default function PlanogramView() {
   const params = useParams();
@@ -363,10 +364,11 @@ export default function PlanogramView() {
           <div className="lg:col-span-3">
             {activePlanogram ? (
               <Tabs defaultValue="editor" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
+                <TabsList className="grid w-full grid-cols-5">
                   <TabsTrigger value="editor">Éditeur</TabsTrigger>
                   <TabsTrigger value="2d">Vue 2D</TabsTrigger>
                   <TabsTrigger value="3d">Vue 3D</TabsTrigger>
+                  <TabsTrigger value="products">Produits</TabsTrigger>
                   <TabsTrigger value="photos">Photos</TabsTrigger>
                 </TabsList>
 
@@ -448,6 +450,39 @@ export default function PlanogramView() {
                         location={location}
                         products={planogramProducts || []}
                       />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                {/* Products List */}
+                <TabsContent value="products">
+                  <Card className="border-slate-200">
+                    <CardHeader>
+                      <CardTitle className="text-slate-900">Produits du Planogramme</CardTitle>
+                      <CardDescription className="text-slate-600">
+                        Liste détaillée des {planogramProducts?.length || 0} produits avec photos et descriptions
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {planogramProducts && planogramProducts.length > 0 ? (
+                        <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                          {planogramProducts.map((item) => (
+                            <ProductCard
+                              key={item.id}
+                              product={item.product || {
+                                id: item.productId,
+                                name: 'Produit inconnu',
+                              }}
+                              variant="list"
+                            />
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-12">
+                          <Package className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+                          <p className="text-slate-600">Aucun produit dans ce planogramme</p>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </TabsContent>
