@@ -56,6 +56,29 @@ export const appRouter = router({
     }),
   }),
 
+  // Sales and Analytics
+  sales: router({
+    trendData: publicProcedure
+      .input(z.object({ storeId: z.number().optional(), days: z.number().optional() }))
+      .query(async ({ input }) => {
+        return await db.getSalesTrendData(input.storeId, input.days || 30);
+      }),
+    productSales: publicProcedure
+      .input(z.object({ storeId: z.number().optional(), limit: z.number().optional() }))
+      .query(async ({ input }) => {
+        return await db.getProductSalesData(input.storeId, input.limit || 10);
+      }),
+    storeComparison: publicProcedure
+      .query(async () => {
+        return await db.getStoreSalesComparison();
+      }),
+    metrics: publicProcedure
+      .input(z.object({ storeId: z.number().optional() }))
+      .query(async ({ input }) => {
+        return await db.getSalesMetrics(input.storeId);
+      }),
+  }),
+
   // Planogram Locations
   planogramLocations: router({
     list: publicProcedure

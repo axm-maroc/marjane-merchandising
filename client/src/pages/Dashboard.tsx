@@ -19,6 +19,7 @@ import {
 import { useLocation } from "wouter";
 import { Link } from "wouter";
 import { useState, useMemo } from "react";
+import { SalesTrendChart, ProductSalesChart, StoreSalesComparison, SalesMetrics } from "@/components/SalesChart";
 import { Line, Bar, Doughnut } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -54,6 +55,30 @@ export default function Dashboard() {
   const [, navigate] = useLocation();
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("month");
   const [selectedStore, setSelectedStore] = useState<string>("all");
+
+  // Déterminer le nombre de jours en fonction de la période
+  const getDaysFromPeriod = (period: TimePeriod): number => {
+    switch (period) {
+      case 'day': return 1;
+      case 'week': return 7;
+      case 'month': return 30;
+      case 'year': return 365;
+      default: return 30;
+    }
+  };
+
+  const days = getDaysFromPeriod(timePeriod);
+  const storeId = selectedStore === "all" ? undefined : parseInt(selectedStore);
+
+  // Variables temporaires pour les graphiques Recharts
+  const salesTrendData: any[] = [];
+  const trendLoading = false;
+  const productSalesData: any[] = [];
+  const productLoading = false;
+  const storeComparisonData: any[] = [];
+  const storeLoading = false;
+  const metricsData: any = null;
+  const metricsLoading = false;
 
   const { data: stores } = trpc.stores.list.useQuery();
   const { data: products } = trpc.products.list.useQuery();
@@ -367,8 +392,35 @@ export default function Dashboard() {
           </Card>
         </div>
 
+        {/* Recharts - Sales Analytics */}
+        <div className="space-y-6 mt-8">
+          {/* Sales Trend Chart */}
+          <SalesTrendChart 
+            data={salesTrendData || []}
+            loading={trendLoading}
+          />
+
+          {/* Product Sales and Store Comparison */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <ProductSalesChart 
+              data={productSalesData || []}
+              loading={productLoading}
+            />
+            <StoreSalesComparison 
+              data={storeComparisonData || []}
+              loading={storeLoading}
+            />
+          </div>
+
+          {/* Sales Metrics */}
+          <SalesMetrics 
+            metrics={metricsData || null}
+            loading={metricsLoading}
+          />
+        </div>
+
         {/* Bottom Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           {/* Répartition des anomalies */}
           <Card className="border-slate-200">
             <CardHeader>

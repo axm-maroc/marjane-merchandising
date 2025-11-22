@@ -1,4 +1,4 @@
-import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
+import { eq, desc, asc, and, gte, lte, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { 
   InsertUser, 
@@ -1688,5 +1688,136 @@ export async function updateSimulationStatus(simulationId: number, status: "draf
   } catch (error) {
     console.error("[Database] Failed to update simulation status:", error);
     throw error;
+  }
+}
+
+
+// Fonctions pour les graphiques de ventes
+export async function getSalesTrendData(storeId?: number, days: number = 30) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get sales trend data: database not available");
+    return [];
+  }
+
+  try {
+    const query = db.select({
+      date: salesForecasts.forecastDate,
+      quantity: salesForecasts.predictedQuantity,
+      revenue: salesForecasts.predictedRevenue,
+      storeId: salesForecasts.storeId,
+      productId: salesForecasts.productId,
+    })
+      .from(salesForecasts)
+      .orderBy(asc(salesForecasts.forecastDate));
+
+    if (storeId) {
+      query.where(eq(salesForecasts.storeId, storeId));
+    }
+
+    const data = await query;
+
+    // Grouper par date et calculer les totaux
+    const grouped = new Map<string, { date: string; totalQuantity: number; totalRevenue: number }>();
+    
+    data.forEach(item => {
+      const dateStr = item.date instanceof Date 
+        ? item.date.toISOString().split('T')[0]
+        : String(item.date).split('T')[0];
+      
+      const existing = grouped.get(dateStr) || { date: dateStr, totalQuantity: 0, totalRevenue: 0 };
+      existing.totalQuantity += item.quantity || 0;
+      existing.totalRevenue += item.revenue || 0;
+      grouped.set(dateStr, existing);
+    });
+
+    return Array.from(grouped.values()).slice(-days);
+  } catch (error) {
+    console.error("[Database] Failed to get sales trend data:", error);
+    return [];
+  }
+}
+
+export async function getProductSalesData(storeId?: number, limit: number = 10) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get product sales data: database not available");
+    return [];
+  }
+
+  try {
+    const query = db.select({
+      productId: salesForecasts.productId,
+      productName: products.name,
+      totalQuantity: sql<number>`SUM(${salesForecasts.predictedQuantity})`,
+      totalRevenue: sql<number>`SUM(${salesForecasts.predictedRevenue})`,
+      avgConfidence: sql<number>`AVG(${salesForecasts.confidence})`,
+    })
+      .from(salesForecasts)
+      .leftJoin(products, eq(salesForecasts.productId, products.id))
+      .groupBy(salesForecasts.productId, products.name);
+
+    if (storeId) {
+      query.where(eq(salesForecasts.storeId, storeId));
+    }
+
+    const data = await query;
+    return data.slice(0, limit);
+  } catch (error) {
+    console.error("[Database] Failed to get product sales data:", error);
+    return [];
+  }
+}
+
+export async function getStoreSalesComparison() {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get store sales comparison: database not available");
+    return [];
+  }
+
+  try {
+    return await db.select({
+      storeId: salesForecasts.storeId,
+      storeName: stores.name,
+      totalQuantity: sql<number>`SUM(${salesForecasts.predictedQuantity})`,
+      totalRevenue: sql<number>`SUM(${salesForecasts.predictedRevenue})`,
+      avgConfidence: sql<number>`AVG(${salesForecasts.confidence})`,
+    })
+      .from(salesForecasts)
+      .leftJoin(stores, eq(salesForecasts.storeId, stores.id))
+      .groupBy(salesForecasts.storeId, stores.name)
+      .orderBy(desc(sql<number>`SUM(${salesForecasts.predictedRevenue})`));
+  } catch (error) {
+    console.error("[Database] Failed to get store sales comparison:", error);
+    return [];
+  }
+}
+
+export async function getSalesMetrics(storeId?: number) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get sales metrics: database not available");
+    return null;
+  }
+
+  try {
+    const query = db.select({
+      totalQuantity: sql<number>`SUM(${salesForecasts.predictedQuantity})`,
+      totalRevenue: sql<number>`SUM(${salesForecasts.predictedRevenue})`,
+      avgConfidence: sql<number>`AVG(${salesForecasts.confidence})`,
+      countRecords: sql<number>`COUNT(*)`,
+    })
+      .from(salesForecasts);
+
+    if (storeId) {
+      query.where(eq(salesForecasts.storeId, storeId));
+    }
+
+    const result = await query;
+    return result[0] || null;
+  } catch (error) {
+    console.error("[Database] Failed to get sales metrics:", error);
+    return null;
   }
 }
