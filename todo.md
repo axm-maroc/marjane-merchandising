@@ -1252,3 +1252,16 @@
 - [ ] Planogramme 2D manque de photos
 - [ ] Ajouter des images pour les produits
 - [ ] Vérifier le rendu 3D
+
+
+## Système de filtres et recherche avancés pour planogrammes
+- [x] Créer une page PlanogramSearch.tsx avec interface de recherche
+- [x] Ajouter les procédures tRPC pour filtrer les planogrammes (searchPlanograms)
+- [x] Implémenter la recherche par nom de planogramme
+- [x] Ajouter le filtrage par magasin
+- [x] Ajouter le filtrage par date de création (plage de dates)
+- [x] Ajouter le filtrage par statut (actif, brouillon, archivé)
+- [x] Implémenter la pagination des résultats
+- [x] Ajouter les filtres multiples en cascade
+- [ ] Créer une barre de recherche avec autocomplétion
+- [x] Ajouter un bouton d'export des résultats de recherche

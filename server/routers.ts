@@ -363,6 +363,23 @@ export const appRouter = router({
         
         return result;
       }),
+    search: publicProcedure
+      .input(z.object({
+        searchQuery: z.string().optional(),
+        storeId: z.number().optional(),
+        status: z.string().optional(),
+        startDate: z.date().optional(),
+        endDate: z.date().optional(),
+        limit: z.number().optional().default(20),
+        offset: z.number().optional().default(0),
+      }))
+      .query(async ({ input }) => {
+        return await db.searchPlanograms(input);
+      }),
+    searchStats: publicProcedure
+      .query(async () => {
+        return await db.getPlanogramSearchStats();
+      }),
   }),
 
   // Stock History

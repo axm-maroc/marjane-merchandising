@@ -1,4 +1,4 @@
-import { eq, desc, asc, and, gte, lte, sql } from "drizzle-orm";
+import { eq, desc, asc, and, or, gte, lte, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { 
   InsertUser, 
@@ -1820,4 +1820,139 @@ export async function getSalesMetrics(storeId?: number) {
     console.error("[Database] Failed to get sales metrics:", error);
     return null;
   }
+}
+
+
+// Fonction de recherche avancée des planogrammes
+export async function searchPlanograms(filters: {
+  searchQuery?: string;
+  storeId?: number;
+  status?: string;
+  startDate?: Date;
+  endDate?: Date;
+  limit?: number;
+  offset?: number;
+}) {
+  const db = await getDb();
+  if (!db) return { results: [], total: 0 };
+
+  const { searchQuery, storeId, status, startDate, endDate, limit = 20, offset = 0 } = filters;
+
+  let query = db
+    .select({
+      id: planograms.id,
+      name: planograms.name,
+      locationId: planograms.locationId,
+      locationName: planogramLocations.name,
+      storeId: planogramLocations.storeId,
+      storeName: stores.name,
+      version: planograms.version,
+      status: planograms.status,
+      createdAt: planograms.createdAt,
+      updatedAt: planograms.updatedAt,
+    })
+    .from(planograms)
+    .innerJoin(planogramLocations, eq(planograms.locationId, planogramLocations.id))
+    .innerJoin(stores, eq(planogramLocations.storeId, stores.id));
+
+  const conditions = [];
+
+  // Filtre par recherche textuelle
+  if (searchQuery) {
+    conditions.push(
+      or(
+        sql`LOWER(${planograms.name}) LIKE LOWER(${`%${searchQuery}%`})`,
+        sql`LOWER(${planogramLocations.name}) LIKE LOWER(${`%${searchQuery}%`})`,
+        sql`LOWER(${stores.name}) LIKE LOWER(${`%${searchQuery}%`})`
+      )
+    );
+  }
+
+  // Filtre par magasin
+  if (storeId) {
+    conditions.push(eq(planogramLocations.storeId, storeId));
+  }
+
+  // Filtre par statut
+  if (status && status !== 'all') {
+    conditions.push(eq(planograms.status, status as "draft" | "active" | "archived"));
+  }
+
+  // Filtre par date de création
+  if (startDate) {
+    conditions.push(gte(planograms.createdAt, startDate));
+  }
+  if (endDate) {
+    conditions.push(lte(planograms.createdAt, endDate));
+  }
+
+  // Appliquer les conditions
+  if (conditions.length > 0) {
+    query = query.where(and(...conditions));
+  }
+
+  // Compter le total
+  const countResult = await db
+    .select({ count: sql`COUNT(*)` })
+    .from(planograms)
+    .innerJoin(planogramLocations, eq(planograms.locationId, planogramLocations.id))
+    .innerJoin(stores, eq(planogramLocations.storeId, stores.id));
+
+  let totalCount = 0;
+  if (countResult.length > 0) {
+    totalCount = Number(countResult[0].count) || 0;
+  }
+
+  // Appliquer la pagination et le tri
+  const results = await query
+    .orderBy(desc(planograms.createdAt))
+    .limit(limit)
+    .offset(offset);
+
+  return { results, total: totalCount };
+}
+
+// Fonction pour obtenir les statistiques de recherche
+export async function getPlanogramSearchStats() {
+  const db = await getDb();
+  if (!db) return { totalPlanograms: 0, byStatus: {}, byStore: {} };
+
+  // Total de planogrammes
+  const totalResult = await db
+    .select({ count: sql`COUNT(*)` })
+    .from(planograms);
+  const totalPlanograms = Number(totalResult[0]?.count) || 0;
+
+  // Par statut
+  const byStatusResult = await db
+    .select({
+      status: planograms.status,
+      count: sql`COUNT(*)`,
+    })
+    .from(planograms)
+    .groupBy(planograms.status);
+
+  const byStatus: Record<string, number> = {};
+  byStatusResult.forEach(row => {
+    byStatus[row.status] = Number(row.count) || 0;
+  });
+
+  // Par magasin
+  const byStoreResult = await db
+    .select({
+      storeId: stores.id,
+      storeName: stores.name,
+      count: sql`COUNT(${planograms.id})`,
+    })
+    .from(planograms)
+    .innerJoin(planogramLocations, eq(planograms.locationId, planogramLocations.id))
+    .innerJoin(stores, eq(planogramLocations.storeId, stores.id))
+    .groupBy(stores.id, stores.name);
+
+  const byStore: Record<string, number> = {};
+  byStoreResult.forEach(row => {
+    byStore[row.storeName] = Number(row.count) || 0;
+  });
+
+  return { totalPlanograms, byStatus, byStore };
 }
