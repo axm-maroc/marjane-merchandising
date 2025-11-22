@@ -823,16 +823,14 @@ export default function ZoneEditor() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button 
-                className="w-full mb-4"
-                onClick={() => {
-                  // Ouvrir une modale de création de planogramme global
-                  toast.info("Fonctionnalité à venir : création de planogramme depuis l'éditeur");
-                }}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Créer un planogramme
-              </Button>
+              <Dialog open={showCreatePlanogramDialog} onOpenChange={setShowCreatePlanogramDialog}>
+                <DialogTrigger asChild>
+                  <Button className="w-full mb-4">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Créer un planogramme
+                  </Button>
+                </DialogTrigger>
+              </Dialog>
               
               {/* Filtres de recherche */}
               <div className="space-y-2 mb-4">
@@ -1147,19 +1145,19 @@ export default function ZoneEditor() {
                     </div>
                     
                     <div className="bg-slate-50 p-3 rounded-lg space-y-2">
-                      <div className="text-sm">
-                        <span className="font-medium">Magasin :</span> {store?.name}
-                      </div>
-                      <div className="text-sm">
-                        <span className="font-medium">Emplacement :</span> {planogramLocations?.find(loc => loc.id === selectedLocationForPlanogram)?.name}
-                      </div>
-                      <div className="text-sm">
-                        <span className="font-medium">Étagères :</span> {planogramLocations?.find(loc => loc.id === selectedLocationForPlanogram)?.shelfCount}
-                      </div>
+                      <div className="text-sm font-medium text-slate-700">Caractéristiques de l'emplacement :</div>
+                      {planogramLocations?.find(loc => loc.id === selectedLocationForPlanogram) && (
+                        <div className="grid grid-cols-2 gap-2 text-xs text-slate-600">
+                          <div>Étagères: <span className="font-medium">{planogramLocations?.find(loc => loc.id === selectedLocationForPlanogram)?.shelfCount}</span></div>
+                          <div>Largeur: <span className="font-medium">{planogramLocations?.find(loc => loc.id === selectedLocationForPlanogram)?.shelfWidth}mm</span></div>
+                          <div>Hauteur: <span className="font-medium">{planogramLocations?.find(loc => loc.id === selectedLocationForPlanogram)?.shelfHeight}mm</span></div>
+                          <div>Profondeur: <span className="font-medium">{planogramLocations?.find(loc => loc.id === selectedLocationForPlanogram)?.shelfDepth}mm</span></div>
+                        </div>
+                      )}
                     </div>
                   </div>
                   
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 pt-4">
                     <Button
                       variant="outline"
                       onClick={() => {

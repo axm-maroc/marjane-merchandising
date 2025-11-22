@@ -295,102 +295,6 @@ export default function Dashboard() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
-        {/* KPIs Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* Taux de conformité */}
-          <Card className="border-slate-200 hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-3">
-              <CardDescription className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                Taux de conformité
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-baseline justify-between">
-                <div className="text-3xl font-bold text-slate-900">{kpis.conformityRate}%</div>
-                <Badge variant={kpis.conformityChange >= 0 ? "default" : "destructive"} className="gap-1">
-                  {kpis.conformityChange >= 0 ? (
-                    <TrendingUp className="w-3 h-3" />
-                  ) : (
-                    <TrendingDown className="w-3 h-3" />
-                  )}
-                  {Math.abs(kpis.conformityChange)}%
-                </Badge>
-              </div>
-              <p className="text-sm text-slate-600 mt-2">vs. période précédente</p>
-            </CardContent>
-          </Card>
-
-          {/* Chiffre d'affaires */}
-          <Card className="border-slate-200 hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-3">
-              <CardDescription className="flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-blue-600" />
-                Chiffre d'affaires
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-baseline justify-between">
-                <div className="text-3xl font-bold text-slate-900">
-                  {(kpis.totalRevenue / 1000).toFixed(0)}K MAD
-                </div>
-                <Badge variant={kpis.revenueChange >= 0 ? "default" : "destructive"} className="gap-1">
-                  {kpis.revenueChange >= 0 ? (
-                    <TrendingUp className="w-3 h-3" />
-                  ) : (
-                    <TrendingDown className="w-3 h-3" />
-                  )}
-                  {Math.abs(kpis.revenueChange)}%
-                </Badge>
-              </div>
-              <p className="text-sm text-slate-600 mt-2">vs. période précédente</p>
-            </CardContent>
-          </Card>
-
-          {/* Rotation des stocks */}
-          <Card className="border-slate-200 hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-3">
-              <CardDescription className="flex items-center gap-2">
-                <Package className="w-4 h-4 text-orange-600" />
-                Rotation des stocks
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-baseline justify-between">
-                <div className="text-3xl font-bold text-slate-900">{kpis.stockRotation}</div>
-                <Badge variant={kpis.stockChange >= 0 ? "default" : "destructive"} className="gap-1">
-                  {kpis.stockChange >= 0 ? (
-                    <TrendingUp className="w-3 h-3" />
-                  ) : (
-                    <TrendingDown className="w-3 h-3" />
-                  )}
-                  {Math.abs(kpis.stockChange)}%
-                </Badge>
-              </div>
-              <p className="text-sm text-slate-600 mt-2">unités moyennes</p>
-            </CardContent>
-          </Card>
-
-          {/* Alertes critiques */}
-          <Card className="border-slate-200 hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-3">
-              <CardDescription className="flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-red-600" />
-                Alertes critiques
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-baseline justify-between">
-                <div className="text-3xl font-bold text-slate-900">{kpis.criticalAlerts}</div>
-                <Link href="/anomalies">
-                  <Button variant="ghost" size="sm">Voir →</Button>
-                </Link>
-              </div>
-              <p className="text-sm text-slate-600 mt-2">nécessitent une action</p>
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Évolution du CA */}
@@ -512,10 +416,106 @@ export default function Dashboard() {
 
           {/* KPIs Tab */}
           <TabsContent value="kpis" className="space-y-6">
+            {/* KPIs Cards Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {/* Taux de conformité */}
+              <Card className="border-slate-200 hover:shadow-lg transition-shadow">
+                <CardHeader className="pb-3">
+                  <CardDescription className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    Taux de conformité
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-baseline justify-between">
+                    <div className="text-3xl font-bold text-slate-900">{kpis.conformityRate}%</div>
+                    <Badge variant={kpis.conformityChange >= 0 ? "default" : "destructive"} className="gap-1">
+                      {kpis.conformityChange >= 0 ? (
+                        <TrendingUp className="w-3 h-3" />
+                      ) : (
+                        <TrendingDown className="w-3 h-3" />
+                      )}
+                      {Math.abs(kpis.conformityChange)}%
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-slate-600 mt-2">vs. période précédente</p>
+                </CardContent>
+              </Card>
+
+              {/* Chiffre d'affaires */}
+              <Card className="border-slate-200 hover:shadow-lg transition-shadow">
+                <CardHeader className="pb-3">
+                  <CardDescription className="flex items-center gap-2">
+                    <DollarSign className="w-4 h-4 text-blue-600" />
+                    Chiffre d'affaires
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-baseline justify-between">
+                    <div className="text-3xl font-bold text-slate-900">
+                      {(kpis.totalRevenue / 1000).toFixed(0)}K MAD
+                    </div>
+                    <Badge variant={kpis.revenueChange >= 0 ? "default" : "destructive"} className="gap-1">
+                      {kpis.revenueChange >= 0 ? (
+                        <TrendingUp className="w-3 h-3" />
+                      ) : (
+                        <TrendingDown className="w-3 h-3" />
+                      )}
+                      {Math.abs(kpis.revenueChange)}%
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-slate-600 mt-2">vs. période précédente</p>
+                </CardContent>
+              </Card>
+
+              {/* Rotation des stocks */}
+              <Card className="border-slate-200 hover:shadow-lg transition-shadow">
+                <CardHeader className="pb-3">
+                  <CardDescription className="flex items-center gap-2">
+                    <Package className="w-4 h-4 text-orange-600" />
+                    Rotation des stocks
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-baseline justify-between">
+                    <div className="text-3xl font-bold text-slate-900">{kpis.stockRotation}</div>
+                    <Badge variant={kpis.stockChange >= 0 ? "default" : "destructive"} className="gap-1">
+                      {kpis.stockChange >= 0 ? (
+                        <TrendingUp className="w-3 h-3" />
+                      ) : (
+                        <TrendingDown className="w-3 h-3" />
+                      )}
+                      {Math.abs(kpis.stockChange)}%
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-slate-600 mt-2">unités moyennes</p>
+                </CardContent>
+              </Card>
+
+              {/* Alertes critiques */}
+              <Card className="border-slate-200 hover:shadow-lg transition-shadow">
+                <CardHeader className="pb-3">
+                  <CardDescription className="flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 text-red-600" />
+                    Alertes critiques
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-baseline justify-between">
+                    <div className="text-3xl font-bold text-slate-900">{kpis.criticalAlerts}</div>
+                    <Link href="/anomalies">
+                      <Button variant="ghost" size="sm">Voir →</Button>
+                    </Link>
+                  </div>
+                  <p className="text-sm text-slate-600 mt-2">nécessitent une action</p>
+                </CardContent>
+              </Card>
+            </div>
+
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-2xl font-bold text-slate-900">KPIs Stratégiques</h2>
-                <p className="text-slate-600 mt-1">Indicateurs clés de performance par magasin</p>
+                <h2 className="text-2xl font-bold text-slate-900">KPIs par Magasin</h2>
+                <p className="text-slate-600 mt-1">Indicateurs détaillés par point de vente</p>
               </div>
               <Select value={selectedStoreId.toString()} onValueChange={(value) => setSelectedStoreId(parseInt(value))}>
                 <SelectTrigger className="w-64">
