@@ -55,6 +55,10 @@ export default function Dashboard() {
   const [, navigate] = useLocation();
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("month");
   const [selectedStore, setSelectedStore] = useState<string>("all");
+  const [selectedStoreId, setSelectedStoreId] = useState<number>(0);
+
+  // Icônes supplémentaires pour les KPIs
+  const { RotateCcw, Smile, Clock } = require('lucide-react');
 
   // Déterminer le nombre de jours en fonction de la période
   const getDaysFromPeriod = (period: TimePeriod): number => {
@@ -89,6 +93,28 @@ export default function Dashboard() {
     productId: 1,
     startDate: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000)
   });
+
+  // Charger les KPIs stratégiques
+  const { data: revenuePerSqm } = trpc.kpis.revenuePerSqm.useQuery(
+    { storeId: selectedStoreId },
+    { enabled: selectedStoreId > 0 }
+  );
+  const { data: rotationByCategory } = trpc.kpis.rotationByCategory.useQuery(
+    { storeId: selectedStoreId },
+    { enabled: selectedStoreId > 0 }
+  );
+  const { data: stockoutRate } = trpc.kpis.stockoutRate.useQuery(
+    { storeId: selectedStoreId },
+    { enabled: selectedStoreId > 0 }
+  );
+  const { data: npsScore } = trpc.kpis.npsScore.useQuery(
+    { storeId: selectedStoreId },
+    { enabled: selectedStoreId > 0 }
+  );
+  const { data: updateTime } = trpc.kpis.updateTime.useQuery(
+    { storeId: selectedStoreId },
+    { enabled: selectedStoreId > 0 }
+  );
 
   // Calcul des KPIs
   const kpis = useMemo(() => {
@@ -484,20 +510,108 @@ export default function Dashboard() {
 
           {/* KPIs Tab */}
           <TabsContent value="kpis" className="space-y-6">
-            <Card className="border-slate-200">
-              <CardHeader>
-                <CardTitle className="text-lg">Indicateurs Clés de Performance Stratégiques</CardTitle>
-                <CardDescription>CA/m², Rotation, Rupture, NPS, Temps d'actualisation</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <p className="text-slate-600 mb-4">Accédez aux KPIs stratégiques détaillés</p>
-                  <Link href="/kpis">
-                    <Button>Voir les KPIs Stratégiques →</Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-slate-900">KPIs Stratégiques</h2>
+                <p className="text-slate-600 mt-1">Indicateurs clés de performance par magasin</p>
+              </div>
+              <Select value={selectedStoreId.toString()} onValueChange={(value) => setSelectedStoreId(parseInt(value))}>
+                <SelectTrigger className="w-64">
+                  <SelectValue placeholder="Sélectionnez un magasin" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">Tous les magasins</SelectItem>
+                  {stores?.map((store: any) => (
+                    <SelectItem key={store.id} value={store.id.toString()}>
+                      {store.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* KPIs Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              {/* CA/m² */}
+              <Card className="border-slate-200 hover:shadow-lg transition-shadow">
+                <CardHeader className="pb-3">
+                  <CardDescription className="flex items-center gap-2">
+                    <DollarSign className="w-4 h-4 text-blue-600" />
+                    CA/m²
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-slate-900">
+                    {typeof revenuePerSqm === 'number' ? (revenuePerSqm as number).toFixed(0) : (revenuePerSqm?.[0]?.revenuePerSqm as number)?.toFixed(0) || "-"} MAD
+                  </div>
+                  <p className="text-xs text-slate-600 mt-2">Chiffre d'affaires par m²</p>
+                </CardContent>
+              </Card>
+
+              {/* Rotation */}
+              <Card className="border-slate-200 hover:shadow-lg transition-shadow">
+                <CardHeader className="pb-3">
+                  <CardDescription className="flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-emerald-600" />
+                    Rotation
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-slate-900">
+                    {typeof rotationByCategory === 'object' && rotationByCategory?.[0]?.rotationRate ? rotationByCategory[0].rotationRate.toFixed(1) : "-"}x
+                  </div>
+                  <p className="text-xs text-slate-600 mt-2">Rotation des stocks</p>
+                </CardContent>
+              </Card>
+
+              {/* Rupture */}
+              <Card className="border-slate-200 hover:shadow-lg transition-shadow">
+                <CardHeader className="pb-3">
+                  <CardDescription className="flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 text-orange-600" />
+                    Rupture
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-slate-900">
+                    {typeof stockoutRate === 'number' ? (stockoutRate as number).toFixed(1) : (stockoutRate?.stockoutRate as number)?.toFixed(1) || "-"}%
+                  </div>
+                  <p className="text-xs text-slate-600 mt-2">Taux de rupture</p>
+                </CardContent>
+              </Card>
+
+              {/* NPS */}
+              <Card className="border-slate-200 hover:shadow-lg transition-shadow">
+                <CardHeader className="pb-3">
+                  <CardDescription className="flex items-center gap-2">
+                    <Package className="w-4 h-4 text-purple-600" />
+                    NPS
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-slate-900">
+                    {typeof npsScore === 'number' ? npsScore : npsScore?.npsScore || "-"}
+                  </div>
+                  <p className="text-xs text-slate-600 mt-2">Net Promoter Score</p>
+                </CardContent>
+              </Card>
+
+              {/* Temps d'actualisation */}
+              <Card className="border-slate-200 hover:shadow-lg transition-shadow">
+                <CardHeader className="pb-3">
+                  <CardDescription className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-pink-600" />
+                    Actualisation
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-slate-900">
+                    {typeof updateTime === 'number' ? updateTime : updateTime?.averageDelay || "-"}h
+                  </div>
+                  <p className="text-xs text-slate-600 mt-2">Temps de mise à jour</p>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </main>
