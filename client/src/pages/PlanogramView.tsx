@@ -2,6 +2,7 @@ import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, LayoutGrid, Box, Calendar, Target, Image as ImageIcon, FileDown, History, Package } from "lucide-react";
 import { Link, useParams } from "wouter";
@@ -456,35 +457,7 @@ export default function PlanogramView() {
 
                 {/* Products List */}
                 <TabsContent value="products">
-                  <Card className="border-slate-200">
-                    <CardHeader>
-                      <CardTitle className="text-slate-900">Produits du Planogramme</CardTitle>
-                      <CardDescription className="text-slate-600">
-                        Liste détaillée des {planogramProducts?.length || 0} produits avec photos et descriptions
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      {planogramProducts && planogramProducts.length > 0 ? (
-                        <div className="space-y-3 max-h-[600px] overflow-y-auto">
-                          {planogramProducts.map((item) => (
-                            <ProductCard
-                              key={item.id}
-                              product={item.product || {
-                                id: item.productId,
-                                name: 'Produit inconnu',
-                              }}
-                              variant="list"
-                            />
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-center py-12">
-                          <Package className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-                          <p className="text-slate-600">Aucun produit dans ce planogramme</p>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
+                  <ProductsTabContent products={planogramProducts || []} />
                 </TabsContent>
 
                 {/* Photos */}
@@ -845,6 +818,116 @@ function InteractivePlanogramEditor({
           onProductRemoved={handleProductRemoved}
           onProductMoved={handleProductMoved}
         />
+      </CardContent>
+    </Card>
+  );
+}
+
+// Composant pour l'onglet Produits avec filtres et recherche
+function ProductsTabContent({ products }: { products: any[] }) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<'name' | 'price' | 'category'>('name');
+
+  // Extraire les catégories uniques
+  const categories = Array.from(
+    new Set(products.map(p => p.product?.category || 'Sans catégorie'))
+  ).sort();
+
+  // Filtrer et trier les produits
+  const filteredProducts = products
+    .filter(item => {
+      const product = item.product;
+      if (!product) return false;
+      
+      const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           (product.brand || '').toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = !selectedCategory || product.category === selectedCategory;
+      
+      return matchesSearch && matchesCategory;
+    })
+    .sort((a, b) => {
+      const prodA = a.product;
+      const prodB = b.product;
+      
+      switch (sortBy) {
+        case 'price':
+          return (prodB.unitPrice || 0) - (prodA.unitPrice || 0);
+        case 'category':
+          return (prodA.category || '').localeCompare(prodB.category || '');
+        case 'name':
+        default:
+          return (prodA.name || '').localeCompare(prodB.name || '');
+      }
+    });
+
+  return (
+    <Card className="border-slate-200">
+      <CardHeader>
+        <CardTitle className="text-slate-900">Produits du Planogramme</CardTitle>
+        <CardDescription className="text-slate-600">
+          Liste détaillée des {filteredProducts.length} produits avec photos et descriptions
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {/* Barre de recherche */}
+          <div className="flex gap-3">
+            <Input
+              placeholder="Rechercher par nom ou marque..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-1"
+            />
+          </div>
+
+          {/* Filtres et tri */}
+          <div className="flex gap-2 flex-wrap">
+            {/* Filtre par catégorie */}
+            <select
+              value={selectedCategory || ''}
+              onChange={(e) => setSelectedCategory(e.target.value || null)}
+              className="px-3 py-2 border border-slate-200 rounded-md text-sm bg-white"
+            >
+              <option value="">Toutes les catégories</option>
+              {categories.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+
+            {/* Tri */}
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+              className="px-3 py-2 border border-slate-200 rounded-md text-sm bg-white"
+            >
+              <option value="name">Trier par nom</option>
+              <option value="price">Trier par prix</option>
+              <option value="category">Trier par catégorie</option>
+            </select>
+          </div>
+
+          {/* Liste des produits */}
+          {filteredProducts.length > 0 ? (
+            <div className="space-y-3 max-h-[600px] overflow-y-auto">
+              {filteredProducts.map((item) => (
+                <ProductCard
+                  key={item.id}
+                  product={item.product || {
+                    id: item.productId,
+                    name: 'Produit inconnu',
+                  }}
+                  variant="list"
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Package className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+              <p className="text-slate-600">Aucun produit ne correspond à votre recherche</p>
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

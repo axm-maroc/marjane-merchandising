@@ -876,5 +876,78 @@ export const appRouter = router({
         return { success: true };
       }),
   }),
+
+  // Notifications en temps réel
+  notifications: router({
+    // Envoyer une notification au propriétaire
+    sendToOwner: protectedProcedure
+      .input(z.object({
+        title: z.string(),
+        content: z.string(),
+        type: z.enum(['alert', 'info', 'success', 'warning']).optional(),
+        actionUrl: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Vérifier que l'utilisateur est admin
+        if (ctx.user?.role !== 'admin') {
+          throw new Error('Seuls les administrateurs peuvent envoyer des notifications');
+        }
+
+        // Envoyer la notification via le système intégré
+        const { notifyOwner } = await import('./_core/notification');
+        const success = await notifyOwner({
+          title: input.title,
+          content: input.content,
+        });
+
+        return { success };
+      }),
+
+    // Alertes critiques (ruptures de stock, anomalies)
+    sendCriticalAlert: protectedProcedure
+      .input(z.object({
+        storeId: z.number(),
+        productId: z.number(),
+        alertType: z.enum(['stockout', 'anomaly', 'low_stock', 'price_mismatch']),
+        message: z.string(),
+        severity: z.enum(['low', 'medium', 'high', 'critical']),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user?.role !== 'admin') {
+          throw new Error('Seuls les administrateurs peuvent envoyer des alertes');
+        }
+
+        const { notifyOwner } = await import('./_core/notification');
+        const title = `⚠️ Alerte ${input.severity.toUpperCase()}: ${input.alertType}`;
+        
+        const success = await notifyOwner({
+          title,
+          content: input.message,
+        });
+
+        return { success, alertId: Math.random().toString(36).substr(2, 9) };
+      }),
+
+    // Notifications de recommandations IA
+    sendRecommendation: protectedProcedure
+      .input(z.object({
+        storeId: z.number(),
+        recommendationType: z.string(),
+        expectedImpact: z.string(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user?.role !== 'admin') {
+          throw new Error('Seuls les administrateurs peuvent envoyer des notifications');
+        }
+
+        const { notifyOwner } = await import('./_core/notification');
+        const success = await notifyOwner({
+          title: `💡 Nouvelle recommandation IA pour le magasin ${input.storeId}`,
+          content: `Type: ${input.recommendationType}\nImpact attendu: ${input.expectedImpact}`,
+        });
+
+        return { success };
+      }),
+  }),
 });
 export type AppRouter = typeof appRouter;
