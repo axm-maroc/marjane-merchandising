@@ -730,3 +730,87 @@ export async function getUpdateTime(storeId: number) {
 
   return results[0]?.avgUpdateTimeHours || 0;
 }
+
+
+// Fonction pour optimiser les positions des produits selon les règles de merchandising
+export async function optimizePlanogramPositions(planogramId: number): Promise<{ optimizedCount: number; message: string }> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  // Récupérer le planogramme et ses produits
+  const [planogram] = await db.select().from(planograms).where(eq(planograms.id, planogramId)).limit(1);
+  if (!planogram) {
+    throw new Error("Planogram not found");
+  }
+
+  // Récupérer les produits du planogramme
+  const planogramProducts = await db.select().from(planogramProductsTable).where(eq(planogramProductsTable.planogramId, planogramId));
+  
+  if (planogramProducts.length === 0) {
+    return { optimizedCount: 0, message: "No products to optimize" };
+  }
+
+  // Récupérer les informations de localisation
+  const [location] = await db.select().from(planogramLocations).where(eq(planogramLocations.id, planogram.locationId)).limit(1);
+  if (!location) {
+    throw new Error("Location not found");
+  }
+
+  // Règles de merchandising
+  const HIGH_ROTATION_CATEGORIES = ['Boissons', 'Produits Laitiers', 'Épicerie Sèche'];
+  const LOW_ROTATION_CATEGORIES = ['Bazar & Décoration', 'Textile & Mode'];
+  const EYE_LEVEL_SHELVES = [2, 3];
+
+  // Grouper les produits par catégorie détectée
+  const productsByCategory: Record<string, typeof planogramProducts> = {};
+  
+  for (const pp of planogramProducts) {
+    // Récupérer le produit pour son nom
+    const [product] = await db.select().from(products).where(eq(products.id, pp.productId)).limit(1);
+    if (!product) continue;
+
+    // Détecter la catégorie
+    let category = 'Autres';
+    if (product.name.includes('Boisson') || product.name.includes('Eau') || product.name.includes('Soda')) category = 'Boissons';
+    else if (product.name.includes('Lait') || product.name.includes('Fromage') || product.name.includes('Yaourt')) category = 'Produits Laitiers';
+    else if (product.name.includes('Pain') || product.name.includes('Pates') || product.name.includes('Riz')) category = 'Épicerie Sèche';
+    else if (product.name.includes('Savon') || product.name.includes('Shampooing') || product.name.includes('Dentifrice')) category = 'Hygiène & Beauté';
+
+    if (!productsByCategory[category]) {
+      productsByCategory[category] = [];
+    }
+    productsByCategory[category].push(pp);
+  }
+
+  // Appliquer les règles de merchandising
+  let optimizedCount = 0;
+
+  for (const [category, categoryProducts] of Object.entries(productsByCategory)) {
+    // Déterminer le niveau d'étagère optimal
+    let optimalShelfLevel: number;
+    
+    if (HIGH_ROTATION_CATEGORIES.includes(category)) {
+      optimalShelfLevel = EYE_LEVEL_SHELVES[0]; // Hauteur des yeux
+    } else if (LOW_ROTATION_CATEGORIES.includes(category)) {
+      optimalShelfLevel = Math.random() > 0.5 ? 0 : (location.shelfCount || 5) - 1; // Extrémités
+    } else {
+      optimalShelfLevel = Math.floor(Math.random() * (location.shelfCount || 5));
+    }
+
+    // Mettre à jour les positions
+    for (let i = 0; i < categoryProducts.length; i++) {
+      const pp = categoryProducts[i];
+      const positionX = (i * 150) % ((location.shelfWidth || 1000) - 100);
+
+      await db.update(planogramProductsTable)
+        .set({ shelfLevel: optimalShelfLevel, positionX })
+        .where(eq(planogramProductsTable.id, pp.id));
+
+      optimizedCount++;
+    }
+  }
+
+  return { optimizedCount, message: `${optimizedCount} produits optimisés avec succès` };
+}
