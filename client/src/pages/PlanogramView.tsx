@@ -176,7 +176,7 @@ export default function PlanogramView() {
         version: activePlanogram.version,
         salesTarget: activePlanogram.salesTarget || undefined,
         products: (planogramProducts || []).map(pp => ({
-          productName: 'Produit',
+          productName: pp.product?.name || 'Produit inconnu',
           quantity: pp.quantity,
           facings: pp.facings,
           shelfLevel: pp.shelfLevel,

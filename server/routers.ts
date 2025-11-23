@@ -402,18 +402,6 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         return await db.deletePlanograms(input.planogramIds);
       }),
-    optimize: publicProcedure
-      .input(z.object({
-        planogramId: z.number(),
-      }))
-      .mutation(async ({ input }) => {
-        const result = await db.optimizePlanogramPositions(input.planogramId);
-        await db.savePlanogramVersion(
-          input.planogramId,
-          `Optimisation automatique des positions`
-        );
-        return result;
-      }),
   }),
 
   // Stock History
