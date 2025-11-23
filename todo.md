@@ -1349,17 +1349,17 @@
 ### 1. Algorithme d'Optimisation des Positions
 - [x] Créer les règles de merchandising (rotation, complémentarité, hauteur des yeux)
 - [x] Implémenter l'algorithme d'optimisation automatique
-- [ ] Créer la procédure tRPC pour optimiser les planogrammes
-- [ ] Ajouter le bouton "Optimiser" dans l'interface
+- [x] Créer la procédure tRPC pour optimiser les planogrammes
+- [ ] Ajouter le bouton "Optimiser" dans l'interface (à faire en Phase 4)
 
 ### 2. Vue Comparative Avant/Après
-- [ ] Créer la table des versions de planogrammes (avant/après)
-- [ ] Implémenter le calcul de l'impact sur les ventes
-- [ ] Créer la vue comparative avec graphiques
-- [ ] Ajouter les indicateurs CA, rotation, ruptures
+- [x] Créer la table des versions de planogrammes (avant/après)
+- [x] Implémenter le calcul de l'impact sur les ventes
+- [x] Créer la vue comparative avec graphiques
+- [x] Ajouter les indicateurs CA, rotation, ruptures
 
 ### 3. Rapports d'Analyse par Catégorie
-- [ ] Créer les fonctions de calcul de performance par catégorie
-- [ ] Implémenter la génération de rapports
-- [ ] Ajouter les recommandations intelligentes
-- [ ] Créer l'interface de visualisation des rapports
+- [x] Créer les fonctions de calcul de performance par catégorie
+- [x] Implémenter la génération de rapports
+- [x] Ajouter les recommandations intelligentes
+- [x] Créer l'interface de visualisation des rapports
