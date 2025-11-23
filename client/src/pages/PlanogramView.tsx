@@ -13,8 +13,6 @@ import { toast } from "sonner";
 import PlanogramEditor from "@/components/PlanogramEditor";
 import ProductCard from "@/components/ProductCard";
 import { useModuleNavigation } from "@/hooks/useModuleNavigation";
-import ValidationPanel from "@/components/ValidationPanel";
-import { trpc } from "@/lib/trpc";
 
 export default function PlanogramView() {
   const params = useParams();
@@ -296,18 +294,6 @@ export default function PlanogramView() {
           </div>
         </div>
       </header>
-
-      {/* Validation Panel */}
-      {activePlanogram && (
-        <ValidationPanel
-          planogramId={activePlanogram.id}
-          status={activePlanogram.status}
-          onStatusChange={() => {
-            // Refresh the page to update the status
-            window.location.reload();
-          }}
-        />
-      )}
 
       {/* Main Content */}
       <main className="container py-8">

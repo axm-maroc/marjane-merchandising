@@ -162,18 +162,6 @@ export const appRouter = router({
       .query(async ({ input }) => {
         return await db.getPlanogramHistory(input.planogramId);
       }),
-    updateStatus: protectedProcedure
-      .input(z.object({
-        planogramId: z.number(),
-        status: z.enum(['draft', 'active', 'archived']),
-      }))
-      .mutation(async ({ input }) => {
-        // Update the planogram status in the database
-        const result = await db.updatePlanogram(input.planogramId, {
-          status: input.status,
-        });
-        return { success: true, planogramId: input.planogramId, status: input.status };
-      }),
     compareVersions: publicProcedure
       .input(z.object({ 
         planogramId: z.number(),

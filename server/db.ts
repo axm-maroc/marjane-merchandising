@@ -160,13 +160,6 @@ export async function getPlanogramById(id: number) {
   return result.length > 0 ? result[0] : null;
 }
 
-export async function updatePlanogram(id: number, data: any) {
-  const db = await getDb();
-  if (!db) return null;
-  const result = await db.update(planograms).set(data).where(eq(planograms.id, id));
-  return result;
-}
-
 export async function getPlanogramsByStore(storeId: number) {
   const db = await getDb();
   if (!db) return [];
@@ -191,6 +184,13 @@ export async function createPlanogram(data: any) {
   const db = await getDb();
   if (!db) return null;
   const result = await db.insert(planograms).values(data);
+  return result;
+}
+
+export async function updatePlanogram(id: number, data: any) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.update(planograms).set(data).where(eq(planograms.id, id));
   return result;
 }
 
