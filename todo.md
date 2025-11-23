@@ -1335,3 +1335,10 @@
 - [x] Corriger l'onglet Éditeur des planogrammes - afficher uniquement produits avec photos
 - [x] Corriger l'onglet Vue 2D des planogrammes - lier avec les produits sélectionnés
 - [x] Lier Vue 2D avec le module de gestion magasin et planogrammes sélectionnés
+
+## Correction planogrammes vides
+
+- [x] Créer un script pour assigner les produits aux planogrammes existants
+- [x] Vérifier que les produits apparaissent dans l'onglet Éditeur
+- [x] Vérifier que les produits s'affichent dans les vues 2D et 3D
+- [x] Rendre l'éditeur opérationnel avec drag & drop fonctionnel
