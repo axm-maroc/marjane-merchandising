@@ -811,7 +811,7 @@ export default function ZoneEditor() {
             </CardContent>
           </Card>
 
-          {/* Panneau Planogrammes */}
+          {/* Panneau Planogrammes - Drag & Drop */}
           <Card className="lg:col-span-1">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -819,18 +819,14 @@ export default function ZoneEditor() {
                 Planogrammes
               </CardTitle>
               <CardDescription>
-                Tous les planogrammes du magasin
+                Glissez les planogrammes vers les zones
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Dialog open={showCreatePlanogramDialog} onOpenChange={setShowCreatePlanogramDialog}>
-                <DialogTrigger asChild>
-                  <Button className="w-full mb-4">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Créer un planogramme
-                  </Button>
-                </DialogTrigger>
-              </Dialog>
+              {/* Barre d'info drag & drop */}
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg mb-4">
+                <p className="text-xs text-blue-900 font-medium">💡 Astuce: Glissez un planogramme vers une zone pour l'assigner</p>
+              </div>
               
               {/* Filtres de recherche */}
               <div className="space-y-2 mb-4">

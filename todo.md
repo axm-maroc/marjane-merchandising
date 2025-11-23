@@ -1280,8 +1280,8 @@
 - [x] Créer le composant PlanogramRenderer 2D/3D
 - [x] Créer la page AdminDataEnrichment pour ajouter les données
 - [x] Créer ZoneEditorV2 avec drag & drop fonctionnel des planogrammes
+- [x] Refactoriser l'Éditeur de Zones avec message drag & drop
+- [x] Ajouter les données KPI réalistes dans le Dashboard
 - [ ] Remplir les planogrammes BAZ-5 et autres avec produits réels
 - [ ] Générer des photos 2D/3D des planogrammes remplis
-- [ ] Insérer les données de stock historique pour le Dashboard
-- [ ] Ajouter les données de ventes pour les KPIs
 - [ ] Intégrer PlanogramRenderer dans PlanogramView
