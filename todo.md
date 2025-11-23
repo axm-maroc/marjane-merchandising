@@ -1324,3 +1324,14 @@
 - [ ] Implémenter les règles de transition de statut
 - [ ] Ajouter les notifications lors du changement de statut
 - [ ] Créer un tableau de bord des statuts par magasin
+
+
+## Corrections urgentes demandées par l'utilisateur
+
+- [x] Corriger l'erreur à l'ouverture de l'éditeur de zone
+- [x] Supprimer le bloc de planogramme dans l'éditeur de zone
+- [x] Insérer des données réelles dans le Tableau de bord analytique
+- [x] Insérer des données KPIs stratégiques par magasin
+- [x] Corriger l'onglet Éditeur des planogrammes - afficher uniquement produits avec photos
+- [x] Corriger l'onglet Vue 2D des planogrammes - lier avec les produits sélectionnés
+- [x] Lier Vue 2D avec le module de gestion magasin et planogrammes sélectionnés

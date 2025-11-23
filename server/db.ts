@@ -325,13 +325,21 @@ export async function getZoneById(id: number) {
 export async function createZone(data: any) {
   const db = await getDb();
   if (!db) return null;
-  const result = await db.insert(storeZones).values(data);
-  // Drizzle returns an array with the inserted row when using MySQL
-  if (Array.isArray(result) && result.length > 0) {
-    return result[0].id;
+  try {
+    const result = await db.insert(storeZones).values(data);
+    let insertId = (result as any).insertId;
+    if (!insertId) return null;
+    if (typeof insertId === 'number') return insertId;
+    if (typeof insertId === 'string') return parseInt(insertId);
+    if (insertId && typeof insertId === 'object') {
+      if (insertId.toNumber) return insertId.toNumber();
+      if (insertId.toString) return parseInt(insertId.toString());
+    }
+    return null;
+  } catch (error) {
+    console.error('Error creating zone:', error);
+    return null;
   }
-  // For some drivers, insertId is available
-  return (result as any).insertId || null;
 }
 
 export async function updateZone(id: number, data: any) {
@@ -526,4 +534,199 @@ export async function getSponsorsByZone(zoneId: number) {
   const db = await getDb();
   if (!db) return [];
   return await db.select().from(zoneSponsors).where(eq(zoneSponsors.zoneId, zoneId));
+}
+
+
+// Sales Analytics functions
+export async function getSalesTrendData(storeId?: number, days: number = 30) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - days);
+
+  const query = storeId
+    ? sql`SELECT 
+        DATE(forecastDate) as date,
+        SUM(predictedRevenue) as revenue
+      FROM salesForecasts
+      WHERE storeId = ${storeId} AND forecastDate >= ${startDate}
+      GROUP BY DATE(forecastDate)
+      ORDER BY date ASC`
+    : sql`SELECT 
+        DATE(forecastDate) as date,
+        SUM(predictedRevenue) as revenue
+      FROM salesForecasts
+      WHERE forecastDate >= ${startDate}
+      GROUP BY DATE(forecastDate)
+      ORDER BY date ASC`;
+
+  const results = await db.execute(query);
+  return results;
+}
+
+export async function getProductSalesData(storeId?: number, limit: number = 10) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const query = storeId
+    ? sql`SELECT 
+        p.name as productName,
+        SUM(sf.predictedQuantity) as totalQuantity,
+        SUM(sf.predictedRevenue) as totalRevenue
+      FROM salesForecasts sf
+      JOIN products p ON sf.productId = p.id
+      WHERE sf.storeId = ${storeId}
+      GROUP BY p.id, p.name
+      ORDER BY totalRevenue DESC
+      LIMIT ${limit}`
+    : sql`SELECT 
+        p.name as productName,
+        SUM(sf.predictedQuantity) as totalQuantity,
+        SUM(sf.predictedRevenue) as totalRevenue
+      FROM salesForecasts sf
+      JOIN products p ON sf.productId = p.id
+      GROUP BY p.id, p.name
+      ORDER BY totalRevenue DESC
+      LIMIT ${limit}`;
+
+  const results = await db.execute(query);
+  return results;
+}
+
+export async function getStoreSalesComparison() {
+  const db = await getDb();
+  if (!db) return [];
+
+  const results = await db.execute(sql`
+    SELECT 
+      s.name as storeName,
+      SUM(sf.predictedRevenue) as totalRevenue,
+      SUM(sf.predictedQuantity) as totalQuantity
+    FROM salesForecasts sf
+    JOIN stores s ON sf.storeId = s.id
+    GROUP BY s.id, s.name
+    ORDER BY totalRevenue DESC
+  `);
+
+  return results;
+}
+
+export async function getSalesMetrics(storeId?: number) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const query = storeId
+    ? sql`SELECT 
+        SUM(predictedRevenue) as totalRevenue,
+        SUM(predictedQuantity) as totalQuantity,
+        AVG(confidence) as avgConfidence,
+        COUNT(DISTINCT productId) as productCount
+      FROM salesForecasts
+      WHERE storeId = ${storeId}`
+    : sql`SELECT 
+        SUM(predictedRevenue) as totalRevenue,
+        SUM(predictedQuantity) as totalQuantity,
+        AVG(confidence) as avgConfidence,
+        COUNT(DISTINCT productId) as productCount
+      FROM salesForecasts`;
+
+  const results = await db.execute(query);
+  return results[0] || null;
+}
+
+
+// KPIs functions
+export async function getRevenuePerSqm(storeId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const results = await db.execute(sql`
+    SELECT 
+      p.category_id as categoryId,
+      SUM(sf.predictedRevenue) / s.surface_area as revenuePerSqm
+    FROM salesForecasts sf
+    JOIN products p ON sf.productId = p.id
+    JOIN stores s ON sf.storeId = s.id
+    WHERE sf.storeId = ${storeId}
+    GROUP BY p.category_id, s.surface_area
+    ORDER BY revenuePerSqm DESC
+  `);
+
+  return results;
+}
+
+export async function getRotationByCategory(storeId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const results = await db.execute(sql`
+    SELECT 
+      p.category_id as categoryId,
+      (SUM(sf.predictedQuantity) / COUNT(DISTINCT DATE(sf.forecastDate))) * 30 as rotationRate
+    FROM salesForecasts sf
+    JOIN products p ON sf.productId = p.id
+    WHERE sf.storeId = ${storeId}
+    GROUP BY p.category_id
+    ORDER BY rotationRate DESC
+  `);
+
+  return results;
+}
+
+export async function getStockoutRate(storeId: number) {
+  const db = await getDb();
+  if (!db) return 0;
+
+  // Calculer le taux de rupture basé sur les stocks faibles
+  const results = await db.execute(sql`
+    SELECT 
+      COUNT(CASE WHEN sh.quantity < 10 THEN 1 END) * 100.0 / COUNT(*) as stockoutRate
+    FROM stockHistory sh
+    WHERE sh.store_id = ${storeId}
+  `);
+
+  return results[0]?.stockoutRate || 0;
+}
+
+export async function getNpsScore(storeId: number) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const results = await db.execute(sql`
+    SELECT 
+      AVG(score) as avgScore,
+      COUNT(*) as totalResponses,
+      COUNT(CASE WHEN score >= 9 THEN 1 END) as promoters,
+      COUNT(CASE WHEN score <= 6 THEN 1 END) as detractors
+    FROM npsScores
+    WHERE store_id = ${storeId}
+  `);
+
+  const data = results[0];
+  if (!data) return null;
+
+  const nps = ((data.promoters - data.detractors) / data.totalResponses) * 100;
+
+  return {
+    score: Math.round(nps),
+    avgScore: Math.round(data.avgScore * 10) / 10,
+    totalResponses: data.totalResponses,
+    promoters: data.promoters,
+    detractors: data.detractors
+  };
+}
+
+export async function getUpdateTime(storeId: number) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const results = await db.execute(sql`
+    SELECT 
+      AVG(TIMESTAMPDIFF(HOUR, created_at, updated_at)) as avgUpdateTimeHours
+    FROM planograms
+    WHERE store_id = ${storeId}
+  `);
+
+  return results[0]?.avgUpdateTimeHours || 0;
 }

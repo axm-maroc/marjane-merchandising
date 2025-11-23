@@ -376,15 +376,18 @@ export default function PlanogramView() {
                 {/* Interactive Editor */}
                 <TabsContent value="editor">
                   <PlanogramEditor
-                    products={(planogramProducts || []).map(pp => ({
-                      id: pp.id,
-                      productId: pp.productId,
-                      productName: pp.product?.name || 'Produit inconnu',
-                      quantity: pp.quantity,
-                      facings: pp.facings,
-                      shelfLevel: pp.shelfLevel,
-                      positionX: pp.positionX,
-                    }))}
+                    products={(planogramProducts || [])
+                      .filter(pp => pp.product?.photoUrl) // Filtrer uniquement les produits avec photos
+                      .map(pp => ({
+                        id: pp.id,
+                        productId: pp.productId,
+                        productName: pp.product?.name || 'Produit inconnu',
+                        photoUrl: pp.product?.photoUrl || '',
+                        quantity: pp.quantity,
+                        facings: pp.facings,
+                        shelfLevel: pp.shelfLevel,
+                        positionX: pp.positionX,
+                      }))}
                     onSave={async (products) => {
                       // @ts-ignore - Type will be available after server restart
                       await trpc.planograms.updateProductsPositions.mutateAsync({
@@ -397,6 +400,7 @@ export default function PlanogramView() {
                           positionX: p.positionX,
                         })),
                       });
+                      toast.success('Produits mis à jour avec succès !');
                     }}
                   />
                 </TabsContent>

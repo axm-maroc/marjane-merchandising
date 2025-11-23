@@ -12,6 +12,7 @@ interface Product {
   id: number;
   productId: number;
   productName: string;
+  photoUrl?: string;
   quantity: number;
   facings: number;
   shelfLevel: number;
@@ -57,7 +58,14 @@ function SortableProduct({ product, onUpdate }: {
       </button>
 
       <div className="flex-1 grid grid-cols-5 gap-3 items-center">
-        <div className="col-span-2">
+        <div className="col-span-2 flex items-center gap-3">
+          {product.photoUrl && (
+            <img 
+              src={product.photoUrl} 
+              alt={product.productName}
+              className="w-12 h-12 object-cover rounded border border-slate-200"
+            />
+          )}
           <p className="font-medium text-slate-900 text-sm">{product.productName}</p>
         </div>
 
