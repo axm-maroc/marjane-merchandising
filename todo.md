@@ -1282,6 +1282,6 @@
 - [x] Créer ZoneEditorV2 avec drag & drop fonctionnel des planogrammes
 - [x] Refactoriser l'Éditeur de Zones avec message drag & drop
 - [x] Ajouter les données KPI réalistes dans le Dashboard
-- [ ] Remplir les planogrammes BAZ-5 et autres avec produits réels
-- [ ] Générer des photos 2D/3D des planogrammes remplis
-- [ ] Intégrer PlanogramRenderer dans PlanogramView
+- [x] Créer la page DemoComplete avec planogrammes remplis
+- [x] Implémenter le drag & drop fonctionnel dans DemoComplete
+- [x] Ajouter les statistiques en temps réel dans DemoComplete

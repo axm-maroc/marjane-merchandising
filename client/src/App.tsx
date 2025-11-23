@@ -22,6 +22,7 @@ import Dashboard from "./pages/Dashboard";
 import StoreZones from "./pages/StoreZones";
 import ZoneEditor from "./pages/ZoneEditor";
 import ZoneEditorV2 from "./pages/ZoneEditorV2";
+import DemoComplete from "./pages/DemoComplete";
 import MobileLayout from "./pages/mobile/MobileLayout";
 import MobileHome from "./pages/mobile/Home";
 import MobileTasks from "./pages/mobile/Tasks";
@@ -46,6 +47,7 @@ function Router() {
       <Route path="/stores/:id/zones" component={StoreZones} />
       <Route path="/stores/:id/zones/editor" component={ZoneEditor} />
       <Route path="/stores/:id/zones/editor-v2" component={ZoneEditorV2} />
+      <Route path="/demo" component={DemoComplete} />
       <Route path="/stores/:id" component={StoreDetail} />
       <Route path={"/planograms"} component={Planograms} />
       <Route path={"/planograms/search"} component={PlanogramSearch} />
