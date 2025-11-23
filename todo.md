@@ -1285,3 +1285,42 @@
 - [x] Créer la page DemoComplete avec planogrammes remplis
 - [x] Implémenter le drag & drop fonctionnel dans DemoComplete
 - [x] Ajouter les statistiques en temps réel dans DemoComplete
+
+
+## Intégration des images réelles des produits
+- [x] Générer les images réalistes de 10 produits (Coca-Cola, Sprite, Fanta, Eau Sidi Ali, Riz Taureau, Huile Lesieur, Sucre Cristal, Shampoing Dove, Déodorant Rexona, Dentifrice Signal)
+- [x] Organiser les images par famille (Boissons, Épicerie, Hygiène)
+- [x] Intégrer les images dans DemoComplete.tsx
+- [x] Afficher les images dans le panneau des produits
+- [x] Ajouter les images dans les cartes de planogrammes
+- [x] Créer une galerie par famille de produits
+- [x] Implémenter le drag & drop avec images réelles
+- [x] Ajouter les statistiques de produits et familles
+
+
+## Développement des 3 suggestions - Phase 3
+
+### 1. Intégration des images réelles dans tous les modules
+- [ ] Intégrer les images dans Planogrammes 2D/3D
+- [ ] Mettre à jour PlanogramView avec les images réelles
+- [ ] Ajouter les images dans le Dashboard (cartes de produits)
+- [ ] Afficher les images dans le module Suivi des Stocks
+- [ ] Utiliser les images dans le module Recommandations IA
+- [ ] Ajouter les images dans l'Éditeur de Zones
+
+### 2. Créer des planogrammes réels pour chaque magasin
+- [ ] Créer un planogramme pour Marjane Bouregreg (Boissons)
+- [ ] Créer un planogramme pour Marjane Californie (Épicerie)
+- [ ] Créer un planogramme pour Marjane Tanger (Hygiène)
+- [ ] Assigner les produits réels avec images à chaque planogramme
+- [ ] Définir les objectifs de vente pour chaque planogramme
+- [ ] Ajouter les données historiques de ventes
+
+### 3. Système de validation des planogrammes
+- [ ] Ajouter le champ `status` à la table `planograms` (enum: Brouillon, Validé, Déployé, Archivé)
+- [ ] Créer les procédures tRPC pour changer le statut
+- [ ] Ajouter les boutons de validation dans PlanogramView
+- [ ] Afficher le statut dans les listes de planogrammes
+- [ ] Implémenter les règles de transition de statut
+- [ ] Ajouter les notifications lors du changement de statut
+- [ ] Créer un tableau de bord des statuts par magasin

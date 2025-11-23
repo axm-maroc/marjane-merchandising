@@ -116,6 +116,17 @@ export default function Planograms() {
                                     <span className="text-slate-600">Étagères</span>
                                     <span className="font-medium text-slate-900">{location.shelfCount}</span>
                                   </div>
+                                  {/* Aperçu des produits */}
+                                  <div className="pt-3 border-t border-slate-200">
+                                    <div className="text-xs font-semibold text-slate-700 mb-2">Produits assignés</div>
+                                    <div className="flex gap-2 flex-wrap">
+                                      {[1, 2, 3].map(i => (
+                                        <div key={i} className="w-8 h-8 bg-slate-200 rounded flex items-center justify-center text-xs text-slate-600">
+                                          {i}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
                                   <div className="pt-2">
                                     <Button variant="outline" className="w-full">
                                       Voir le planogramme →

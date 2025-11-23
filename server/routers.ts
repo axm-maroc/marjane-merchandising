@@ -564,7 +564,7 @@ export const appRouter = router({
         status: z.enum(['active', 'inactive', 'maintenance']).default('active'),
       }))
       .mutation(async ({ input }) => {
-        return await db.createStoreZone(input);
+        return await db.createZone(input);
       }),
     update: publicProcedure
       .input(z.object({
@@ -577,7 +577,7 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         const { zoneId, ...data } = input;
-        return await db.updateStoreZone(zoneId, data);
+        return await db.updateZone(zoneId, data);
       }),
     delete: publicProcedure
       .input(z.object({ zoneId: z.number() }))

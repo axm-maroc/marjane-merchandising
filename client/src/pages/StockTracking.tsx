@@ -104,7 +104,7 @@ export default function StockTracking() {
       setSelectedZoneId(zones[0].id);
     }
     if (!selectedPlanogramId && planograms && planograms.length > 0) {
-      setSelectedPlanogramId(planograms[0].id);
+      setSelectedPlanogramId(planograms[0].planogram.id);
     }
     if (!selectedProductId && filteredProducts && filteredProducts.length > 0) {
       setSelectedProductId(filteredProducts[0].id);

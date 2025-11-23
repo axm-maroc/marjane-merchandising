@@ -7,18 +7,18 @@ import { Link } from "wouter";
 import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 
-// Données de démonstration
+// Données de démonstration avec images réelles
 const DEMO_PRODUCTS = [
-  { id: 1, name: 'Coca-Cola 1.5L', price: 15, category: 'Boissons', color: '#DC2626' },
-  { id: 2, name: 'Sprite 1.5L', price: 14, category: 'Boissons', color: '#10B981' },
-  { id: 3, name: 'Fanta Orange 1.5L', price: 13, category: 'Boissons', color: '#F59E0B' },
-  { id: 4, name: 'Eau Sidi Ali 1.5L', price: 4, category: 'Boissons', color: '#3B82F6' },
-  { id: 5, name: 'Riz Taureau 1kg', price: 25, category: 'Épicerie', color: '#8B4513' },
-  { id: 6, name: 'Huile Lesieur 1L', price: 45, category: 'Épicerie', color: '#FCD34D' },
-  { id: 7, name: 'Sucre Cristal 1kg', price: 12, category: 'Épicerie', color: '#FFFFFF' },
-  { id: 8, name: 'Shampoing Dove 400ml', price: 35, category: 'Hygiène', color: '#EC4899' },
-  { id: 9, name: 'Déodorant Rexona 150ml', price: 22, category: 'Hygiène', color: '#6366F1' },
-  { id: 10, name: 'Dentifrice Signal 100ml', price: 12, category: 'Hygiène', color: '#0891B2' },
+  { id: 1, name: 'Coca-Cola 1.5L', price: 15, category: 'Boissons', color: '#DC2626', image: '/products/coca-cola-1-5l.png' },
+  { id: 2, name: 'Sprite 1.5L', price: 14, category: 'Boissons', color: '#10B981', image: '/products/sprite-1-5l.png' },
+  { id: 3, name: 'Fanta Orange 1.5L', price: 13, category: 'Boissons', color: '#F59E0B', image: '/products/fanta-orange-1-5l.png' },
+  { id: 4, name: 'Eau Sidi Ali 1.5L', price: 4, category: 'Boissons', color: '#3B82F6', image: '/products/eau-sidi-ali-1-5l.png' },
+  { id: 5, name: 'Riz Taureau 1kg', price: 25, category: 'Épicerie', color: '#8B4513', image: '/products/riz-taureau-1kg.png' },
+  { id: 6, name: 'Huile Lesieur 1L', price: 45, category: 'Épicerie', color: '#FCD34D', image: '/products/huile-lesieur-1l.png' },
+  { id: 7, name: 'Sucre Cristal 1kg', price: 12, category: 'Épicerie', color: '#FFFFFF', image: '/products/sucre-cristal-1kg.png' },
+  { id: 8, name: 'Shampoing Dove 400ml', price: 35, category: 'Hygiène', color: '#EC4899', image: '/products/shampoing-dove-400ml.png' },
+  { id: 9, name: 'Déodorant Rexona 150ml', price: 22, category: 'Hygiène', color: '#6366F1', image: '/products/deodorant-rexona-150ml.png' },
+  { id: 10, name: 'Dentifrice Signal 100ml', price: 12, category: 'Hygiène', color: '#0891B2', image: '/products/dentifrice-signal-100ml.png' },
 ];
 
 const DEMO_PLANOGRAMS = [
@@ -150,6 +150,15 @@ export default function DemoComplete() {
     setDraggedPlanogramId(null);
   };
 
+  // Grouper les produits par famille
+  const productsByFamily = DEMO_PRODUCTS.reduce((acc, product) => {
+    if (!acc[product.category]) {
+      acc[product.category] = [];
+    }
+    acc[product.category].push(product);
+    return acc;
+  }, {} as Record<string, typeof DEMO_PRODUCTS>);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       {/* Header */}
@@ -167,7 +176,7 @@ export default function DemoComplete() {
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-slate-900">Démonstration Complète</h1>
-                <p className="text-slate-600 mt-1">Planogrammes remplis + Drag & Drop + Visualisations</p>
+                <p className="text-slate-600 mt-1">Planogrammes avec images réelles + Drag & Drop</p>
               </div>
             </div>
           </div>
@@ -176,7 +185,7 @@ export default function DemoComplete() {
 
       <main className="container py-8">
         <Tabs defaultValue="demo" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="demo" className="flex items-center gap-2">
               <Grid3x3 className="w-4 h-4" />
               Drag & Drop
@@ -184,6 +193,10 @@ export default function DemoComplete() {
             <TabsTrigger value="planograms" className="flex items-center gap-2">
               <Package className="w-4 h-4" />
               Planogrammes
+            </TabsTrigger>
+            <TabsTrigger value="produits" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Produits
             </TabsTrigger>
             <TabsTrigger value="stats" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
@@ -263,18 +276,21 @@ export default function DemoComplete() {
                   <CardContent>
                     <div className="space-y-3">
                       <div className="text-sm font-semibold text-slate-700">Produits assignés:</div>
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         {planogram.products.map(productId => {
                           const product = DEMO_PRODUCTS.find(p => p.id === productId);
                           return (
                             <div
                               key={productId}
-                              className="flex items-center gap-2 p-2 bg-slate-50 rounded"
+                              className="flex items-center gap-3 p-2 bg-slate-50 rounded hover:bg-slate-100 transition-colors"
                             >
-                              <div
-                                className="w-4 h-4 rounded"
-                                style={{ backgroundColor: product?.color }}
-                              />
+                              {product?.image && (
+                                <img
+                                  src={product.image}
+                                  alt={product.name}
+                                  className="w-10 h-10 object-cover rounded"
+                                />
+                              )}
                               <div className="flex-1 min-w-0">
                                 <div className="text-sm font-medium text-slate-900 truncate">
                                   {product?.name}
@@ -294,6 +310,44 @@ export default function DemoComplete() {
             </div>
           </TabsContent>
 
+          {/* Onglet Produits par Famille */}
+          <TabsContent value="produits" className="space-y-6">
+            {Object.entries(productsByFamily).map(([family, products]) => (
+              <Card key={family}>
+                <CardHeader>
+                  <CardTitle className="text-lg">{family}</CardTitle>
+                  <CardDescription>{products.length} produits</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    {products.map(product => (
+                      <div
+                        key={product.id}
+                        className="flex flex-col items-center gap-2 p-3 bg-slate-50 rounded-lg hover:shadow-md transition-shadow"
+                      >
+                        {product.image && (
+                          <img
+                            src={product.image}
+                            alt={product.name}
+                            className="w-20 h-20 object-cover rounded"
+                          />
+                        )}
+                        <div className="text-center">
+                          <div className="text-xs font-medium text-slate-900 line-clamp-2">
+                            {product.name}
+                          </div>
+                          <div className="text-xs text-slate-600 mt-1">
+                            {product.price} MAD
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </TabsContent>
+
           {/* Onglet Statistiques */}
           <TabsContent value="stats" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -304,6 +358,16 @@ export default function DemoComplete() {
                 <CardContent>
                   <div className="text-3xl font-bold text-slate-900">{DEMO_PRODUCTS.length}</div>
                   <p className="text-xs text-slate-500 mt-1">Produits disponibles</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-slate-600">Familles</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-slate-900">{Object.keys(productsByFamily).length}</div>
+                  <p className="text-xs text-slate-500 mt-1">Catégories de produits</p>
                 </CardContent>
               </Card>
 
@@ -324,18 +388,6 @@ export default function DemoComplete() {
                 <CardContent>
                   <div className="text-3xl font-bold text-slate-900">{zones.length}</div>
                   <p className="text-xs text-slate-500 mt-1">Zones du magasin</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-slate-600">Assignations</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-slate-900">
-                    {zones.filter(z => z.assignedPlanogramId).length}
-                  </div>
-                  <p className="text-xs text-slate-500 mt-1">Zones avec planogramme</p>
                 </CardContent>
               </Card>
             </div>
