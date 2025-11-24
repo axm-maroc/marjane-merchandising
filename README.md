@@ -1,62 +1,97 @@
-# Marjane - Optimisation Merchandising Omnicanal
+# 🛒 Marjane - Solution d'Optimisation Merchandising Omnicanal
 
-Solution complète d'optimisation merchandising pour les hypermarchés Marjane au Maroc.
+Solution complète de gestion et d'optimisation du merchandising pour la chaîne de distribution marocaine Marjane.
 
-## 🎯 Fonctionnalités
+## 🎯 Fonctionnalités Principales
 
-### Gestion des Magasins
-- **12 magasins Marjane authentiques** (Rabat, Casablanca, Marrakech, Fès, Agadir, Tanger, Oujda, Meknès, Tétouan)
+### 📊 Dashboard Analytique
+- KPIs en temps réel (conformité, CA, rotation, alertes)
+- Graphiques de tendances (ventes, conformité, anomalies)
+- Performance par magasin et par produit
+- 5 KPIs stratégiques : CA/m², Rotation, Rupture, NPS, Actualisation
+
+### 🏪 Gestion des Magasins
+- 12 magasins Marjane authentiques au Maroc
 - Géolocalisation et informations détaillées
-- Gestion des zones et emplacements
+- Gestion des zones avec sponsoring fournisseurs
+- Photos et plans de magasin
 
-### Planogrammes 2D/3D
-- **Éditeur interactif de planogrammes** avec sélection visuelle des produits
-- **Éditeur de zones** avec outils de dessin (rectangle, sélection, suppression)
-- Visualisation 2D/3D des rayonnages
-- Affectation de produits avec photos réelles
-- Gestion des statuts (Brouillon, Actif, Archivé)
+### 📦 Planogrammes 2D/3D
+- Éditeur interactif avec drag & drop
+- Visualisation 2D et 3D isométrique
+- 174 planogrammes actifs
+- 1,451 produits assignés
+- Versioning et historique complet
+- Import/Export CSV/XLSX
+- Templates réutilisables
 
-### Référentiel Produits
-- **25 produits** avec photos réelles (Coca-Cola, Sprite, Fanta, eau minérale, produits laitiers, etc.)
-- Catégorisation par type (Boissons, Frais, Épicerie, Hygiène, Entretien)
-- Gestion des prix et marques
+### 🤖 Intelligence Artificielle
+- **Optimisation automatique** : Placement optimal selon règles merchandising
+- **Prévisions de stock** : Projection sur 30 jours avec alertes
+- **Détection d'anomalies** : Analyse par vision IA des photos rayons
+- **Recommandations intelligentes** : Basées sur marges et saisonnalité
+- **Simulateur d'impact** : Prévision CA/marge avant changements
 
-### Analytics & IA
-- **Dashboard analytique** avec KPIs et performance
-- **Prévisions IA** avec recommandations intelligentes
-- **Détection d'anomalies** entre planogramme prévu et réel
-- **Suivi des stocks** avec historique et prévisions
+### 📈 Suivi des Stocks
+- Historique complet avec graphiques
+- Prévisions sur 30 jours
+- Alertes de stock critique
+- Export CSV/Excel
+- Filtres en cascade : Magasin → Zone → Planogramme → Produit
 
-### Contrats de Sponsoring
-- Gestion des contrats fournisseurs
-- Suivi des revenus et emplacements premium
-- Historique des contrats
+### 📱 Application Mobile Terrain
+- Interface mobile-first optimisée
+- Capture de photos rayons
+- Remontée d'anomalies terrain
+- Gestion des tâches
+- Synchronisation hors-ligne (PWA)
 
-## 🛠️ Stack Technique
+### 💬 Feedback Client (NPS)
+- Formulaires publics avec QR codes
+- Dashboard de gestion des feedbacks négatifs
+- Notifications automatiques au propriétaire
+- Statistiques par magasin
+
+## 🏗️ Architecture Technique
 
 ### Frontend
-- **React 19** avec TypeScript
-- **Tailwind CSS 4** pour le styling
-- **shadcn/ui** pour les composants
-- **Wouter** pour le routing
-- **tRPC** pour les appels API type-safe
+- **Framework** : React 19 + TypeScript
+- **UI** : Tailwind CSS 4 + Shadcn/ui
+- **Routing** : Wouter
+- **Charts** : Recharts + Chart.js
+- **State** : React Query (tRPC)
 
 ### Backend
-- **Node.js 22** avec Express 4
-- **tRPC 11** pour l'API
-- **Drizzle ORM** pour la base de données
-- **MySQL/TiDB** comme base de données
+- **Framework** : Express.js + tRPC 11
+- **Base de données** : MySQL avec Drizzle ORM
+- **Authentification** : Manus OAuth
+- **API** : Type-safe avec tRPC (pas de REST)
+- **IA** : Intégration LLM pour vision et recommandations
 
-### Authentification
-- **Manus OAuth** intégré
-- Gestion des rôles (admin/user)
+### Infrastructure
+- **Hébergement** : Manus Platform
+- **Stockage** : S3 pour les images
+- **Maps** : Google Maps API
+- **Notifications** : API Manus
 
-### Tests
-- **Vitest** pour les tests unitaires
-- **101 tests** passent avec succès
+## 📊 Données Actuelles
 
-## 📦 Installation
+- **Magasins** : 12 magasins Marjane authentiques
+- **Produits** : 41 produits avec photos (27 avec images réelles)
+- **Planogrammes** : 174 actifs, 60 générés
+- **Assignations** : 1,451 produits positionnés
+- **Ventes** : 14,760 enregistrements (30 jours)
+- **Zones** : 120 zones magasin
+- **Sponsoring** : 35 contrats actifs
 
+## 🚀 Installation
+
+### Prérequis
+- Node.js 22+
+- pnpm 10+
+- MySQL/TiDB
+
+### Installation
 ```bash
 # Cloner le dépôt
 git clone https://github.com/axm-maroc/marjane-merchandising.git
@@ -65,34 +100,19 @@ cd marjane-merchandising
 # Installer les dépendances
 pnpm install
 
-# Configurer les variables d'environnement
-# (Les secrets sont injectés automatiquement par la plateforme Manus)
-
-# Pousser le schéma vers la base de données
+# Configurer la base de données
 pnpm db:push
 
-# Générer les données de démonstration
-npx tsx scripts/seed-demo-data.mjs
+# Générer des données de démonstration
+node scripts/generate-all-planograms.mjs
+node scripts/generate-sales-data.mjs
+node scripts/assign-products-to-planograms.mjs
 
 # Démarrer le serveur de développement
 pnpm dev
 ```
 
-## 🚀 Démarrage Rapide
-
-```bash
-# Développement
-pnpm dev
-
-# Tests
-pnpm test
-
-# Build de production
-pnpm build
-
-# Démarrer en production
-pnpm start
-```
+L'application sera accessible sur `http://localhost:3000`
 
 ## 📁 Structure du Projet
 
@@ -102,94 +122,91 @@ marjane-merchandising/
 │   ├── src/
 │   │   ├── pages/         # Pages de l'application
 │   │   ├── components/    # Composants réutilisables
-│   │   ├── lib/           # Utilitaires et configuration
-│   │   └── contexts/      # Contextes React
+│   │   ├── lib/           # Utilitaires (tRPC client)
+│   │   └── App.tsx        # Routes principales
 │   └── public/            # Assets statiques
 ├── server/                # Backend Express + tRPC
-│   ├── routers.ts         # Routes tRPC
-│   ├── db.ts              # Helpers de base de données
-│   └── _core/             # Infrastructure (OAuth, LLM, etc.)
-├── drizzle/               # Schéma de base de données
-│   └── schema.ts
-├── scripts/               # Scripts utilitaires
-│   ├── seed-demo-data.mjs        # Génération de données
-│   ├── reset-database.mjs        # Réinitialisation DB
-│   └── delete-test-stores.mjs    # Nettoyage
-└── shared/                # Types et constantes partagés
+│   ├── routers.ts         # Routes API (15 modules)
+│   ├── db.ts              # Fonctions base de données
+│   └── _core/             # Infrastructure (OAuth, LLM, Maps)
+├── drizzle/               # Schéma base de données
+│   └── schema.ts          # Définition des tables (20+)
+├── scripts/               # Scripts de génération de données
+└── shared/                # Types partagés
 ```
 
-## 🗄️ Base de Données
+## 🔑 Fonctionnalités Avancées
 
-Le projet utilise **Drizzle ORM** avec MySQL/TiDB. Schéma principal :
+### Optimisation IA des Planogrammes
+```typescript
+// Algorithme de placement optimal
+- Produits forte rotation (Boissons, Laitiers, Épicerie) → Hauteur des yeux (niveaux 2-3)
+- Produits faible rotation (Bazar, Textile) → Extrémités (niveaux 0 ou 5)
+```
 
-- `stores` - Magasins Marjane
-- `zones` - Zones dans les magasins
-- `planogram_locations` - Emplacements de rayonnage
-- `planograms` - Planogrammes
-- `products` - Référentiel produits
-- `planogram_products` - Association produits-planogrammes
-- `sponsorship_contracts` - Contrats fournisseurs
-- `stock_records` - Historique des stocks
-- `users` - Utilisateurs (OAuth)
+### Prévisions de Stock
+```typescript
+// Calcul des prévisions
+projectedStock = currentStock - (averageDailySales × numberOfDays)
+daysUntilStockout = currentStock / averageDailySales
+```
+
+### Détection d'Anomalies
+- Upload photo du rayon
+- Analyse IA avec LLM vision
+- Détection : produits manquants, mal positionnés, quantités incorrectes
 
 ## 🧪 Tests
 
 ```bash
-# Exécuter tous les tests
+# Lancer tous les tests
 pnpm test
 
-# Tests en mode watch
-pnpm test:watch
+# Tests unitaires
+pnpm test server/
 
-# Coverage
-pnpm test:coverage
+# Statistiques actuelles
+# 167 tests passent, 10 skippés
 ```
 
-**Couverture actuelle :** 101 tests passent sur 105 (4 désactivés)
+## 📜 Scripts Utiles
 
-## 🔐 Sécurité
+```bash
+# Génération de données
+node scripts/generate-all-planograms.mjs      # Générer planogrammes
+node scripts/generate-sales-data.mjs          # Générer ventes
+node scripts/assign-products-to-planograms.mjs # Assigner produits
 
-- Authentification OAuth Manus
-- Variables d'environnement sécurisées
-- Validation des entrées avec Zod
-- Protection CSRF
-- Cookies HTTP-only
+# Optimisation
+node scripts/optimize-planogram-positions.mjs  # Optimiser positions
 
-## 📝 Variables d'Environnement
+# Nettoyage
+node scripts/clean-test-stores.mjs            # Nettoyer magasins test
+node scripts/reset-database.mjs               # Réinitialiser DB
 
-Les variables suivantes sont automatiquement injectées par la plateforme Manus :
+# Vérification
+node scripts/list-products.mjs                # Lister produits
+node scripts/count-stores.mjs                 # Compter magasins
+```
 
-- `DATABASE_URL` - Connexion MySQL/TiDB
-- `JWT_SECRET` - Secret pour les sessions
-- `OAUTH_SERVER_URL` - URL du serveur OAuth
-- `BUILT_IN_FORGE_API_KEY` - Clé API Manus
-- `VITE_APP_TITLE` - Titre de l'application
-- `VITE_APP_LOGO` - Logo de l'application
+## 🔐 Authentification
 
-## 🤝 Contribution
+L'application utilise Manus OAuth pour l'authentification :
+- Connexion automatique via portail Manus
+- Sessions sécurisées avec JWT
+- Rôles : `admin` et `user`
 
-1. Fork le projet
-2. Créer une branche (`git checkout -b feature/AmazingFeature`)
-3. Commit les changements (`git commit -m 'Add AmazingFeature'`)
-4. Push vers la branche (`git push origin feature/AmazingFeature`)
-5. Ouvrir une Pull Request
+## 📞 Support
+
+Pour toute question ou problème :
+- **Email** : support@marjane.ma
+- **Documentation** : Voir `/docs` dans le projet
+- **Issues** : https://github.com/axm-maroc/marjane-merchandising/issues
 
 ## 📄 Licence
 
-Ce projet est propriétaire et appartient à Marjane Maroc.
-
-## 👥 Équipe
-
-Développé pour **Marjane Maroc** - Leader de la grande distribution au Maroc
-
-## 🔗 Liens Utiles
-
-- [Documentation Manus](https://docs.manus.im)
-- [Site Marjane](https://www.marjane.ma)
-- [Drizzle ORM](https://orm.drizzle.team)
-- [tRPC](https://trpc.io)
+Propriétaire - Marjane Holding © 2025
 
 ---
 
-**Version actuelle :** 82b14253  
-**Dernière mise à jour :** Novembre 2025
+Développé avec ❤️ pour Marjane par l'équipe AXM Maroc
